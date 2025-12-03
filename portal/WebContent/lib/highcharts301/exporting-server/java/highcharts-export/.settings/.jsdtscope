@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+<<<<<<< HEAD
+	<classpathentry kind="src" path="src/main/webapp"/>
+	<classpathentry excluding="**/node_modules/*|**/*.min.js|**/bower_components/*" kind="src" path="target/m2e-wtp/web-resources"/>
+=======
+	<classpathentry excluding="**/node_modules/*|**/*.min.js|**/bower_components/*" kind="src" path="src/main/webapp"/>
+>>>>>>> 6a10f739aabe98108a59e2f2e9af09010cadc6e8
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
+		<attributes>
+			<attribute name="hide" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

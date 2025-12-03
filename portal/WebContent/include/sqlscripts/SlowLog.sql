@@ -1,0 +1,1 @@
+select * from mysql.slow_log order by query_time desc;

@@ -1,0 +1,184 @@
+<script>
+function changeToUrdu(){
+	
+	//document.getElementById("log").innerHTML += event.keyCode;
+	
+	
+	if (event.shiftKey){
+		if (event.keyCode == 72){ // h
+			document.getElementById("UrduWord").innerHTML += '&#1607;';
+			return false;
+		}else
+		if (event.keyCode == 73){ // i
+			document.getElementById("UrduWord").innerHTML += '&#1592;';
+			return false;
+		}else
+		if (event.keyCode == 75){ // k
+			document.getElementById("UrduWord").innerHTML += '&#1582;';
+			return false;
+		}else
+		if (event.keyCode == 83){ // s
+			document.getElementById("UrduWord").innerHTML += '&#1588;';
+			return false;
+		}else
+		if (event.keyCode == 65){ // a
+			document.getElementById("UrduWord").innerHTML += '&#1570;';
+			return false;
+		}else
+		if (event.keyCode == 68){ // d
+			document.getElementById("UrduWord").innerHTML += '&#1672;';
+			return false;
+		}else
+		if (event.keyCode == 84){ // t
+			document.getElementById("UrduWord").innerHTML += '&#1657;';
+			return false;
+		}
+		if (event.keyCode == 82){ // r
+			document.getElementById("UrduWord").innerHTML += '&#1681;';
+			return false;
+		}else
+		if (event.keyCode == 78){ // n
+			document.getElementById("UrduWord").innerHTML += '&#64414;';
+			return false;
+		}else
+		if (event.keyCode == 89){ // y
+			document.getElementById("UrduWord").innerHTML += '&#64431;';
+			return false;
+		}else
+		if (event.keyCode == 69){ // e
+			document.getElementById("UrduWord").innerHTML += '&#1594;';
+			return false;
+		}else
+		if (event.keyCode == 67){ // c
+			document.getElementById("UrduWord").innerHTML += '&#1579;';
+			return false;
+		}
+	}
+	if (event.keyCode == 8){ // a
+		
+		document.getElementById("UrduWord").innerHTML += '&#8;';
+		return false;
+	}else
+	if (event.keyCode == 32){ // a
+		document.getElementById("UrduWord").innerHTML += '&#32;';
+		return false;
+	}else
+	if (event.keyCode == 65){ // a
+		document.getElementById("UrduWord").innerHTML += '&#1575;';
+		return false;
+	}else
+	if (event.keyCode == 66){ // b
+		document.getElementById("UrduWord").innerHTML += '&#1576;';
+		return false;
+	}else
+	if (event.keyCode == 67){ // c
+		if (!event.ctrlKey){
+			document.getElementById("UrduWord").innerHTML += '&#1670;';
+			return false;
+		}
+	}else
+	if (event.keyCode == 68){ // d
+		document.getElementById("UrduWord").innerHTML += '&#1583;';
+		return false;
+	}else
+	if (event.keyCode == 69){ // e
+		document.getElementById("UrduWord").innerHTML += '&#1593;';
+		return false;
+	}else
+	if (event.keyCode == 70){ // f
+		document.getElementById("UrduWord").innerHTML += '&#1601;';
+		return false;
+	}else
+	if (event.keyCode == 71){ // g
+		document.getElementById("UrduWord").innerHTML += '&#1711;';
+		return false;
+	}else
+	if (event.keyCode == 72){ // h
+		document.getElementById("UrduWord").innerHTML += '&#1581;';
+		return false;
+	}else
+	if (event.keyCode == 73){ // i
+		document.getElementById("UrduWord").innerHTML += '&#1591;';
+		return false;
+	}else
+	if (event.keyCode == 74){ // j
+		document.getElementById("UrduWord").innerHTML += '&#1580;';
+		return false;
+	}else
+	if (event.keyCode == 75){ // k
+		document.getElementById("UrduWord").innerHTML += '&#1705;';
+		return false;
+	}else
+	if (event.keyCode == 76){ // l
+		document.getElementById("UrduWord").innerHTML += '&#1604;';
+		return false;
+	}else
+	if (event.keyCode == 77){ // m
+		document.getElementById("UrduWord").innerHTML += '&#1605;';
+		return false;
+	}else
+	if (event.keyCode == 78){ // n
+		document.getElementById("UrduWord").innerHTML += '&#1606;';
+		return false;
+	}else
+	if (event.keyCode == 79){ // o
+		document.getElementById("UrduWord").innerHTML += '&#1589;';
+		return false;
+	}else
+	if (event.keyCode == 80){ // p
+		document.getElementById("UrduWord").innerHTML += '&#1662;';
+		return false;
+	}else
+	if (event.keyCode == 81){ // q
+		document.getElementById("UrduWord").innerHTML += '&#1602;';
+		return false;
+	}else
+	if (event.keyCode == 82){ // r
+		document.getElementById("UrduWord").innerHTML += '&#1585;';
+		return false;
+	}else
+	if (event.keyCode == 83){ // s
+		if (!event.altKey){
+			document.getElementById("UrduWord").innerHTML += '&#1587;';
+			return false;
+		}
+	}else
+	if (event.keyCode == 84){ // t
+		document.getElementById("UrduWord").innerHTML += '&#1578;';
+		return false;
+	}else
+	if (event.keyCode == 85){ // u
+		document.getElementById("UrduWord").innerHTML += '&#1569;';
+		return false;
+	}else
+	if (event.keyCode == 86){ // v
+		if (!event.ctrlKey){
+			document.getElementById("UrduWord").innerHTML += '&#1608;';
+			return false;
+		}
+	}else
+	if (event.keyCode == 87){ // w
+		document.getElementById("UrduWord").innerHTML += '&#1574;';
+		return false;
+	}else
+	if (event.keyCode == 88){ // x
+		if (!event.ctrlKey){
+			//document.getElementById("UrduWord").innerHTML += '&#1608;';
+			return false;
+		}
+	}else
+	if (event.keyCode == 89){ // y
+		document.getElementById("UrduWord").innerHTML += '&#1610;';
+		return false;
+	}else
+	if (event.keyCode == 90){ // z
+		if (!event.ctrlKey){
+			document.getElementById("UrduWord").innerHTML += '&#1586;';
+			return false;
+		}
+	}
+}
+</script>
+<textarea id="UrduWord" name="UrduWord" onkeydown="return changeToUrdu();" style="font-family: Tahoma; font-size: 16pt;"></textarea>
+<span id="UrduWord1"></span>
+<span id="log1"></span>

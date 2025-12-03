@@ -1,0 +1,20 @@
+00 02 * * * /bin/sh /home/ftpshared/BashFiles/MySQLBackup.sh
+00 01 * * * /bin/sh /home/ftpshared/BashFiles/SyncOutlets.sh
+40 06 * * * /bin/sh /home/ftpshared/BashFiles/SyncHCM.sh
+*/40 * * * * /bin/sh /home/ftpshared/BashFiles/SyncAR.sh >> /var/log/cron-logs.txt
+00 03 * * * /bin/sh /home/ftpshared/BashFiles/AppBackup.sh
+30 03 * * 0,4 /bin/sh /home/ftpshared/BashFiles/AttachmentsBackup.sh
+00 20 * * * /bin/sh /home/ftpshared/BashFiles/LogPJP.sh
+20 08 * * * /bin/sh /home/ftpshared/BashFiles/SMS101.sh
+00 23 * * * /bin/sh /home/ftpshared/BashFiles/SMS1130PM.sh
+00 04 * * * /bin/sh /home/ftpshared/BashFiles/LogPJP.sh
+25 23 * * 0,1,2,3,4,6 /bin/sh /home1/ftpshared/BashFiles/SMSBackorders.sh
+30 21 1 * * /bin/sh /home/ftpshared/BashFiles/1SMSMonthlySalesStatistics.sh
+00 05 * * * /bin/sh /home/ftpshared/BashFiles/SyncSalesInternal.sh
+45 17 * * 0,1,2,3,4,6 /bin/sh /home/ftpshared/BashFiles/1CaneRatesEmail.sh
+20 11 * * * /bin/sh /home/ftpshared/BashFiles/EmailCashInflow.sh
+32 16 * * * /bin/sh /home/ftpshared/BashFiles/EmailReceivables.sh
+15 22 * * 0,1,2,3,4,6 /bin/sh /home/ftpshared/BashFiles/EmailDistributorScoreCard.sh
+00 11 * * * /bin/sh /home/ftpshared/BashFiles/SyncCash.sh
+30 06 * * * /bin/sh /home/ftpshared/BashFiles/EmailCashInflowPre.sh
+05 06 * * * /home/ftpshared/BashFiles/SyncUpfrontDiscount.sh

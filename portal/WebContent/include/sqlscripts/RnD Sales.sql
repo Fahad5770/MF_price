@@ -1,0 +1,3 @@
+SELECT om.customer_id,om.customer_name,ss.outlet_id,sa.outlet_name,pv.package_label,sum(ss.quty_quant) 
+FROM pep.sap_sales ss,sampling sa,outletmaster om,pep.inventory_products_view pv where sa.outlet_id=ss.outlet_id and om.outlet_id=sa.outlet_id and pv.sap_code=ss.material_matnr and sa.active= 1 and month_zmonth = 2 and year_zyear = 2015
+group by ss.outlet_id, pv.package_label order by om.customer_id;

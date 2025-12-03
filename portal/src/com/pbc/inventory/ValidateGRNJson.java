@@ -1,0 +1,113 @@
+package com.pbc.inventory;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.simple.JSONObject;
+
+import com.pbc.util.Datasource;
+import com.pbc.util.Utilities;
+import com.pbc.util.MaxLength;
+import com.pbc.workflow.Workflow;
+import com.pbc.workflow.WorkflowChat;
+import com.pbc.common.Distributor;
+import com.pbc.util.UserAccess;
+
+
+
+@WebServlet(description = "Executes GRN", urlPatterns = { "/inventory/ValidateGRNJson" })
+public class ValidateGRNJson extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    public ValidateGRNJson() {
+        super();
+    }
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		HttpSession session = request.getSession();
+		
+		 
+		String UserID = null;
+
+		if (session.getAttribute("UserID") != null){
+			UserID = (String)session.getAttribute("UserID");
+		}
+		
+		if (UserID == null){
+			response.sendRedirect(com.pbc.util.Utilities.getSessionExpiredPageURL(request));
+		}
+
+		PrintWriter out = response.getWriter();
+		
+		long Barcode = Utilities.parseLong(request.getParameter("GRNBarcode"));		
+		
+		
+		
+		Datasource ds = new Datasource();
+		JSONObject obj = new JSONObject();	
+		
+		try {
+			
+			int FeatureID = 36;
+			Distributor [] DistributorObj = UserAccess.getUserFeatureDistributor(Utilities.parseInt(UserID), FeatureID);
+			int DistributorID=0;
+			
+			
+			ds.createConnection();
+			Statement s = ds.createStatement();
+			
+			ResultSet rs = s.executeQuery("select distributor_id from inventory_delivery_note where barcode="+Barcode);
+			if( rs.first() ){
+				 DistributorID = rs.getInt("distributor_id");
+			}
+				boolean isOK = false;
+				
+				for(int i=0;i<DistributorObj.length;i++)
+				{
+					if(DistributorObj[i].DISTRIBUTOR_ID == DistributorID)
+					{
+						isOK = true;
+						break;
+					}
+					
+				}
+				
+				if (isOK)
+				{
+					obj.put("success", "true");
+				}else{
+					obj.put("success", "not allowed");
+				}		
+			
+			
+			
+			
+			s.close();
+			ds.dropConnection();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			obj.put("success", "false");
+			obj.put("error", e.toString());
+			e.printStackTrace();
+		}
+		
+		
+		out.print(obj);
+		out.close();
+		
+	}
+	
+}

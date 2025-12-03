@@ -1,0 +1,1 @@
+SELECT ipv.package_label, ipv.brand_label, total_units_issued, total_units_received FROM inventory_distributor_stock ids join inventory_distributor_stock_products idsp on ids.id = idsp.id join inventory_products_view ipv on idsp.product_id = ipv.product_id where ids.distributor_id = 100914 and ids.created_on between '2016-09-01' and '2016-10-01' and ids.document_type_id = 18;

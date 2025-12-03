@@ -1,0 +1,5 @@
+select date_format(sampling_month,'%Y') syear, date_format(sampling_month,'%m') smonth, sampling_month, distributor_id, fixed_sampling, percase_sampling, (fixed_sampling+percase_sampling-net_amount) adjustment, net_amount from (
+	select sampling_month, distributor_id, sum(fixed_net_paid) fixed_sampling, sum(percase_net_paid) percase_sampling, sum(net_payable) net_amount from (
+		SELECT sma.month sampling_month, sma.distributor_id, (SELECT sum(net_payable) FROM pep.sampling_monthly_approval_fixed where approval_id = sma.approval_id) fixed_net_paid, (SELECT sum(net_payable) FROM pep.sampling_monthly_approval_percase where approval_id = sma.approval_id) percase_net_paid, sma.net_payable FROM sampling_monthly_approval sma where sma.status_id = 1 and sma.status_on between '2014-12-01' and '2015-01-01'
+	) tab group by sampling_month, distributor_id
+) tab2 where net_amount != 0 order by sampling_month, distributor_id;
