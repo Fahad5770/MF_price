@@ -157,9 +157,9 @@ Statement s1 = ds.createStatement();
     
     <table border="0" width="100%">
 		<tr>
-			<td>
+			<!-- <td>
 				Product Type
-			</td>
+			</td> -->
 			<td>
 				Product Code 
 			</td>
@@ -174,9 +174,6 @@ Statement s1 = ds.createStatement();
 			</td>
 			<td>
 				Bottle
-			</td>
-			<td>
-				Discount
 			</td>
 			
             
@@ -209,10 +206,10 @@ Statement s1 = ds.createStatement();
 		%>
 					<tr>
 				
-							<td valign="top" style="width:18%">
+						<%-- 	<td valign="top" style="width:18%">
 								<input type="text" placeholder="Product Type" id="PriceListProductType" name="PriceListProductType" data-mini="true" value="<%=rs.getString("category_label")%>" readonly="readonly" tabindex="-1">
 								<input type="hidden" name="PriceListSubTableID" id="PriceListSubTableID" value="<%=rs.getString("category_id")%>"/>
-							</td>
+							</td> --%>
 							<td valign="top" style="width:18%">
 								<input  type="text" placeholder="Product Code" id="PriceListSapCode" name="PriceListSapCode" data-mini="true" value="<%=rs.getString("sap_code")%>" readonly="readonly" tabindex="-1">
 								<input  type="hidden" id="PriceListProductCode" name="PriceListProductCode"  value="<%=rs.getString("product_id")%>">
@@ -229,10 +226,10 @@ Statement s1 = ds.createStatement();
 							</td>
 							<td valign="top" style="width:12%">
 								<input  type="text" placeholder="Bottle" id="PriceListBottle_<%=i %>" name="PriceListBottle" data-mini="true" tabindex="-1" readonly="readonly" value="<%=EditUnits%>">
-							</td>
+							<%-- </td>
 								<td valign="top" style="width:16%">
 								<input  type="text" placeholder="Disount" id="discount_<%=i %>" name="PriceListDisount" data-mini="true" tabindex="-1" value="<%=EditDiscount%>">
-							</td>
+							</td> --%>
 				
 					</tr>			
 			<%

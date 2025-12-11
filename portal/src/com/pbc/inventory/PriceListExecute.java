@@ -63,7 +63,8 @@ public class PriceListExecute extends HttpServlet {
 		long[] ProductID = Utilities.parseLong(request.getParameterValues("PriceListProductCode"));
 		double[] RawCases = Utilities.parseDouble(request.getParameterValues("PriceListRawCase"));
 		double[] Bottles = Utilities.parseDouble(request.getParameterValues("PriceListBottle"));
-		double[] Discounts = Utilities.parseDouble(request.getParameterValues("PriceListDisount"));
+		
+		//double[] Discounts = Utilities.parseDouble(request.getParameterValues("PriceListDisount"));
 		
 		
 		Datasource ds = new Datasource();
@@ -103,7 +104,7 @@ public class PriceListExecute extends HttpServlet {
 				{
 					if(RawCases[i] !=0 && Bottles[i] !=0)
 					{
-						s.executeUpdate("insert into inventory_price_list_products(id,product_id,raw_case,unit,discount) values("+MasterTablePriceListID+","+ ProductID[i] +","+RawCases[i]+","+Bottles[i]+","+Discounts[i]+")");
+						s.executeUpdate("insert into inventory_price_list_products(id,product_id,raw_case,unit,discount) values("+MasterTablePriceListID+","+ ProductID[i] +","+RawCases[i]+","+Bottles[i]+", 0)");
 					}
 				}
 				
