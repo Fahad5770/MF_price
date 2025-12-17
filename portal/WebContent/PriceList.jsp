@@ -15,10 +15,8 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 <%@include file="include/ValidateSession.jsp" %>
 
-
 <jsp:useBean id="bean" class="com.pbc.inventory.DeliveryNote" scope="page"/>
 <jsp:setProperty name="bean" property="*"/>
-
 
 <%
 
@@ -37,13 +35,12 @@ Statement s1 = ds.createStatement();
 %>
 <html>
 
-
 <head>
 		<jsp:include page="include/StandaloneSrc.jsp" /> <!-- JQM Base -->
         <script src="js/lookups.js"></script>
         <script src="js/PriceList.js?2=2"></script>
         
-        
+ 
 </head>
 
 <body>
@@ -147,10 +144,16 @@ Statement s1 = ds.createStatement();
 		
 		</table>
 	</li>
+	
+	
 	 <li data-role="list-divider">Scope</li>
     <div id="PriceListDataScope">
 	
 	</div>
+	
+	
+	
+	
     <li data-role="list-divider">Product Price List</li>
     <li>	
 		
@@ -240,17 +243,9 @@ Statement s1 = ds.createStatement();
 
 			<% 	
 			%>
-		   
-		   
-		   
-		   
-		  
-		
 		
 	</table>
-	
 
-	
 	</li>
 	</ul>
 	
@@ -268,9 +263,7 @@ Statement s1 = ds.createStatement();
 			<tr>
 				<td>
 					<a data-icon="check" data-theme="a" data-role="button" data-inline="true" id="DeliveryNoteSave" href="#"  onClick="SavePriceList();">Save</a>
-                    
                    
-                    
                     <button data-icon="check" data-theme="b" data-inline="true" id="DeliveryNoteReset" onClick="javascript:window.location='PriceList.jsp'" >Reset</button>
                     
 				</td>

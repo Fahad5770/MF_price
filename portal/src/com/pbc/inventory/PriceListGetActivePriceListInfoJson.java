@@ -57,6 +57,9 @@ public class PriceListGetActivePriceListInfoJson extends HttpServlet {
 		
 		long RegionID = Utilities.parseLong(request.getParameter("RegionID"));		
 		long DistributorGroupID = Utilities.parseLong(request.getParameter("DistributorGroupID"));
+		
+		// DistributorGroupID ==>>> channel_id
+		
 		long DistributorID = Utilities.parseLong(request.getParameter("DistributorID"));
 		long PJPID = Utilities.parseLong(request.getParameter("PJPID"));
 		
@@ -73,7 +76,7 @@ public class PriceListGetActivePriceListInfoJson extends HttpServlet {
 			
 			if(DistributorGroupID != 0)  //for Distributor Group
 			{
-				 rs = s.executeQuery("SELECT * FROM inventory_price_list_distributor_groups ipr,inventory_price_list ipl where ipr.price_list_id=ipl.id and ipr.group_id="+DistributorGroupID);	
+				 rs = s.executeQuery("SELECT * FROM inventory_price_list_channel ipr,inventory_price_list ipl where ipr.price_list_id=ipl.id and ipr.channel_id="+DistributorGroupID);	
 				
 			}
 			

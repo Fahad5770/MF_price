@@ -24,6 +24,7 @@
 		    <div class="ui-grid-b">
 			    <div class="ui-block-a" >
 			    	<div class="ui-bar " style="min-height:60px"><!-- block 1 -->
+			    	
 			    	<div data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="d" id="datascope" data-mini="true">
 		    		<h4 id="TitleGoesHere" style="width:100%">Region</h4>
 		    		<%
@@ -51,6 +52,7 @@
 			</tr>
 			
 			</table>
+			
 			<div id="AddeddRegion" style="width:70%">
 					<ul data-role="listview" data-inset="true" id="populateRegionDataUl" data-mini="true">					    
 					  <%
@@ -67,6 +69,7 @@
 					 %>    
 					</ul>
 					</div>
+					
 				</div>
 			    	</div>
 			    </div>
@@ -110,7 +113,9 @@
 				
 			    	</div>
 			    </div>
-			    <div class="ui-block-c">
+			    
+			    
+			    <%-- <div class="ui-block-c">
 			    	<div class="ui-bar " style="min-height:60px"><!--  block 3 -->
 			    	<div data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="d" id="datascope" data-mini="true">
 		    		<h4 id="" style="width:100%">Distributor Group</h4>
@@ -157,7 +162,55 @@
 					</div>
 				</div>
 			    	</div>
-			    </div>
+			    </div> --%>
+			    
+			     <div class="ui-block-c">
+			    	<div class="ui-bar " style="min-height:60px"><!--  block 3 -->
+			    	<div data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="d" id="datascope" data-mini="true">
+		    		<h4 id="" style="width:100%">Channel</h4>
+		    		<%			
+			
+			ResultSet rs5 = s.executeQuery("select * from pci_sub_channel");
+			%>
+			<table width="100%" border="0">
+			<tr>
+				<td style="width:70%">
+					<select name="GroupDistributorSelect" id="GroupDistributorSelect" data-mini="true">
+					<option value="-1" data-mini="true">Select Channel Group</option>
+						<%
+						while(rs5.next())
+						{
+						%>						
+						    <option value="<%=rs5.getString("id")%>" data-mini="true"><%=rs5.getString("label")%></option>
+						<%
+						} 
+						%>    
+					</select>
+				</td>
+				<td style="width:30%"><a href="#" data-role="button" data-icon="plus" data-iconpos="left" data-inline="true" onClick="AddGroupDistributor()" data-mini="true">Add</a></td>
+			</tr>
+			
+			</table>
+			<div id="AddeddGroupDistributor" style="width:70%">
+					<ul data-role="listview" data-inset="true" id="populateGroupDistributorDataUl" data-mini="true">					    
+					  <%
+					   //selecting Region
+					ResultSet rs6 = s.executeQuery("select * from inventory_price_list_channel uadg, pci_sub_channel cdg  where cdg.id=uadg.channel_id and price_list_id="+PriceListID);
+					
+					while(rs6.next())
+					{
+						String FunctionName = "onClick=RemoveList('GroupDistributorDynamicallyAdded_"+rs6.getString("id")+"')";
+				    	%>
+				    	<li data-mini="true" data-icon="delete" id="GroupDistributorDynamicallyAdded_<%= rs6.getString("id")%>"><input type='hidden' name='GroupDistributorhiddenfield' value='<%=rs6.getString("id")%>,GroupDistributor'/><a href='#' <%=FunctionName%>><%=rs6.getString("label")%></a></li>
+				   <%  	
+					}
+					 %>    
+					</ul>
+					</div>
+				</div>
+			    	</div>
+			    </div> 
+			    
 			</div><!-- /grid-b -->		
 		    		
 				

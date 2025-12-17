@@ -86,7 +86,6 @@ public class PriceListAdditionalRightExecute extends HttpServlet {
 					}
 				}
 					
-				
 				//updating Distributor 
 				query = "delete from inventory_price_list_distributors where price_list_id = "+PriceListID;
 				s.executeUpdate(query);
@@ -109,10 +108,28 @@ public class PriceListAdditionalRightExecute extends HttpServlet {
 					}
 				}
 				
-				//Distributor Group updation
-				//System.out.println("Distributor Group ");
-				query = "delete from inventory_price_list_distributor_groups where price_list_id = "+PriceListID;
+				/*
+				 * //Distributor Group updation //System.out.println("Distributor Group ");
+				 * query =
+				 * "delete from inventory_price_list_distributor_groups where price_list_id = "
+				 * +PriceListID; s.executeUpdate(query);
+				 * 
+				 * if(request.getParameterValues("GroupDistributorhiddenfield") != null) {
+				 * String [] SelectedDistributorGroups =
+				 * request.getParameterValues("GroupDistributorhiddenfield"); for(int
+				 * ii=0;ii<SelectedDistributorGroups.length;ii++) { String []
+				 * FeatureIDndRegionID = SelectedDistributorGroups[ii].split(",");
+				 * //GroupID,Feature ID query2 = "insert into " +
+				 * "inventory_price_list_distributor_groups(price_list_id,group_id)" +
+				 * "values("+PriceListID+","+FeatureIDndRegionID[0]+")";
+				 * s.executeUpdate(query2); } }
+				 */
+				
+				//Distributor Channel updation
+				//System.out.println("Distribu tor Group ");
+				query = "delete from inventory_price_list_channel where price_list_id = "+PriceListID;
 				s.executeUpdate(query);
+				
 				
 				if(request.getParameterValues("GroupDistributorhiddenfield") != null)
 				{
@@ -121,7 +138,7 @@ public class PriceListAdditionalRightExecute extends HttpServlet {
 					{
 						String [] FeatureIDndRegionID = SelectedDistributorGroups[ii].split(","); //GroupID,Feature ID						
 						query2 = "insert into " +
-				                "inventory_price_list_distributor_groups(price_list_id,group_id)" +
+				                "inventory_price_list_channel(price_list_id,channel_id)" +
 				                "values("+PriceListID+","+FeatureIDndRegionID[0]+")";						
 						s.executeUpdate(query2);
 					}
