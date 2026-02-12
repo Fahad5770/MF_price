@@ -54,7 +54,7 @@ public class GetProductInfo extends HttpServlet {
 			response.sendRedirect(Utilities.getSessionExpiredPageURL(request));
 		}
 
-		long ProductID = Utilities.parseLong(request.getParameter("ProductCode"));
+		long SapCode = Utilities.parseLong(request.getParameter("ProductCode"));
 		long OutletID = Utilities.parseLong(request.getParameter("OutletID"));
 
 		int PackageID = Utilities.parseInt(request.getParameter("PackageID"));
@@ -76,7 +76,7 @@ public class GetProductInfo extends HttpServlet {
 				ResultSet rs3 = s.executeQuery("select sap_code from inventory_products where package_id=" + PackageID
 						+ " and brand_id=" + BrandID + " and category_id=1");
 				if (rs3.first()) {
-					ProductID = rs3.getLong("sap_code");
+					SapCode = rs3.getLong("sap_code");
 				}
 
 			}
@@ -85,8 +85,10 @@ public class GetProductInfo extends HttpServlet {
 			String BrandLabel = "";
 
 			ResultSet rs = s.executeQuery(
-					"SELECT  package_id, (select label from inventory_packages where id = package_id) package_label, brand_id, (select label from inventory_brands where id = brand_id) brand_label, sap_code, id, unit_per_sku, (select liquid_in_ml from inventory_packages where id = package_id) liquid_in_ml, (select shell_product_id from inventory_products_map where product_id=id limit 1) shell_product_id, id,is_other_brand FROM inventory_products where sap_code = "
-							+ ProductID);
+					"SELECT  package_id, (select label from inventory_packages where id = package_id) package_label, brand_id, (select label from inventory_brands where id = brand_id) brand_label, sap_code, id, unit_per_sku, "
+					+ "(select liquid_in_ml from inventory_packages where id = package_id) liquid_in_ml, (select shell_product_id from inventory_products_map where product_id=id limit 1) shell_product_id, id,is_other_brand"
+					+ " FROM inventory_products where sap_code = "
+							+ SapCode);
 			if (rs.first()) {
 
 				obj.put("exists", "true");
@@ -104,7 +106,7 @@ public class GetProductInfo extends HttpServlet {
 
 				// System.out.println(request.getParameter("OutletID"));
 				if (request.getParameter("OutletID") != null) {
-					double PriceArray[] = Product.getSellingPrice_2(ProductID, OutletID);
+					double PriceArray[] = Product.getSellingPrice_3(SapCode, OutletID);
 
 					obj.put("RawCasePricewithoutDisc", PriceArray[0]);
 					obj.put("UnitPrice", PriceArray[1]);
@@ -117,10 +119,10 @@ public class GetProductInfo extends HttpServlet {
 					
 					System.out.println("Discount" + PriceArray[2]);
 
-					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(rs.getInt(6), OutletID);
+					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax2(rs.getInt(6), OutletID);
 
-					obj.put("WHTaxAmount", ProductsTax.get("wh_tax"));
-					obj.put("SalesTaxAmount", ProductsTax.get("income_tax"));
+					obj.put("SalesTax", ProductsTax.get("sales_tax"));
+					obj.put("IncomeTax", ProductsTax.get("income_tax"));
 
 				}
 

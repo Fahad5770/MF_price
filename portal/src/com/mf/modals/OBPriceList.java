@@ -15,21 +15,15 @@ public class OBPriceList {
     private String unit_per_case;
     private String liquid_in_ml;
 
-    private int is_filer;
-    private int is_register;
-
     private double raw_case_price;
     private double unit_price;
-    private double discount;
-    private double tax;
-
+    
     // Constructor
     public OBPriceList(int id, int product_id, int package_id, int brand_id,
                        String package_label, String brand_label,
                        String unit_per_case, String liquid_in_ml,
-                       int is_filer, int is_register,
-                       double raw_case_price, double unit_price,
-                       double discount, double tax) {
+                       double raw_case_price, double unit_price
+                      ) {
         this.id = id;
         this.product_id = product_id;
         this.package_id = package_id;
@@ -38,12 +32,9 @@ public class OBPriceList {
         this.brand_label = brand_label;
         this.unit_per_case = unit_per_case;
         this.liquid_in_ml = liquid_in_ml;
-        this.is_filer = is_filer;
-        this.is_register = is_register;
         this.raw_case_price = raw_case_price;
         this.unit_price = unit_price;
-        this.discount = discount;
-        this.tax = tax;
+
     }
 
     // Default Constructor
@@ -74,23 +65,11 @@ public class OBPriceList {
     public String getLiquid_in_ml() { return liquid_in_ml; }
     public void setLiquid_in_ml(String liquid_in_ml) { this.liquid_in_ml = liquid_in_ml; }
 
-    public int getIs_filer() { return is_filer; }
-    public void setIs_filer(int is_filer) { this.is_filer = is_filer; }
-
-    public int getIs_register() { return is_register; }
-    public void setIs_register(int is_register) { this.is_register = is_register; }
-
     public double getRaw_case_price() { return raw_case_price; }
     public void setRaw_case_price(double raw_case_price) { this.raw_case_price = raw_case_price; }
 
     public double getUnit_price() { return unit_price; }
     public void setUnit_price(double unit_price) { this.unit_price = unit_price; }
-
-    public double getDiscount() { return discount; }
-    public void setDiscount(double discount) { this.discount = discount; }
-
-    public double getTax() { return tax; }
-    public void setTax(double tax) { this.tax = tax; }
 
     // Method to return JSON-like structure
     public LinkedHashMap<String, Object> getIntoJson() {
@@ -104,13 +83,9 @@ public class OBPriceList {
         priceDetails.put("BrandLabel", this.brand_label);
         priceDetails.put("UnitPerCase", this.unit_per_case);
         priceDetails.put("LiquidInML", this.liquid_in_ml);
-        priceDetails.put("is_filer", this.is_filer);
-        priceDetails.put("is_Register", this.is_register);
         priceDetails.put("RawCasePrice", this.raw_case_price);
         priceDetails.put("UnitPrice", this.unit_price);
-        priceDetails.put("discount", this.discount);
-        priceDetails.put("tax", this.tax);
-
+      
         return priceDetails;
     }
 }

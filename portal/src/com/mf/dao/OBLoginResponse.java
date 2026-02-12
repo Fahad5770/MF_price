@@ -3,8 +3,13 @@ package com.mf.dao;
 import java.util.LinkedHashMap;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class OBLoginResponse {
+	private JSONArray priceDiscount = new JSONArray();
+	private JSONArray priceDiscountRegion = new JSONArray();
+	private JSONArray priceDiscountDistributor = new JSONArray();
+	private JSONArray priceDiscountChannel = new JSONArray();
 
 	private JSONArray UserData = new JSONArray();
 	private JSONArray BeatPlanRows = new JSONArray();
@@ -24,14 +29,13 @@ public class OBLoginResponse {
 	private JSONArray Cities = new JSONArray();
 	private JSONArray UserAreas = new JSONArray();
 	private JSONArray StockPosition = new JSONArray();
-
+	private JSONObject SalesTax = new JSONObject();
+	private JSONObject IncomeTax = new JSONObject();
 
 	private String token = "";
 	private int is_order_lock;
 	private int order_lock_time;
 	private int productgroupId = 0;
-
-
 
 	public JSONArray getStockPosition() {
 		return StockPosition;
@@ -209,34 +213,90 @@ public class OBLoginResponse {
 		this.Cities = cities;
 	}
 
-	public LinkedHashMap<String, Object> getIntoJson() {
-		LinkedHashMap<String, Object> dataArray = new LinkedHashMap<String, Object>();
+	public JSONObject getSalesTax() {
+		return SalesTax;
+	}
 
-		dataArray.put("is_order_lock", this.is_order_lock);
-		dataArray.put("order_lock_time", this.order_lock_time);
-		dataArray.put("jwt_token", this.token);
-		dataArray.put("access_features", this.AccessFeatures);
-		dataArray.put("all_features", this.AllFeatures);
-		dataArray.put("user", this.UserData);
-		dataArray.put("beat_plan_rows", this.BeatPlanRows);
-		dataArray.put("product_group_id", this.productgroupId);
-		dataArray.put("Products", this.Products); // old ProductGroupRows
-		dataArray.put("pjp_list", pjpList);
-		dataArray.put("pci_sub_channel", this.pcisubChannnel);
-		dataArray.put("promotions_active", this.activePromotion);
-		dataArray.put("promotion_free_products", this.promotionsProductsFree);
-		dataArray.put("promotion_products", this.promoProducts);
-		dataArray.put("active_price_list", this.ActivePriceList);
-		dataArray.put("price_list", this.PriceList);
-		dataArray.put("hand_discount", this.PriceHandDiscount);
-		dataArray.put("spot_discount", this.SpotDiscount);
-		dataArray.put("no_order_reasons", this.NoOrderReason);
-		dataArray.put("cities", this.Cities);
-		dataArray.put("user_areas", this.UserAreas);
-		dataArray.put("stock_position", this.StockPosition);
+	public void setSalesTax(JSONObject salesTax) {
+		SalesTax = salesTax;
+	}
+
+	public JSONObject getIncomeTax() {
+		return IncomeTax;
+	}
+
+	public void setIncomeTax(JSONObject incomeTax) {
+		IncomeTax = incomeTax;
+	}
+
+	public JSONArray getPriceDiscount() {
+		return priceDiscount;
+	}
+
+	public void setPriceDiscount(JSONArray priceDiscount) {
+		this.priceDiscount = priceDiscount;
+	}
+
+	public JSONArray getPriceDiscountRegion() {
+		return priceDiscountRegion;
+	}
+
+	public void setPriceDiscountRegion(JSONArray priceDiscountRegion) {
+		this.priceDiscountRegion = priceDiscountRegion;
+	}
+
+	public JSONArray getPriceDiscountDistributor() {
+		return priceDiscountDistributor;
+	}
+
+	public void setPriceDiscountDistributor(JSONArray priceDiscountDistributor) {
+		this.priceDiscountDistributor = priceDiscountDistributor;
+	}
+
+	public JSONArray getPriceDiscountChannel() {
+		return priceDiscountChannel;
+	}
+
+	public void setPriceDiscountChannel(JSONArray priceDiscountChannel) {
+		this.priceDiscountChannel = priceDiscountChannel;
+	}
+
+	public LinkedHashMap<String, Object> getIntoJson() {
+		LinkedHashMap<String, Object> dataObject = new LinkedHashMap<String, Object>();
+
+		dataObject.put("is_order_lock", this.is_order_lock);
+		dataObject.put("order_lock_time", this.order_lock_time);
+		dataObject.put("jwt_token", this.token);
+		dataObject.put("sales_tax", this.SalesTax);
+		dataObject.put("incomeTax", this.IncomeTax);
+		dataObject.put("access_features", this.AccessFeatures);
+		dataObject.put("all_features", this.AllFeatures);
+		dataObject.put("user", this.UserData);
+		dataObject.put("beat_plan_rows", this.BeatPlanRows);
+		dataObject.put("product_group_id", this.productgroupId);
+		dataObject.put("Products", this.Products); // old ProductGroupRows
+		dataObject.put("pjp_list", pjpList);
+		dataObject.put("pci_sub_channel", this.pcisubChannnel);
+		dataObject.put("promotions_active", this.activePromotion);
+		dataObject.put("promotion_free_products", this.promotionsProductsFree);
+		dataObject.put("promotion_products", this.promoProducts);
+		dataObject.put("active_price_list", this.ActivePriceList);
+		dataObject.put("price_list", this.PriceList);
+		dataObject.put("hand_discount", this.PriceHandDiscount);
+		dataObject.put("spot_discount", this.SpotDiscount);
+		dataObject.put("no_order_reasons", this.NoOrderReason);
+		dataObject.put("cities", this.Cities);
+		dataObject.put("user_areas", this.UserAreas);
+		dataObject.put("stock_position", this.StockPosition);
+		
+		dataObject.put("price_discount", this.priceDiscount);
+		dataObject.put("price_discount_region", this.priceDiscountRegion);
+		dataObject.put("price_discount_distributor", this.priceDiscountDistributor);
+		dataObject.put("price_discount_channel", this.priceDiscountChannel);
+
 
 		// / System.out.println(dataArray);
-		return dataArray;
+		return dataObject;
 	}
 
 }

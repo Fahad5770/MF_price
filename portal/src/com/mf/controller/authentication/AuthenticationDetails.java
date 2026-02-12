@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.mf.discounts.getPriceDisacountInfoJson;
 import com.mf.interfaces.IAuthenticationDetails;
@@ -15,9 +16,14 @@ import com.mf.modals.ActivePromotion;
 import com.mf.modals.BeatPlans;
 import com.mf.modals.Distribution;
 import com.mf.modals.DistributorLocation;
+import com.mf.modals.IncomeTax;
 import com.mf.modals.Outlet;
 import com.mf.modals.OutletOB;
 import com.mf.modals.PCISubChannels;
+import com.mf.modals.PriceDiscount;
+import com.mf.modals.PriceDiscountChannel;
+import com.mf.modals.PriceDiscountDistributor;
+import com.mf.modals.PriceDiscountRegion;
 import com.mf.modals.PriceHandDiscount;
 import com.mf.modals.PriceList;
 import com.mf.modals.Cities;
@@ -33,6 +39,7 @@ import com.mf.modals.ProductStockPosition;
 import com.mf.modals.NoOrderReason;
 import com.mf.modals.OBPriceList;
 import com.mf.modals.SalesPromotionsProducts;
+import com.mf.modals.SalesTax;
 import com.mf.modals.SpotDiscountProducts;
 import com.pbc.util.Datasource;
 import com.mf.modals.UserAreas;
@@ -463,6 +470,67 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 	}
 
 	@Override
+	public JSONArray get_price_disc(Datasource ds) {
+
+		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_price_disc(ds);
+
+		JSONArray price_disc_array = new JSONArray();
+
+		for (PriceDiscount pd : priceDiscountList) {
+			price_disc_array.add(pd.getIntoJson());
+		}
+
+		return price_disc_array;
+	}
+	
+	@Override
+	public JSONArray get_price_disc_region(Datasource ds ,  int userId) {
+
+	    List<PriceDiscountRegion> priceDiscountRegionList = GetPriceInfoJson.get_price_disc_region(ds, userId);
+
+	    JSONArray price_disc_array = new JSONArray();
+
+	    for (PriceDiscountRegion pd : priceDiscountRegionList) {
+	        price_disc_array.add(pd.getIntoJson());
+	    }
+
+	    return price_disc_array;
+	}
+
+	@Override
+	public JSONArray get_price_disc_channel(Datasource ds) {
+
+	    List<PriceDiscountChannel> priceDiscountChannelList =
+	            GetPriceInfoJson.get_price_disc_channel(ds);
+
+	    JSONArray price_disc_array = new JSONArray();
+
+	    for (PriceDiscountChannel pd : priceDiscountChannelList) {
+	        price_disc_array.add(pd.getIntoJson());
+	    }
+
+	    return price_disc_array;
+	}
+
+	
+	
+	@Override
+	public JSONArray get_price_disc_distributor(Datasource ds , int userId) {
+
+	    List<PriceDiscountDistributor> priceDiscountDistributorList =
+	            GetPriceInfoJson.get_price_disc_distributor(ds , userId);
+
+	    JSONArray price_disc_array = new JSONArray();
+
+	    for (PriceDiscountDistributor pd : priceDiscountDistributorList) {
+	        price_disc_array.add(pd.getIntoJson());
+	    }
+
+	    return price_disc_array;
+	}
+
+
+	@Override
 	public JSONArray get_active_price_list(Datasource ds, String AllOutlets) {
 		List<ActivePriceList> ActivePriceLists = GetPriceInfoJson.get_active_price_list(ds, AllOutlets);
 
@@ -684,11 +752,10 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 	@Override
 	public JSONArray StockPosition(Datasource ds, int user_id) {
 		// TODO Auto-generated method stub
-		
-		
+
 		List<ProductStockPosition> get_products_stock = GetProductsInfoJson.get_products_stock(ds, user_id);
 		JSONArray products_stock_array = new JSONArray();
-		for(ProductStockPosition productStockPosition : get_products_stock) {
+		for (ProductStockPosition productStockPosition : get_products_stock) {
 			products_stock_array.add(productStockPosition.getIntoJson());
 		}
 		return products_stock_array;
@@ -696,6 +763,80 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 	@Override
 	public JSONArray OrderBookerBeatPlanRowsByLocation(Datasource ds, int user_id, double lat, double lng) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public JSONObject get_sales_tax(Datasource ds) {
+
+		JSONObject sales_tax_object = new JSONObject();
+
+		try {
+
+			Statement s1 = ds.createStatement();
+
+			String query = "SELECT * FROM inventory_sales_tax WHERE isActive = 1";
+
+			ResultSet rsSalesTax = s1.executeQuery(query);
+
+			while (rsSalesTax.next()) {
+
+				SalesTax salesTax = new SalesTax(rsSalesTax.getInt("FR"), rsSalesTax.getInt("FUR"),
+						rsSalesTax.getInt("NFR"), rsSalesTax.getInt("NFUR"));
+
+				sales_tax_object = salesTax.getIntoJson();
+
+			}
+			s1.close();
+
+		} catch (SQLException e) {
+			System.out.println("Sales Tax Error :- " + e);
+
+		}
+
+		return sales_tax_object;
+	}
+
+	@Override
+	public JSONObject get_income_tax(Datasource ds) {
+
+		JSONObject sales_tax_object = new JSONObject();
+
+		try {
+
+			Statement s1 = ds.createStatement();
+
+			String query = "SELECT * FROM inventory_income_tax WHERE isActive = 1";
+
+			ResultSet rsIncomeTax = s1.executeQuery(query);
+
+			while (rsIncomeTax.next()) {
+
+				IncomeTax incomeTax = new IncomeTax(rsIncomeTax.getInt("FR"), rsIncomeTax.getInt("FUR"),
+						rsIncomeTax.getInt("NFR"), rsIncomeTax.getInt("NFUR"));
+
+				sales_tax_object = incomeTax.getIntoJson();
+
+			}
+			s1.close();
+
+		} catch (SQLException e) {
+			System.out.println("Income Tax Error :- " + e);
+
+		}
+
+		return sales_tax_object;
+	}
+
+	@Override
+	public JSONArray get_price_disc_region(Datasource ds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public JSONArray get_price_disc_distributor(Datasource ds) {
 		// TODO Auto-generated method stub
 		return null;
 	}

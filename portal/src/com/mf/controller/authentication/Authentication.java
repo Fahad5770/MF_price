@@ -225,13 +225,25 @@ public class Authentication implements IAuthentication {
 			/* create array of user */
 			JSONArray UserData = new JSONArray();
 			UserData.add(user.getIntoJson());
+			
 			OBloginResponse.setUserData(UserData);
 
 			OBloginResponse.setBeatPlanRows(AD.OrderBookerBeatPlanRows(ds, loginRequest.getUser_id()));
-			
 			OBloginResponse.setProductgroupId(productGroupId);
 			OBloginResponse.setProducts(AD.Products(ds, productGroupId));
+			
 			OBloginResponse.setPriceList(AD.get_ob_price_list(ds));
+			
+			OBloginResponse.setSalesTax(AD.get_sales_tax(ds));
+			OBloginResponse.setIncomeTax(AD.get_income_tax(ds));
+			
+			OBloginResponse.setPriceDiscount(AD.get_price_disc(ds));
+			OBloginResponse.setPriceDiscountChannel(AD.get_price_disc_channel(ds));
+			
+			OBloginResponse.setPriceDiscountRegion(AD.get_price_disc_region(ds, loginRequest.getUser_id()));
+			
+			OBloginResponse.setPriceDiscountDistributor(AD.get_price_disc_distributor(ds , loginRequest.getUser_id()));
+
 			OBloginResponse.setPcisubChannnel(AD.get_pci_sub_channels(ds));
 			OBloginResponse.setPromotionsProductsFree(AD.get_free_promotion_products(ds, AllOutlets));
 			OBloginResponse.setActivePriceList(AD.get_active_price_list(ds, AllOutlets));
@@ -244,6 +256,7 @@ public class Authentication implements IAuthentication {
 			OBloginResponse.setPromoProducts(AD.get_promotion_products(ds, AllOutlets));
 			OBloginResponse.setPjpList(AD.get_pjp_list(ds, loginRequest.getUser_id()));
 			OBloginResponse.setStockPosition(AD.StockPosition(ds, loginRequest.getUser_id()));
+			
 			responseModal.setData(OBloginResponse.getIntoJson());
 			responseModal.setStatus(true);
 			responseModal.setUserMessage("Login Successfully");

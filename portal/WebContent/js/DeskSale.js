@@ -1415,7 +1415,7 @@ function getProductInfoJson(ProductID) {
 					
 					UnitPrice = parseFloat(json.UnitPrice);
 					$('#DeskSaleUnitRate').val(json.UnitPrice);
-					$('#DeskSaleTax').val(json.WHTaxAmount + json.SalesTaxAmount);
+					$('#DeskSaleTax').val(json.SalesTax + json.IncomeTax);
 
 				} else {
 					// $("#DeskSaleDistributorName").val("Invalid ID");

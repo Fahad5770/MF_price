@@ -113,4 +113,50 @@ public class AlmoizFormulas {
 
 		return ProductTax;
 	}
+	
+	public static HashMap<String, Double> ProductsTax2(int productId, long outlet_id) {
+		HashMap<String, Double> ProductTax2 = new HashMap<String, Double>();
+		Datasource ds = new Datasource();
+		try {
+			ds.createConnection();
+			Statement s = ds.createStatement();
+			Statement s2 = ds.createStatement();
+			boolean isRegister = false, isFiler = false;
+			//System.out.println("-----------------------------------------------------------------------------");
+			System.out.println("select is_filer, is_register from common_outlets where id=" + outlet_id);
+			ResultSet rsStatus = s
+					.executeQuery("select is_filer, is_register from common_outlets where id=" + outlet_id);
+			if (rsStatus.first()) {
+				isRegister = (rsStatus.getInt("is_register") == 1);
+				isFiler = (rsStatus.getInt("is_filer") == 1);
+			}
+
+
+			String SelectText = (isRegister && isFiler) ? "FR"
+					: (isRegister && !isFiler) ? "FUR"
+							: (!isRegister && isFiler) ? "NFR"
+									: (!isRegister && !isFiler) ? "NFUR" : "";
+
+			System.out.println(
+					"SELECT " + SelectText + " FROM inventory_sales_tax where isActive=1");
+			ResultSet rsSaleTax = s2.executeQuery(
+					"SELECT " + SelectText + " FROM inventory_sales_tax where isActive=1");
+			ProductTax2.put("sales_tax", (rsSaleTax.first()) ? rsSaleTax.getDouble(1) : 0);
+			System.out.println(
+					"SELECT " + SelectText + " FROM inventory_income_tax where isActive=1");
+			ResultSet rsIncomeTax = s2.executeQuery(
+					"SELECT " + SelectText + " FROM inventory_income_tax where isActive=1");
+			ProductTax2.put("income_tax", (rsIncomeTax.first()) ? rsIncomeTax.getDouble(1) : 0);
+			//System.out.println("-----------------------------------------------------------------------------");
+			s.close();
+			s2.close();
+			ds.dropConnection();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+
+		return ProductTax2;
+	}
 }
