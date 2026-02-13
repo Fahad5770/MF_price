@@ -516,7 +516,7 @@ function DeskSaleAddProduct() {
 										+ $('#DeskSaleDiscount').val()
 										+ "<input type='hidden' name='DeskSaleMainFormDiscount' value='"
 										+ $('#DeskSaleDiscount').val()
-										+ "'></td>"
+										+ "'><input type='hidden' name='DeskSaleDiscountId' id='DeskSaleDiscountId' value='"+$('#DSDiscountId').val()+"' /></td>"
 										+ "<td>"
 										+ $('#DeskSaleTax').val()
 										+ "<input type='hidden' name='DeskSaleMainFormTax' value='"
@@ -1412,6 +1412,8 @@ function getProductInfoJson(ProductID) {
 					$('#DeskSaleRate').val(json.RawCasePrice);
 					
 					$('#DeskSaleDiscount').val(json.Discount);
+					$('#DSDiscountId').val(json.DiscountId);
+
 					
 					UnitPrice = parseFloat(json.UnitPrice);
 					$('#DeskSaleUnitRate').val(json.UnitPrice);

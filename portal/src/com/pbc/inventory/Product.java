@@ -108,37 +108,138 @@ public class Product {
 		return ret;
 	}
 
-	public static double[] getSellingPrice_3(long SAPCode , long OutletID)
+	public static double[] getSellingPrice_3(long SAPCode, long OutletID)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+
 		Datasource ds = new Datasource();
 		double[] ret = new double[5];
+
 		ds.createConnection();
+
 		Statement s = ds.createStatement();
 		Statement s2 = ds.createStatement();
+		Statement s3 = ds.createStatement();
+		Statement s4 = ds.createStatement();
 
 		int ProductID = 0;
-		ResultSet rs9 = s.executeQuery("select id from inventory_products where sap_code = " + SAPCode);
-		if (rs9.first()) {
-			ProductID = rs9.getInt(1);
+
+		// Get Product ID
+		ResultSet rs19 = s.executeQuery("select id from inventory_products where sap_code = " + SAPCode);
+		if (rs19.first()) {
+			ProductID = rs19.getInt(1);
 		}
 
-		// System.out.println("select is_filer, is_register from common_outlets where
-		// id=" + OutletID);
-
-		// System.out.println("select * from inventory_price_list_products where id=1
-		// and product_id=" + ProductID);
+		// Get Base Prices
 		ResultSet rs4 = s2
 				.executeQuery("select * from inventory_price_list_products where id=1 and product_id=" + ProductID);
 		if (rs4.first()) {
 			ret[0] = rs4.getDouble("raw_case");
 			ret[1] = rs4.getDouble("unit");
-			ret[2] = 0;
 		}
-		
-		
+
+		double discount = 0;
+		int discountId = 0;
+
+		// ===================== 1st Priority: Channel =====================
+		System.out.println("Checking Channel Discount...");
+		ResultSet rs5 = s3.executeQuery("SELECT ipd.id FROM inventory_price_discount ipd "
+				+ "JOIN inventory_price_discount_channel ipdc ON ipd.id=ipdc.price_discount_id "
+				+ "WHERE curdate() BETWEEN valid_from AND valid_to AND is_active=1 "
+				+ "AND pci_sub_channel_id IN (SELECT pic_channel_id FROM common_outlets WHERE id = " + OutletID + ")");
+
+		if (rs5.first()) {
+
+			int price_disc_id = rs5.getInt("id");
+
+			ResultSet rs6 = s4
+					.executeQuery("SELECT * FROM pep.inventory_price_discount_products WHERE price_discount_id= "
+							+ price_disc_id + " AND product_id IN "
+							+ "(SELECT id FROM inventory_products WHERE sap_code= " + SAPCode + ")");
+
+			if (rs6.first() && rs6.getDouble("discount_value") > 0) {
+				discountId = price_disc_id;
+				discount = rs6.getDouble("discount_value");
+				System.out.println("Channel Stop");
+			}
+		}
+
+		// ===================== 2nd Priority: Distributor =====================
+		if (discount == 0) {
+			System.out.println("Checking Distributor Discount...");
+			ResultSet rs7 = s4.executeQuery("SELECT ipd.id FROM inventory_price_discount ipd "
+					+ "JOIN inventory_price_discount_distributor ipdc ON ipd.id=ipdc.price_discount_id "
+					+ "WHERE curdate() BETWEEN valid_from AND valid_to AND is_active=1 "
+					+ "AND distributor_id IN (SELECT distributor_id FROM common_outlets WHERE id = " + OutletID + ")");
+
+			if (rs7.first()) {
+
+				int price_disc_id = rs7.getInt("id");
+
+				ResultSet rs8 = s4
+						.executeQuery("SELECT * FROM pep.inventory_price_discount_products WHERE price_discount_id= "
+								+ price_disc_id + " AND product_id IN "
+								+ "(SELECT id FROM inventory_products WHERE sap_code= " + SAPCode + ")");
+
+				if (rs8.first() && rs8.getDouble("discount_value") > 0) {
+					discountId = price_disc_id;
+					discount = rs8.getDouble("discount_value");
+					System.out.println("Distributor Stop");
+				}
+			}
+		}
+
+		// ===================== 3rd Priority: Region =====================
+		if (discount == 0) {
+			System.out.println("Checking Region Discount...");
+			ResultSet rs9 = s3.executeQuery("SELECT ipd.id FROM inventory_price_discount ipd "
+					+ "JOIN inventory_price_discount_region ipdc ON ipd.id=ipdc.price_discount_id "
+					+ "WHERE curdate() BETWEEN valid_from AND valid_to AND is_active=1 "
+					+ "AND region_id IN (SELECT region_id FROM common_outlets WHERE id = " + OutletID + ")");
+
+			if (rs9.first()) {
+
+				int price_disc_id = rs9.getInt("id");
+
+				ResultSet rs10 = s4
+						.executeQuery("SELECT * FROM pep.inventory_price_discount_products WHERE price_discount_id= "
+								+ price_disc_id + " AND product_id IN "
+								+ "(SELECT id FROM inventory_products WHERE sap_code= " + SAPCode + ")");
+
+				if (rs10.first() && rs10.getDouble("discount_value") > 0) {
+					discountId = price_disc_id;
+					discount = rs10.getDouble("discount_value");
+					System.out.println("Region Stop");
+				}
+			}
+		}
+
+		// ===================== 4th Priority: Global =====================
+		if (discount == 0) {
+
+			System.out.println(
+					"SELECT * FROM pep.inventory_price_discount_products WHERE price_discount_id= 1 AND product_id IN "
+							+ "(SELECT id FROM inventory_products WHERE sap_code= " + SAPCode + ")");
+			ResultSet rs12 = s4.executeQuery(
+					"SELECT * FROM pep.inventory_price_discount_products WHERE price_discount_id= 1 AND product_id IN "
+							+ "(SELECT id FROM inventory_products WHERE sap_code= " + SAPCode + ")");
+
+			if (rs12.first() && rs12.getDouble("discount_value") > 0) {
+				discountId = 1;
+				discount = rs12.getDouble("discount_value");
+				System.out.println("Global Stop");
+			}
+		}
+
+		ret[2] = discount;
+		ret[3] = discountId;
 
 		s.close();
+		s2.close();
+		s3.close();
+		s4.close();
+
 		ds.dropConnection();
+
 		return ret;
 	}
 

@@ -68,14 +68,17 @@ public class DeskSaleExecute extends HttpServlet {
 		long DistributorID = Utilities.parseLong(request.getParameter("DeskSaleDistributorIDHidden"));
 		long RegionID = Utilities.parseLong(request.getParameter("DeskSaleRegionIDHidden"));
 
-		//double SalesTaxRate = Utilities.parseDouble(request.getParameter("DeskSaleSalesTaxRateHidden"));
-	//	double WHTaxRate = Utilities.parseDouble(request.getParameter("DeskSaleWHTaxHidden"));
+		// double SalesTaxRate =
+		// Utilities.parseDouble(request.getParameter("DeskSaleSalesTaxRateHidden"));
+		// double WHTaxRate =
+		// Utilities.parseDouble(request.getParameter("DeskSaleWHTaxHidden"));
 
 		// double InvoiceAmount =
 		// Utilities.parseDouble(request.getParameter("DeskSaleMainFormTotalInvoiceAmount"));
 		// double SalesTaxAmount =
 		// Utilities.parseDouble(request.getParameter("DeskSaleMainFormSalesTax"));
 		double WHTaxAmount = Utilities.parseDouble(request.getParameter("DeskSaleMainFormWithHoldingTax"));
+
 		double TotalAmount = Utilities.parseDouble(request.getParameter("DeskSaleMainFormTotalAmount"));
 		double TotalDiscout = Utilities.parseDouble(request.getParameter("DeskSaleMainFormTotalDiscount"));
 		double Adjustment = Utilities.parseDouble(request.getParameter("DeskSaleMainFormAdjustment"));
@@ -88,7 +91,28 @@ public class DeskSaleExecute extends HttpServlet {
 		double aRate[] = Utilities.parseDouble(request.getParameterValues("DeskSaleMainFormRateHidden"));
 		double aUnitRate[] = Utilities.parseDouble(request.getParameterValues("DeskSaleMainFormUnitRateHidden"));
 
+		// double Discount[] =
+		// Utilities.parseDouble(request.getParameterValues("DeskSaleMainFormDiscount"));
+
 		double Discount[] = Utilities.parseDouble(request.getParameterValues("DeskSaleMainFormDiscount"));
+
+		// Get all values submitted (as strings)
+		String[] discountIdStr = request.getParameterValues("DeskSaleDiscountId");
+		int[] DiscountId = null;
+		if (discountIdStr != null) {
+			DiscountId = new int[discountIdStr.length];
+			for (int i = 0; i < discountIdStr.length; i++) {
+				try {
+					DiscountId[i] = Integer.parseInt(discountIdStr[i]);
+				} catch (NumberFormatException e) {
+					DiscountId[i] = 0; // fallback if invalid number
+				}
+				System.out.println("DiscountId[" + i + "] = " + DiscountId[i]);
+			}
+		} else {
+			System.out.println("No DiscountId submitted.");
+		}
+
 		int UnitPerSKU[] = Utilities.parseInt(request.getParameterValues("DeskSaleMainFormUnitPerSKU"));
 		int LiquidInML[] = Utilities.parseInt(request.getParameterValues("DeskSaleMainFormLiquidInML"));
 
@@ -222,27 +246,21 @@ public class DeskSaleExecute extends HttpServlet {
 						ds.startTransaction();
 						// s.getConnection().setAutoCommit(false);
 
-					/*	int isFiler = 0;
-						ResultSet rs31 = s.executeQuery("select is_filer from common_outlets where id=" + OutletID);
-						if (rs31.first()) {
-							isFiler = rs31.getInt("is_filer");
-						}*/
+						/*
+						 * int isFiler = 0; ResultSet rs31 =
+						 * s.executeQuery("select is_filer from common_outlets where id=" + OutletID);
+						 * if (rs31.first()) { isFiler = rs31.getInt("is_filer"); }
+						 */
 
-						/*ResultSet rs4 = s.executeQuery("select * from inventory_sales_tax_rates");
-						while (rs4.next()) {
-							if (rs4.getInt("id") == 1) {
-								// sales_tax_rate = rs4.getDouble("rate");
-							} else if (rs4.getInt("id") == 2) {
-								if (isFiler == 1) {
-									WHTaxRate = rs4.getDouble("filer_rate");
-								} else {
-									WHTaxRate = rs4.getDouble("rate");
-								}
-
-								// wh_tax_rate = rs4.getDouble("rate");
-							}
-						}
-*/
+						/*
+						 * ResultSet rs4 = s.executeQuery("select * from inventory_sales_tax_rates");
+						 * while (rs4.next()) { if (rs4.getInt("id") == 1) { // sales_tax_rate =
+						 * rs4.getDouble("rate"); } else if (rs4.getInt("id") == 2) { if (isFiler == 1)
+						 * { WHTaxRate = rs4.getDouble("filer_rate"); } else { WHTaxRate =
+						 * rs4.getDouble("rate"); }
+						 * 
+						 * // wh_tax_rate = rs4.getDouble("rate"); } }
+						 */
 						// Patch for updating PJP ID
 
 						long PJPID = 0;
@@ -258,13 +276,13 @@ public class DeskSaleExecute extends HttpServlet {
 						if (isEditCase) {
 							SQLMain = "replace into inventory_sales_invoices (id, uvid, created_on, created_by, outlet_id, type_id, distributor_id, invoice_amount, sales_tax_rate, sales_tax_amount, wh_tax_rate, wh_tax_amount, total_amount, discount, net_amount, region_id, fraction_adjustment, beat_plan_id) values("
 									+ DeskSaleEditID + ", " + UniqueVoucherID + ", now(), " + UserID + ", " + OutletID
-									+ ", 1, " + DistributorID + ", 0, 0, 0, "
-									+ "0 , 0, 0, 0, 0, " + RegionID + ", 0, " + ((PJPID == 0) ? null : PJPID) + " )";
+									+ ", 1, " + DistributorID + ", 0, 0, 0, " + "0 , 0, 0, 0, 0, " + RegionID + ", 0, "
+									+ ((PJPID == 0) ? null : PJPID) + " )";
 						} else {
 							SQLMain = "insert into inventory_sales_invoices (uvid, created_on, created_by, outlet_id, type_id, distributor_id, invoice_amount, sales_tax_rate, sales_tax_amount, wh_tax_rate, wh_tax_amount, total_amount, discount, net_amount, region_id, fraction_adjustment, beat_plan_id) values("
 									+ UniqueVoucherID + ", now(), " + UserID + ", " + OutletID + ", 1, " + DistributorID
-									+ ", 0,0, 0, 0, 0, 0, 0, 0, " + RegionID
-									+ ", 0, " + ((PJPID == 0) ? null : PJPID) + " )";
+									+ ", 0,0, 0, 0, 0, 0, 0, 0, " + RegionID + ", 0, " + ((PJPID == 0) ? null : PJPID)
+									+ " )";
 						}
 
 						System.out.println(SQLMain);
@@ -300,6 +318,8 @@ public class DeskSaleExecute extends HttpServlet {
 							long LiquidInMLPerUnit = 0;
 							int LrbTypeID = 0;
 
+							System.out.println(	"SELECT unit_per_sku, liquid_in_ml,lrb_type_id FROM inventory_products_view where product_id = "
+									+ ProductID[i]);
 							ResultSet rs3 = s.executeQuery(
 									"SELECT unit_per_sku, liquid_in_ml,lrb_type_id FROM inventory_products_view where product_id = "
 											+ ProductID[i]);
@@ -337,11 +357,11 @@ public class DeskSaleExecute extends HttpServlet {
 							// double incomeTax = 0.0;
 							double ItemWHTaxAmount = 0.0;
 							System.out.println("UserID : " + UserID);
-							HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(ProductID[i], OutletID);
-							
-							double WHTaxAmount = ProductsTax.get("wh_tax") * RawCases[i];
-							
-							double SalesTaxAmount = ProductsTax.get("income_tax")* RawCases[i];
+							HashMap<String, Double> ProductsTax2 = AlmoizFormulas.ProductsTax2(ProductID[i], OutletID);
+
+							WHTaxAmount = ProductsTax2.get("income_tax") * RawCases[i];
+
+							double SalesTaxAmount = ProductsTax2.get("sales_tax") * RawCases[i];
 //							if (Utilities.parseLong(UserID) == 1111) {
 //								HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(ProductID[i],
 //										OutletID);
@@ -371,12 +391,18 @@ public class DeskSaleExecute extends HttpServlet {
 							InvoiceSaleTaxAmount += SalesTaxAmount;
 							InvoiceNetAmount += ItemNetAmount;
 
+							System.out.println("1111 : ");
 							StockPosting sp = new StockPosting();
 
 							long AvailableTotalUnits = sp.getClosingBalanceExInvoiced(DistributorID, ProductID[i],
 									new Date());
 
+							System.out.println("AvailableTotalUnits : "  + AvailableTotalUnits);
 							if (AvailableTotalUnits == 0) {
+								
+								
+								System.out.println("AvailableTotalUnits : "  + AvailableTotalUnits);
+								
 								String ProductName = getProductName(s, ProductID[i]);
 								obj.put("success", "false");
 								obj.put("error", "No Stock Available for " + ProductName);
@@ -388,6 +414,9 @@ public class DeskSaleExecute extends HttpServlet {
 								return;
 
 							} else if (TotalUnits > AvailableTotalUnits) {
+								
+								System.out.println("TotalUnits : "  + TotalUnits);
+
 
 								String ProductName = getProductName(s, ProductID[i]);
 								obj.put("success", "false");
@@ -402,23 +431,33 @@ public class DeskSaleExecute extends HttpServlet {
 								out.close();
 								return;
 							}
+							
+							System.out.println("ProductID size : "+ProductID.length);
+							System.out.println("Discount size : "+Discount.length);
+							System.out.println("DiscountId size : "+DiscountId.length);
+							
+							System.out.println("INSERT INTO inventory_sales_invoices_products "
+									+ "(id, product_id, raw_cases, units, total_units, liquid_in_ml, discount, discount_id, "
+									+ "rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, "
+									+ "sales_tax_amount, net_amount, hand_discount_rate, hand_discount_amount, hand_discount_id) "
+									+ "VALUES (" + DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", "
+									+ Units[i] + ", " + TotalUnits + ", " + LiquidInMLValue + ", " + Discount[i] + ", "
+									+ DiscountId[i] + ", " + RateRawCase + ", " + RateUnit + ", " + RawCaseAmount + ", "
+									+ UnitAmount + ", " + ItemTotalAmount + ", " + WHTaxAmount + ", " + SalesTaxAmount
+									+ ", " + ItemNetAmount + ", " + HandDiscountRate + ", " + HandDiscountAmount + ", "
+									+ HandDiscountIDInsert + ")");
 
-							System.out.println(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, discount, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, sales_tax_amount, net_amount, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
-											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
-											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + Discount[i] + ", "
-											+ RateRawCase + ", " + RateUnit + ", " + RawCaseAmount + ", " + UnitAmount
-											+ ", " + ItemTotalAmount + ", " + WHTaxAmount + "," + SalesTaxAmount + "," + ItemNetAmount
-											+ "," + HandDiscountRate + ", " + HandDiscountAmount + ", "
-											+ HandDiscountIDInsert + ") ");
-							s.executeUpdate(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, discount, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, sales_tax_amount, net_amount, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
-											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
-											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + Discount[i] + ", "
-											+ RateRawCase + ", " + RateUnit + ", " + RawCaseAmount + ", " + UnitAmount
-											+ ", " + ItemTotalAmount + ", " + WHTaxAmount + "," + SalesTaxAmount + "," + ItemNetAmount
-											+ "," + HandDiscountRate + ", " + HandDiscountAmount + ", "
-											+ HandDiscountIDInsert + ") ");
+							s.executeUpdate("INSERT INTO inventory_sales_invoices_products "
+									+ "(id, product_id, raw_cases, units, total_units, liquid_in_ml, discount, discount_id, "
+									+ "rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, "
+									+ "sales_tax_amount, net_amount, hand_discount_rate, hand_discount_amount, hand_discount_id) "
+									+ "VALUES (" + DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", "
+									+ Units[i] + ", " + TotalUnits + ", " + LiquidInMLValue + ", " + Discount[i] + ", "
+									+ DiscountId[i] + ", " + RateRawCase + ", " + RateUnit + ", " + RawCaseAmount + ", "
+									+ UnitAmount + ", " + ItemTotalAmount + ", " + WHTaxAmount + ", " + SalesTaxAmount
+									+ ", " + ItemNetAmount + ", " + HandDiscountRate + ", " + HandDiscountAmount + ", "
+									+ HandDiscountIDInsert + ")");
+
 						}
 
 						InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));
@@ -429,8 +468,6 @@ public class DeskSaleExecute extends HttpServlet {
 
 //						double TotalAmountExSalesTax = Utilities.parseDouble(
 //								Utilities.getDisplayCurrencyFormatSimple((InvoiceAmount / (SalesTaxRate + 100)) * 100));
-
-					
 
 						if (PromotionsProductID != null) {
 							for (int i = 0; i < PromotionsProductID.length; i++) {
@@ -464,8 +501,8 @@ public class DeskSaleExecute extends HttpServlet {
 //								double ItemNetAmount = Utilities.parseDouble(
 //										Utilities.getDisplayCurrencyFormatSimple((ItemTotalAmount + ItemWHTaxAmount)));
 
-								double ItemNetAmount = Utilities.parseDouble(
-										Utilities.getDisplayCurrencyFormatSimple((ItemTotalAmount + 0 )));
+								double ItemNetAmount = Utilities
+										.parseDouble(Utilities.getDisplayCurrencyFormatSimple((ItemTotalAmount + 0)));
 								StockPosting sp = new StockPosting();
 								long AvailableTotalUnits = sp.getClosingBalanceExInvoiced(DistributorID,
 										PromotionsProductID[i], new Date());
@@ -517,8 +554,8 @@ public class DeskSaleExecute extends HttpServlet {
 												+ PromotionsUnitRate[i] + ", "
 												+ Utilities.getDisplayCurrencyFormatSimple(RawCaseAmount) + ", "
 												+ Utilities.getDisplayCurrencyFormatSimple(UnitAmount) + ", "
-												+ ItemTotalAmount + ", 0," + ItemNetAmount
-												+ ", 1, " + PromotionID[i] + ") ");
+												+ ItemTotalAmount + ", 0," + ItemNetAmount + ", 1, " + PromotionID[i]
+												+ ") ");
 							}
 						}
 
@@ -530,10 +567,10 @@ public class DeskSaleExecute extends HttpServlet {
 						 * Utilities.getDisplayCurrencyFormatSimple(FractionAmount) + ", net_amount = "
 						 * + InoviceTotalAmountString + " where id = " + DeskSaleID);
 						 */
-						//System.out.println(InvoiceNetAmount);
-					//	System.out.println(ShelfRent);
+						// System.out.println(InvoiceNetAmount);
+						// System.out.println(ShelfRent);
 						if (ShelfRent != 0) {
-							if(InvoiceNetAmount < ShelfRent) {
+							if (InvoiceNetAmount < ShelfRent) {
 								obj.put("success", "false");
 								obj.put("error", "The invoice amount should be equal or more than the shelf rent");
 								out.print(obj);
@@ -541,9 +578,9 @@ public class DeskSaleExecute extends HttpServlet {
 								return;
 							}
 						}
-						
-						InvoiceNetAmount = InvoiceNetAmount-ShelfRent;
-						
+
+						InvoiceNetAmount = InvoiceNetAmount - ShelfRent;
+
 						String InoviceTotalAmountString = InvoiceNetAmount + "";
 
 						if (InoviceTotalAmountString.indexOf(".") != -1) {
@@ -559,18 +596,21 @@ public class DeskSaleExecute extends HttpServlet {
 						}
 
 						double FractionAmount = Utilities.parseDouble(InoviceTotalAmountString) - InvoiceNetAmount;
-						
+
 //						System.out.println("update inventory_sales_invoices set invoice_amount = " + InvoiceAmount
 //								+ ", wh_tax_amount = " + InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount
 //								+ ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount)
 //								+ ", net_amount = " + InoviceTotalAmountString + " where id = " + DeskSaleID);
 						s.executeUpdate("update inventory_sales_invoices set invoice_amount = " + InvoiceAmount
-								+ ", sales_tax_amount= "+InvoiceSaleTaxAmount+" , wh_tax_amount = " + InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount
+								+ ", sales_tax_amount= " + InvoiceSaleTaxAmount + " , wh_tax_amount = "
+								+ InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount
 								+ ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount)
-								+ ", net_amount = " + InoviceTotalAmountString + ", shelf_rent="+ShelfRent+" where id = " + DeskSaleID);
-						
+								+ ", net_amount = " + InoviceTotalAmountString + ", shelf_rent=" + ShelfRent
+								+ " where id = " + DeskSaleID);
+
 //						/System.out.println("update rental_discount set is_released = 1, released_on=now(), released_by=" + UserID);
-						s.executeUpdate("update rental_discount set is_released = 1, released_on=now(), released_by=" + UserID);
+						s.executeUpdate(
+								"update rental_discount set is_released = 1, released_on=now(), released_by=" + UserID);
 						ds.commit();
 
 						// boolean posted = SalesPosting.post(DeskSaleID, Long.parseLong(UserID));
@@ -624,6 +664,9 @@ public class DeskSaleExecute extends HttpServlet {
 	private String getProductName(Statement s, int ProductID) throws SQLException {
 
 		String ProductName = "";
+		System.out.println(
+				"SELECT concat(package_label, ' ', brand_label) product_name FROM pep.inventory_products_view where product_id="
+						+ ProductID);
 		ResultSet rs = s.executeQuery(
 				"SELECT concat(package_label, ' ', brand_label) product_name FROM pep.inventory_products_view where product_id="
 						+ ProductID);

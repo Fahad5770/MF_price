@@ -45,6 +45,10 @@ public class GetProductInfo extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		System.out.println("SERVLET HIT: " + System.currentTimeMillis());
+
+		
 		// TODO Auto-generated method stub
 
 		PrintWriter out = response.getWriter();
@@ -111,6 +115,8 @@ public class GetProductInfo extends HttpServlet {
 					obj.put("RawCasePricewithoutDisc", PriceArray[0]);
 					obj.put("UnitPrice", PriceArray[1]);
 					obj.put("Discount", PriceArray[2]);
+					obj.put("DiscountId", PriceArray[3]);
+
 					
 					double RawCasePrice = PriceArray[0] + PriceArray[2];
 					

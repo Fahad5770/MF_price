@@ -186,9 +186,17 @@ long region_id= (rsRegion.first()) ? rsRegion.getLong("region_id") : 0;
 			<td valign="top" style="width:10%">
 				<input  type="text" placeholder="Tax" id="DeskSaleTax" name="DeskSaleTax" data-mini="true" readonly="readonly" >
 			</td>
+			
 			<td valign="top" style="width:10%">
-				<input  type="text" placeholder="Discount" id="DeskSaleDiscount" name="DeskSaleDiscount" data-mini="true" onchange="DeskSaleCalculate()" readonly="readonly">
+			    <!-- Discount amount -->
+			    <input type="text" placeholder="Discount" id="DeskSaleDiscount" name="DeskSaleDiscount" 
+			           data-mini="true" onchange="DeskSaleCalculate()" readonly="readonly">
+			
+			    <!-- Discount ID / type (invisible) -->
+			    <input type="hidden" type="text" id="DSDiscountId" name="DSDiscountId" placeholder="Discount ID" readonly="readonly">
 			</td>
+
+			
 			<td valign="top" style="width:10%">
 				<input  type="text" placeholder="Net Amount" id="DeskSaleNetAmount" name="DeskSaleNetAmount" data-mini="true" readonly="readonly">
 			</td>
