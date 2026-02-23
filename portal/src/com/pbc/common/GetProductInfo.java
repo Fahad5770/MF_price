@@ -110,7 +110,7 @@ public class GetProductInfo extends HttpServlet {
 
 				// System.out.println(request.getParameter("OutletID"));
 				if (request.getParameter("OutletID") != null) {
-					double PriceArray[] = Product.getSellingPrice_3(SapCode, OutletID);
+					double PriceArray[] = Product.getSellingPrice_2(SapCode, OutletID);
 
 					obj.put("RawCasePricewithoutDisc", PriceArray[0]);
 					obj.put("UnitPrice", PriceArray[1]);
