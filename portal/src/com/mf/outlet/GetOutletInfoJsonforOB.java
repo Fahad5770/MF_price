@@ -18,8 +18,9 @@ public class GetOutletInfoJsonforOB {
 
 			Statement s = ds.createStatement();
 
-			System.out.println("select " + "    dbpv.id beat_plan_id," + "    dbpv.distributor_id," + "    dbpv.label pjp_label,"
-					+ "    dbpv.city_id," + "    co.is_filer," +  " coc.contact_number telepohone," +"    co.is_Register," + "    co.Is_Geo_Fence,"
+			System.out.println("select " + "    dbpv.id beat_plan_id," + "    dbpv.distributor_id,"
+					+ "    dbpv.label pjp_label," + "    dbpv.city_id," + "    co.is_filer,"
+					+ " coc.contact_number telepohone," + "    co.is_Register," + "    co.Is_Geo_Fence,"
 					+ "    co.Geo_Radius,"
 					+ "    (SELECT label from pci_sub_channel psc where psc.id=co.pic_channel_id) as channel_label,"
 					+ "    (select order_created_on_date " + "        from inventory_sales_adjusted isa "
@@ -34,8 +35,8 @@ public class GetOutletInfoJsonforOB {
 					+ "join common_outlets_contacts coc on dbpv.outlet_id = coc.outlet_id and coc.is_primary = 1 "
 					+ "where dbpv.outlet_active = 1 " + "  and dbpv.assigned_to = " + user_id);
 			ResultSet rsOutlets = s.executeQuery("select " + "    dbpv.id beat_plan_id," + "    dbpv.distributor_id,"
-					+ "    dbpv.label pjp_label," + "    dbpv.city_id," + " coc.contact_number telepohone," +"    co.is_filer," + "    co.is_Register,"
-					+ "    co.Is_Geo_Fence," + "    co.Geo_Radius,"
+					+ "    dbpv.label pjp_label," + "    dbpv.city_id," + " coc.contact_number telepohone,"
+					+ "    co.is_filer," + "    co.is_Register," + "    co.Is_Geo_Fence," + "    co.Geo_Radius,"
 					+ "    (SELECT label from pci_sub_channel psc where psc.id=co.pic_channel_id) as channel_label,"
 					+ "    (select order_created_on_date " + "        from inventory_sales_adjusted isa "
 					+ "        where isa.outlet_id = dbpv.outlet_id " + "          and isa.invoice_amount != 0 "
@@ -53,17 +54,18 @@ public class GetOutletInfoJsonforOB {
 				OutletOB outlet = new OutletOB(rsOutlets.getLong("outlet_id"), rsOutlets.getString("outlet_name"),
 						rsOutlets.getInt("day_number"), rsOutlets.getString("owner"), rsOutlets.getString("address"),
 						rsOutlets.getString("telepohone"), rsOutlets.getInt("nfc_tag_id"),
-						rsOutlets.getString("order_created_on_date"), ((rsOutlets.getString("channel_label") == null) ? "" : rsOutlets.getString("channel_label")),
+						rsOutlets.getString("order_created_on_date"),
+						((rsOutlets.getString("channel_label") == null) ? "" : rsOutlets.getString("channel_label")),
 						rsOutlets.getDouble("lat"), rsOutlets.getDouble("lng"), rsOutlets.getInt("is_filer"),
 						rsOutlets.getInt("is_register"), rsOutlets.getInt("Is_Geo_Fence"),
 						rsOutlets.getInt("Geo_Radius"), rsOutlets.getString("area_label"),
 						rsOutlets.getString("sub_area_label"), rsOutlets.getInt("is_alternative"),
 						rsOutlets.getInt("pic_channel_id1"), rsOutlets.getInt("beat_plan_id"),
 						rsOutlets.getLong("distributor_id"), rsOutlets.getString("pjp_label"),
-						rsOutlets.getInt("city_id"));
+						rsOutlets.getInt("city_id"), 1, 1);
 
 				outlets.add(outlet);
-				//System.out.println(outlet.toString());
+				// System.out.println(outlet.toString());
 			}
 
 			s.close();

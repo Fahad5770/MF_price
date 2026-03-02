@@ -10,5 +10,7 @@ public interface IOrderFunctions {
 
 	public int getBrandID(long PromotionID, int ProductID, int PromotionIDs)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException;
+	
+	 public boolean splitOrder(long OrderID);
 
 }

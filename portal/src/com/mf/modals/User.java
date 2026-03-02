@@ -10,8 +10,24 @@ public class User {
 	private String designation;
 	private String department;
 	private String city;
+	private long distributor_id;
+	private int region_id;
 
 	public User() {
+	}
+
+	public User(int id, int is_active, String password, String name, String designation, String department, String city,
+			int region_id, long distributor_id) {
+		super();
+		this.id = id;
+		this.is_active = is_active;
+		this.password = password;
+		this.name = name;
+		this.designation = designation;
+		this.department = department;
+		this.city = city;
+		this.region_id = region_id;
+		this.distributor_id = distributor_id;
 	}
 
 	public User(int id, int is_active, String password, String name, String designation, String department,
@@ -41,6 +57,8 @@ public class User {
 		user.put("designatiom", this.designation);
 		user.put("department", this.department);
 		user.put("city", this.city);
+		user.put("region_id", this.region_id);
+		user.put("distributor_id", this.distributor_id);
 		return user;
 	}
 
@@ -98,6 +116,22 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public int getRegion_id() {
+		return region_id;
+	}
+
+	public void setRegion_id(int region_id) {
+		this.region_id = region_id;
+	}
+
+	public long getDistributor_id() {
+		return distributor_id;
+	}
+
+	public void setDistributor_id(long distributor_id) {
+		this.distributor_id = distributor_id;
 	}
 
 }

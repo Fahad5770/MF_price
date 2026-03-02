@@ -253,9 +253,12 @@ Statement s1 = ds.createStatement();
 	</form>
 	
     </div><!-- /content -->
-    <jsp:include page="LookupDistributorSearchPopup.jsp" > 
-    	<jsp:param value="DistributorSearchCallBackForUserRights" name="CallBack" />
-    </jsp:include><!-- Include Distributor Search -->
+    <jsp:include page="LookupDistributorSearchPopup.jsp">
+			<jsp:param value="DistributorSearchCallBackForUserRights"
+				name="CallBack" />
+			<jsp:param value="51" name="DistributorSearchFeatureID" />
+		</jsp:include>
+    
     <div data-role="footer" data-position="fixed" data-theme="b">
     
 	<div>

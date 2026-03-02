@@ -27,9 +27,45 @@ public class Outlet extends BeatPlans {
 	private String purchaser_name;
 	private String purchaser_mobile_no;
 	private String cache_contact_nic;
+	private int price_id = 0;
+	private int discount_id = 0;
 
 	public Outlet() {
 		super();
+	}
+
+	public Outlet(int price_id, int discount_id, int isGeoFence, int beatPlan, long distributor_id, String pjp_label,
+			int geo_radius, long outlet_id, String outletName, int dayNumber, String owner, String address,
+			String telephone, int nfcTagId, int accuracy, int subChannelId, String subChannelLabel,
+			String orderCreatedOnDate, String vpo_classifications, int visit, double lat, double lng, String areaLabel,
+			String subAreaLabel, boolean isAlternative, String purchaserName, String purchaserMobileNo,
+			String cacheContactNic, int city_id) {
+		super(beatPlan, pjp_label, distributor_id, city_id);
+		this.is_geo_fence = isGeoFence;
+		this.geo_radius = geo_radius;
+		this.outlet_id = outlet_id;
+		this.outlet_name = outletName;
+		this.day_number = dayNumber;
+		this.owner = owner;
+		this.address = address;
+		this.telephone = telephone;
+		this.nfc_tag_id = nfcTagId;
+		this.accuracy = accuracy;
+		this.sub_channel_id = subChannelId;
+		this.sub_channel_label = subChannelLabel;
+		this.order_created_on_date = orderCreatedOnDate;
+		this.vpo_classifications = vpo_classifications;
+		this.visit = visit;
+		this.lat = lat;
+		this.lng = lng;
+		this.area_label = areaLabel;
+		this.sub_area_label = subAreaLabel;
+		this.is_alternative = isAlternative;
+		this.purchaser_name = purchaserName;
+		this.purchaser_mobile_no = purchaserMobileNo;
+		this.cache_contact_nic = cacheContactNic;
+		this.price_id = price_id;
+		this.discount_id = discount_id;
 	}
 
 	public Outlet(int isGeoFence, int beatPlan, long distributor_id, String pjp_label, int geo_radius, long outlet_id,
@@ -93,6 +129,8 @@ public class Outlet extends BeatPlans {
 		outlet.put("purchaser_name", this.purchaser_name);
 		outlet.put("purchaser_mobile_no", this.purchaser_mobile_no);
 		outlet.put("cache_contact_nic", this.cache_contact_nic);
+		outlet.put("price_id", this.price_id);
+		outlet.put("discount_id", this.discount_id);
 		return outlet;
 	}
 
@@ -106,7 +144,7 @@ public class Outlet extends BeatPlans {
 				+ ", visit=" + visit + ", lat=" + lat + ", lng=" + lng + ", area_label=" + area_label
 				+ ", sub_area_label=" + sub_area_label + ", is_alternative=" + is_alternative + ", purchaser_name="
 				+ purchaser_name + ", purchaser_mobile_no=" + purchaser_mobile_no + ", cache_contact_nic="
-				+ cache_contact_nic + "]";
+				+ cache_contact_nic + ", price_id=" + price_id + ", discount_id=" + discount_id + "]";
 	}
 
 	public long getOutlet_id() {
@@ -291,6 +329,30 @@ public class Outlet extends BeatPlans {
 
 	public void setCache_contact_nic(String cache_contact_nic) {
 		this.cache_contact_nic = cache_contact_nic;
+	}
+
+	public String getVpo_classifications() {
+		return vpo_classifications;
+	}
+
+	public void setVpo_classifications(String vpo_classifications) {
+		this.vpo_classifications = vpo_classifications;
+	}
+
+	public int getPrice_id() {
+		return price_id;
+	}
+
+	public void setPrice_id(int price_id) {
+		this.price_id = price_id;
+	}
+
+	public int getDiscount_id() {
+		return discount_id;
+	}
+
+	public void setDiscount_id(int discount_id) {
+		this.discount_id = discount_id;
 	}
 
 }

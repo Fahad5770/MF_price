@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,6 +44,7 @@ import com.mf.modals.SalesTax;
 import com.mf.modals.SpotDiscountProducts;
 import com.pbc.util.Datasource;
 import com.mf.modals.UserAreas;
+import com.mf.modals.SalesTax.SalesTaxDetail;
 
 @SuppressWarnings("unchecked")
 
@@ -115,18 +117,18 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 				if (distance_in_meters < 501) {
 					System.out.println("distance_in_meters : " + distance_in_meters);
-					Outlet outlet = new Outlet(0, rsOutlets.getInt("beat_plan_id"), rsOutlets.getLong("distributor_id"),
-							rsOutlets.getString("pjp_label"), 0, rsOutlets.getLong("outlet_id"),
-							rsOutlets.getString("outlet_name"), rsOutlets.getInt("day_number"),
-							rsOutlets.getString("owner"), rsOutlets.getString("address"),
-							rsOutlets.getString("telepohone"), rsOutlets.getInt("nfc_tag_id"),
-							rsOutlets.getInt("accuracy"), rsOutlets.getInt("pic_channel_id"),
-							rsOutlets.getString("channel_label"), rsOutlets.getString("order_created_on_date"),
-							rsOutlets.getString("vpo_classifications"), rsOutlets.getInt("Visit"),
-							rsOutlets.getDouble("lat"), rsOutlets.getDouble("lng"), rsOutlets.getString("area_label"),
-							rsOutlets.getString("sub_area_label"), (rsOutlets.getInt("is_alternative") == 1),
-							rsOutlets.getString("purchaser_name"), "", rsOutlets.getString("cache_contact_nic"),
-							rsOutlets.getInt("city_id"));
+					Outlet outlet = new Outlet(1, 1, 0, rsOutlets.getInt("beat_plan_id"),
+							rsOutlets.getLong("distributor_id"), rsOutlets.getString("pjp_label"), 0,
+							rsOutlets.getLong("outlet_id"), rsOutlets.getString("outlet_name"),
+							rsOutlets.getInt("day_number"), rsOutlets.getString("owner"),
+							rsOutlets.getString("address"), rsOutlets.getString("telepohone"),
+							rsOutlets.getInt("nfc_tag_id"), rsOutlets.getInt("accuracy"),
+							rsOutlets.getInt("pic_channel_id"), rsOutlets.getString("channel_label"),
+							rsOutlets.getString("order_created_on_date"), rsOutlets.getString("vpo_classifications"),
+							rsOutlets.getInt("Visit"), rsOutlets.getDouble("lat"), rsOutlets.getDouble("lng"),
+							rsOutlets.getString("area_label"), rsOutlets.getString("sub_area_label"),
+							(rsOutlets.getInt("is_alternative") == 1), rsOutlets.getString("purchaser_name"), "",
+							rsOutlets.getString("cache_contact_nic"), rsOutlets.getInt("city_id"));
 
 					Data.add(outlet.getIntoJson());
 
@@ -457,8 +459,20 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 	}
 
 	@Override
-	public JSONArray get_ob_price_list(Datasource ds) {
-		List<OBPriceList> priceLists = GetPriceInfoJson.get_ob_price_list(ds);
+	public JSONArray get_global_price_list(Datasource ds) {
+		List<OBPriceList> priceLists = GetPriceInfoJson.get_global_price_list(ds);
+
+		JSONArray price_list_array = new JSONArray();
+
+		for (OBPriceList priceList : priceLists) {
+			price_list_array.add(priceList.getIntoJson());
+		}
+
+		return price_list_array;
+	}
+
+	public JSONArray get_active_price_list(Datasource ds) {
+		List<OBPriceList> priceLists = GetPriceInfoJson.get_active_price_list(ds);
 
 		JSONArray price_list_array = new JSONArray();
 
@@ -470,9 +484,77 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 	}
 
 	@Override
-	public JSONArray get_price_disc(Datasource ds) {
+	public JSONArray get_region_price_list(Datasource ds, int region_id) {
 
-		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_price_disc(ds);
+		JSONArray region_price_array = new JSONArray();
+
+		try {
+			if (region_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipl.id,region_id from inventory_price_list ipl join inventory_price_list_regions iplg on ipl.id=iplg.price_list_id where region_id="
+								+ region_id + " and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsRegionPrice = s.executeQuery(
+						"select ipl.id,region_id from inventory_price_list ipl join inventory_price_list_regions iplg on ipl.id=iplg.price_list_id where region_id="
+								+ region_id + " and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsRegionPrice.next()) {
+					LinkedHashMap<String, Object> Regionprice = new LinkedHashMap<>();
+
+					Regionprice.put("price_id", rsRegionPrice.getInt("id"));
+					Regionprice.put("region_id", rsRegionPrice.getInt("region_id"));
+					region_price_array.add(Regionprice);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("User Details Error :- " + e);
+		}
+
+		return region_price_array;
+
+	}
+
+	@Override
+	public JSONArray get_distribution_price_list(Datasource ds, long distributor_id) {
+
+		JSONArray distributor_price_array = new JSONArray();
+
+		try {
+			if (distributor_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipl.id, ipld.distributor_id from inventory_price_list ipl join inventory_price_list_distributors ipld on ipl.id=ipld.price_list_id where ipld.distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsDistributorPrice = s.executeQuery(
+						"select ipl.id, ipld.distributor_id from inventory_price_list ipl join inventory_price_list_distributors ipld on ipl.id=ipld.price_list_id where ipld.distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsDistributorPrice.next()) {
+					LinkedHashMap<String, Object> Distributorprice = new LinkedHashMap<>();
+
+					Distributorprice.put("price_id", rsDistributorPrice.getInt("id"));
+					Distributorprice.put("distributor_id", rsDistributorPrice.getLong("distributor_id"));
+					distributor_price_array.add(Distributorprice);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("User Details Error :- " + e);
+		}
+
+		return distributor_price_array;
+
+	}
+
+	@Override
+	public JSONArray get_global_price_disc(Datasource ds) {
+
+		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_global_price_disc(ds);
 
 		JSONArray price_disc_array = new JSONArray();
 
@@ -482,65 +564,116 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 		return price_disc_array;
 	}
-	
+
 	@Override
-	public JSONArray get_price_disc_region(Datasource ds ,  int userId) {
+	public JSONArray get_active_price_disc(Datasource ds) {
 
-	    List<PriceDiscountRegion> priceDiscountRegionList = GetPriceInfoJson.get_price_disc_region(ds, userId);
+		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_active_price_disc(ds);
 
-	    JSONArray price_disc_array = new JSONArray();
+		JSONArray price_disc_array = new JSONArray();
 
-	    for (PriceDiscountRegion pd : priceDiscountRegionList) {
-	        price_disc_array.add(pd.getIntoJson());
-	    }
+		for (PriceDiscount pd : priceDiscountList) {
+			price_disc_array.add(pd.getIntoJson());
+		}
 
-	    return price_disc_array;
+		return price_disc_array;
+	}
+
+	@Override
+	public JSONArray get_price_disc_region(Datasource ds, int region_id) {
+
+		JSONArray region_discount_array = new JSONArray();
+
+		try {
+			if (region_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsRegionDiscount = s.executeQuery(
+						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsRegionDiscount.next()) {
+					LinkedHashMap<String, Object> RegionDiscount = new LinkedHashMap<>();
+
+					RegionDiscount.put("discount_id", rsRegionDiscount.getInt("id"));
+					RegionDiscount.put("region_id", rsRegionDiscount.getInt("region_id"));
+					region_discount_array.add(RegionDiscount);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
+		}
+
+		return region_discount_array;
 	}
 
 	@Override
 	public JSONArray get_price_disc_channel(Datasource ds) {
 
-	    List<PriceDiscountChannel> priceDiscountChannelList =
-	            GetPriceInfoJson.get_price_disc_channel(ds);
+		JSONArray distributor_discount_array = new JSONArray();
 
-	    JSONArray price_disc_array = new JSONArray();
+		try {
 
-	    for (PriceDiscountChannel pd : priceDiscountChannelList) {
-	        price_disc_array.add(pd.getIntoJson());
-	    }
+			Statement s = ds.createStatement();
 
-	    return price_disc_array;
-	}
+			System.out.println(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_price_discount ipd join inventory_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			ResultSet rsDistributorDiscount = s.executeQuery(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_price_discount ipd join inventory_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 
-	
-	
-	@Override
-	public JSONArray get_price_disc_distributor(Datasource ds , int userId) {
+			while (rsDistributorDiscount.next()) {
+				LinkedHashMap<String, Object> DistributorDiscount = new LinkedHashMap<>();
 
-	    List<PriceDiscountDistributor> priceDiscountDistributorList =
-	            GetPriceInfoJson.get_price_disc_distributor(ds , userId);
+				DistributorDiscount.put("discount_id", rsDistributorDiscount.getInt("id"));
+				DistributorDiscount.put("channel_id", rsDistributorDiscount.getInt("pci_sub_channel_id"));
+				distributor_discount_array.add(DistributorDiscount);
+			}
 
-	    JSONArray price_disc_array = new JSONArray();
+			s.close();
 
-	    for (PriceDiscountDistributor pd : priceDiscountDistributorList) {
-	        price_disc_array.add(pd.getIntoJson());
-	    }
-
-	    return price_disc_array;
-	}
-
-
-	@Override
-	public JSONArray get_active_price_list(Datasource ds, String AllOutlets) {
-		List<ActivePriceList> ActivePriceLists = GetPriceInfoJson.get_active_price_list(ds, AllOutlets);
-
-		JSONArray active_price_list_array = new JSONArray();
-
-		for (ActivePriceList activePriceList : ActivePriceLists) {
-			active_price_list_array.add(activePriceList.getIntoJson());
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
 		}
 
-		return active_price_list_array;
+		return distributor_discount_array;
+	}
+
+	@Override
+	public JSONArray get_price_disc_distributor(Datasource ds, long distributor_id) {
+
+		JSONArray distributor_discount_array = new JSONArray();
+
+		try {
+			if (distributor_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsDistributorDiscount = s.executeQuery(
+						"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsDistributorDiscount.next()) {
+					LinkedHashMap<String, Object> DistributorDiscount = new LinkedHashMap<>();
+
+					DistributorDiscount.put("discount_id", rsDistributorDiscount.getInt("id"));
+					DistributorDiscount.put("distributor_id", rsDistributorDiscount.getInt("distributor_id"));
+					distributor_discount_array.add(DistributorDiscount);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
+		}
+
+		return distributor_discount_array;
 	}
 
 	@Override
@@ -768,26 +901,27 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 	}
 
 	@Override
-	public JSONObject get_sales_tax(Datasource ds) {
+	public JSONArray get_sales_tax(Datasource ds) {
 
-		JSONObject sales_tax_object = new JSONObject();
-
+		SalesTax sale_tax = new SalesTax();
 		try {
 
 			Statement s1 = ds.createStatement();
-
-			String query = "SELECT * FROM inventory_sales_tax WHERE isActive = 1";
+			List<SalesTax.SalesTaxDetail> sales_tax_detail_list = new ArrayList<SalesTax.SalesTaxDetail>();
+			String query = "SELECT * FROM inventory_product_tax_rates";
 
 			ResultSet rsSalesTax = s1.executeQuery(query);
 
 			while (rsSalesTax.next()) {
 
-				SalesTax salesTax = new SalesTax(rsSalesTax.getInt("FR"), rsSalesTax.getInt("FUR"),
-						rsSalesTax.getInt("NFR"), rsSalesTax.getInt("NFUR"));
-
-				sales_tax_object = salesTax.getIntoJson();
+				SalesTax.SalesTaxDetail salesTax = new SalesTax().new SalesTaxDetail(rsSalesTax.getInt("product_id"),
+						rsSalesTax.getDouble("register_filer"), rsSalesTax.getDouble("unregister_filer"),
+						rsSalesTax.getDouble("register_non_filer"), rsSalesTax.getDouble("unregister_non_filer"));
+				sales_tax_detail_list.add(salesTax);
 
 			}
+
+			sale_tax.setSales_tax_detail(sales_tax_detail_list);
 			s1.close();
 
 		} catch (SQLException e) {
@@ -795,48 +929,44 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 		}
 
-		return sales_tax_object;
+		return sale_tax.getIntoJson();
 	}
 
 	@Override
-	public JSONObject get_income_tax(Datasource ds) {
+	public JSONArray get_income_tax(Datasource ds) {
 
-		JSONObject sales_tax_object = new JSONObject();
-
+		IncomeTax income_tax = new IncomeTax();
 		try {
 
 			Statement s1 = ds.createStatement();
+			List<IncomeTax.IncomeTaxDetail> income_tax_detail_list = new ArrayList<IncomeTax.IncomeTaxDetail>();
 
-			String query = "SELECT * FROM inventory_income_tax WHERE isActive = 1";
+			String query = "SELECT * FROM inventory_product_income_tax";
 
 			ResultSet rsIncomeTax = s1.executeQuery(query);
 
 			while (rsIncomeTax.next()) {
 
-				IncomeTax incomeTax = new IncomeTax(rsIncomeTax.getInt("FR"), rsIncomeTax.getInt("FUR"),
-						rsIncomeTax.getInt("NFR"), rsIncomeTax.getInt("NFUR"));
+				IncomeTax.IncomeTaxDetail incomeTax = new IncomeTax().new IncomeTaxDetail(
+						rsIncomeTax.getInt("product_id"), rsIncomeTax.getDouble("register_filer"),
+						rsIncomeTax.getDouble("unregister_filer"), rsIncomeTax.getDouble("register_non_filer"),
+						rsIncomeTax.getDouble("unregister_non_filer"));
 
-				sales_tax_object = incomeTax.getIntoJson();
+				income_tax_detail_list.add(incomeTax);
 
 			}
 			s1.close();
-
+			income_tax.setIncome_tax_detail(income_tax_detail_list);
 		} catch (SQLException e) {
 			System.out.println("Income Tax Error :- " + e);
 
 		}
 
-		return sales_tax_object;
+		return income_tax.getIntoJson();
 	}
 
 	@Override
 	public JSONArray get_price_disc_region(Datasource ds) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public JSONArray get_price_disc_distributor(Datasource ds) {
 		// TODO Auto-generated method stub
 		return null;
 	}

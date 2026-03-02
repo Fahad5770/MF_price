@@ -6,10 +6,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class OBLoginResponse {
-	private JSONArray priceDiscount = new JSONArray();
+	private JSONArray GlobalpriceDiscount = new JSONArray();
+	private JSONArray ActivepriceDiscount = new JSONArray();
 	private JSONArray priceDiscountRegion = new JSONArray();
-	private JSONArray priceDiscountDistributor = new JSONArray();
+	private JSONArray priceDiscountDistribution = new JSONArray();
 	private JSONArray priceDiscountChannel = new JSONArray();
+
+	private JSONArray GlobalPriceList = new JSONArray();
+	private JSONArray ActivePriceList = new JSONArray();
+	private JSONArray RegionPrice = new JSONArray();
+	private JSONArray DistributionPrice = new JSONArray();
 
 	private JSONArray UserData = new JSONArray();
 	private JSONArray BeatPlanRows = new JSONArray();
@@ -19,8 +25,7 @@ public class OBLoginResponse {
 	private JSONArray activePromotion = new JSONArray();
 	private JSONArray promoProducts = new JSONArray();
 	private JSONArray promotionsProductsFree = new JSONArray();
-	private JSONArray ActivePriceList = new JSONArray();
-	private JSONArray PriceList = new JSONArray();
+
 	private JSONArray PriceHandDiscount = new JSONArray();
 	private JSONArray AllFeatures = new JSONArray();
 	private JSONArray AccessFeatures = new JSONArray();
@@ -29,8 +34,8 @@ public class OBLoginResponse {
 	private JSONArray Cities = new JSONArray();
 	private JSONArray UserAreas = new JSONArray();
 	private JSONArray StockPosition = new JSONArray();
-	private JSONObject SalesTax = new JSONObject();
-	private JSONObject IncomeTax = new JSONObject();
+	private JSONArray SalesTax = new JSONArray();
+	private JSONArray IncomeTax = new JSONArray();
 
 	private String token = "";
 	private int is_order_lock;
@@ -141,12 +146,12 @@ public class OBLoginResponse {
 		ActivePriceList = activePriceList;
 	}
 
-	public JSONArray getPriceList() {
-		return PriceList;
+	public JSONArray getGlobalPriceList() {
+		return GlobalPriceList;
 	}
 
-	public void setPriceList(JSONArray priceList) {
-		PriceList = priceList;
+	public void setGlobalPriceList(JSONArray globalPriceList) {
+		GlobalPriceList = globalPriceList;
 	}
 
 	public JSONArray getPriceHandDiscount() {
@@ -213,28 +218,52 @@ public class OBLoginResponse {
 		this.Cities = cities;
 	}
 
-	public JSONObject getSalesTax() {
+	public JSONArray getSalesTax() {
 		return SalesTax;
 	}
 
-	public void setSalesTax(JSONObject salesTax) {
+	public void setSalesTax(JSONArray salesTax) {
 		SalesTax = salesTax;
 	}
 
-	public JSONObject getIncomeTax() {
+	public JSONArray getIncomeTax() {
 		return IncomeTax;
 	}
 
-	public void setIncomeTax(JSONObject incomeTax) {
+	public void setIncomeTax(JSONArray incomeTax) {
 		IncomeTax = incomeTax;
 	}
 
-	public JSONArray getPriceDiscount() {
-		return priceDiscount;
+	public JSONArray getGlobalpriceDiscount() {
+		return GlobalpriceDiscount;
 	}
 
-	public void setPriceDiscount(JSONArray priceDiscount) {
-		this.priceDiscount = priceDiscount;
+	public void setGlobalpriceDiscount(JSONArray globalpriceDiscount) {
+		GlobalpriceDiscount = globalpriceDiscount;
+	}
+
+	public JSONArray getActivepriceDiscount() {
+		return ActivepriceDiscount;
+	}
+
+	public void setActivepriceDiscount(JSONArray activepriceDiscount) {
+		ActivepriceDiscount = activepriceDiscount;
+	}
+
+	public JSONArray getRegionPrice() {
+		return RegionPrice;
+	}
+
+	public void setRegionPrice(JSONArray regionPrice) {
+		RegionPrice = regionPrice;
+	}
+
+	public JSONArray getDistributionPrice() {
+		return DistributionPrice;
+	}
+
+	public void setDistributionPrice(JSONArray distributionPrice) {
+		DistributionPrice = distributionPrice;
 	}
 
 	public JSONArray getPriceDiscountRegion() {
@@ -245,12 +274,12 @@ public class OBLoginResponse {
 		this.priceDiscountRegion = priceDiscountRegion;
 	}
 
-	public JSONArray getPriceDiscountDistributor() {
-		return priceDiscountDistributor;
+	public JSONArray getPriceDiscountDistribution() {
+		return priceDiscountDistribution;
 	}
 
-	public void setPriceDiscountDistributor(JSONArray priceDiscountDistributor) {
-		this.priceDiscountDistributor = priceDiscountDistributor;
+	public void setPriceDiscountDistribution(JSONArray priceDiscountDistribution) {
+		this.priceDiscountDistribution = priceDiscountDistribution;
 	}
 
 	public JSONArray getPriceDiscountChannel() {
@@ -268,7 +297,7 @@ public class OBLoginResponse {
 		dataObject.put("order_lock_time", this.order_lock_time);
 		dataObject.put("jwt_token", this.token);
 		dataObject.put("sales_tax", this.SalesTax);
-		dataObject.put("incomeTax", this.IncomeTax);
+		dataObject.put("income_tax", this.IncomeTax);
 		dataObject.put("access_features", this.AccessFeatures);
 		dataObject.put("all_features", this.AllFeatures);
 		dataObject.put("user", this.UserData);
@@ -280,20 +309,23 @@ public class OBLoginResponse {
 		dataObject.put("promotions_active", this.activePromotion);
 		dataObject.put("promotion_free_products", this.promotionsProductsFree);
 		dataObject.put("promotion_products", this.promoProducts);
-		dataObject.put("active_price_list", this.ActivePriceList);
-		dataObject.put("price_list", this.PriceList);
 		dataObject.put("hand_discount", this.PriceHandDiscount);
 		dataObject.put("spot_discount", this.SpotDiscount);
 		dataObject.put("no_order_reasons", this.NoOrderReason);
 		dataObject.put("cities", this.Cities);
 		dataObject.put("user_areas", this.UserAreas);
 		dataObject.put("stock_position", this.StockPosition);
-		
-		dataObject.put("price_discount", this.priceDiscount);
-		dataObject.put("price_discount_region", this.priceDiscountRegion);
-		dataObject.put("price_discount_distributor", this.priceDiscountDistributor);
-		dataObject.put("price_discount_channel", this.priceDiscountChannel);
 
+		dataObject.put("global_price_list", this.GlobalPriceList);
+		dataObject.put("active_price_list", this.ActivePriceList);
+		dataObject.put("region_price", this.RegionPrice);
+		dataObject.put("distribution_price", this.DistributionPrice);
+
+		dataObject.put("global_price_discount", this.GlobalpriceDiscount);
+		dataObject.put("active_price_discount", this.ActivepriceDiscount);
+		dataObject.put("price_discount_region", this.priceDiscountRegion);
+		dataObject.put("price_discount_distribution", this.priceDiscountDistribution);
+		dataObject.put("price_discount_channel", this.priceDiscountChannel);
 
 		// / System.out.println(dataArray);
 		return dataObject;

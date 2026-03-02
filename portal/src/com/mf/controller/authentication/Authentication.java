@@ -75,7 +75,7 @@ public class Authentication implements IAuthentication {
 			}
 			// check user password
 			if (!GetUserInfoJson.is_user_password(ds, loginRequest.getUser_id(), loginRequest.getPassword())) {
-				
+
 				if (!loginRequest.getPassword().equals(MFConfig.getMobileMVPassword())) {
 					UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7, loginRequest.getDevice_id(), request);
 					responseModal.setErrorResponse("Invalid Password");
@@ -83,13 +83,13 @@ public class Authentication implements IAuthentication {
 
 					return responseModal;
 				}
-//				UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7, loginRequest.getDevice_id(), request);
-//				responseModal.setErrorResponse("Invalid Password");
-//				System.out.println("checking user password");
-//
-//				return responseModal;
+				// UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7,
+				// loginRequest.getDevice_id(), request);
+				// responseModal.setErrorResponse("Invalid Password");
+				// System.out.println("checking user password");
+				//
+				// return responseModal;
 			}
-			
 
 			LoginResponseMV loginResponseMV = new LoginResponseMV();
 
@@ -112,9 +112,11 @@ public class Authentication implements IAuthentication {
 			JSONArray UserData = new JSONArray();
 			UserData.add(user.getIntoJson());
 			loginResponseMV.setUserData(UserData);
-			loginResponseMV.setBeatPlanRows((loginRequest.getApp_version().equals("1.0.3") || loginRequest.getApp_version().equals("1.0.4"))
-					? AD.BeatPlanRows(ds, loginRequest.getUser_id(), loginRequest.getLat(), loginRequest.getLng())
-					: AD.BeatPlanRows(ds, loginRequest.getUser_id()));
+			loginResponseMV.setBeatPlanRows(
+					(loginRequest.getApp_version().equals("1.0.3") || loginRequest.getApp_version().equals("1.0.4"))
+							? AD.BeatPlanRows(ds, loginRequest.getUser_id(), loginRequest.getLat(),
+									loginRequest.getLng())
+							: AD.BeatPlanRows(ds, loginRequest.getUser_id()));
 			loginResponseMV.setProducts(AD.Products(ds, productGroupId));
 			loginResponseMV.setCities(AD.Cities(ds, loginRequest.getUser_id()));
 			loginResponseMV.setBeatPlans(AD.get_pjp_list(ds, loginRequest.getUser_id()));
@@ -182,12 +184,13 @@ public class Authentication implements IAuthentication {
 				return responseModal;
 			}
 			// check user password
-			System.out.println(!GetUserInfoJson.is_user_password(ds, loginRequest.getUser_id(), loginRequest.getPassword()));
+			System.out.println(
+					!GetUserInfoJson.is_user_password(ds, loginRequest.getUser_id(), loginRequest.getPassword()));
 			System.out.println(!loginRequest.getPassword().equals(MFConfig.getMobile_OB_AdminPassword()));
 			System.out.println(loginRequest.getPassword());
 			System.out.println(MFConfig.getMobile_OB_AdminPassword());
 			if (!GetUserInfoJson.is_user_password(ds, loginRequest.getUser_id(), loginRequest.getPassword())) {
-				
+
 				if (!loginRequest.getPassword().equals(MFConfig.getMobile_OB_AdminPassword())) {
 					UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7, loginRequest.getDevice_id(), request);
 					responseModal.setErrorResponse("Invalid Password");
@@ -195,11 +198,12 @@ public class Authentication implements IAuthentication {
 
 					return responseModal;
 				}
-//				UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7, loginRequest.getDevice_id(), request);
-//				responseModal.setErrorResponse("Invalid Password");
-//				System.out.println("checking user password");
-//
-//				return responseModal;
+				// UserInfoExecute.user_logs(ds, loginRequest.getUser_id(), 7,
+				// loginRequest.getDevice_id(), request);
+				// responseModal.setErrorResponse("Invalid Password");
+				// System.out.println("checking user password");
+				//
+				// return responseModal;
 			}
 
 			// Generate Token
@@ -225,28 +229,31 @@ public class Authentication implements IAuthentication {
 			/* create array of user */
 			JSONArray UserData = new JSONArray();
 			UserData.add(user.getIntoJson());
-			
+
 			OBloginResponse.setUserData(UserData);
 
 			OBloginResponse.setBeatPlanRows(AD.OrderBookerBeatPlanRows(ds, loginRequest.getUser_id()));
 			OBloginResponse.setProductgroupId(productGroupId);
 			OBloginResponse.setProducts(AD.Products(ds, productGroupId));
-			
-			OBloginResponse.setPriceList(AD.get_ob_price_list(ds));
-			
+
+			// Prices work
+			OBloginResponse.setGlobalPriceList(AD.get_global_price_list(ds));
+			OBloginResponse.setActivePriceList(AD.get_active_price_list(ds));
+			OBloginResponse.setRegionPrice(AD.get_region_price_list(ds, user.getRegion_id()));
+			OBloginResponse.setDistributionPrice(AD.get_distribution_price_list(ds, user.getDistributor_id()));
+
+			// Discount work
+			OBloginResponse.setGlobalpriceDiscount(AD.get_global_price_disc(ds));
+			OBloginResponse.setActivepriceDiscount(AD.get_active_price_disc(ds));
+			OBloginResponse.setPriceDiscountRegion(AD.get_price_disc_region(ds, user.getRegion_id()));
+			OBloginResponse.setPriceDiscountDistribution(AD.get_price_disc_distributor(ds, user.getDistributor_id()));
+			OBloginResponse.setPriceDiscountChannel(AD.get_price_disc_channel(ds));
+
 			OBloginResponse.setSalesTax(AD.get_sales_tax(ds));
 			OBloginResponse.setIncomeTax(AD.get_income_tax(ds));
-			
-			OBloginResponse.setPriceDiscount(AD.get_price_disc(ds));
-			OBloginResponse.setPriceDiscountChannel(AD.get_price_disc_channel(ds));
-			
-			OBloginResponse.setPriceDiscountRegion(AD.get_price_disc_region(ds, loginRequest.getUser_id()));
-			
-			OBloginResponse.setPriceDiscountDistributor(AD.get_price_disc_distributor(ds , loginRequest.getUser_id()));
 
 			OBloginResponse.setPcisubChannnel(AD.get_pci_sub_channels(ds));
 			OBloginResponse.setPromotionsProductsFree(AD.get_free_promotion_products(ds, AllOutlets));
-			OBloginResponse.setActivePriceList(AD.get_active_price_list(ds, AllOutlets));
 			OBloginResponse.setNoOrderReason(AD.NoOrderReason(ds));
 			OBloginResponse.setSpotDiscount(AD.SpotDiscount(ds));
 			OBloginResponse.setPriceHandDiscount(AD.get_price_hand_discount(ds, AllOutlets));
@@ -256,7 +263,7 @@ public class Authentication implements IAuthentication {
 			OBloginResponse.setPromoProducts(AD.get_promotion_products(ds, AllOutlets));
 			OBloginResponse.setPjpList(AD.get_pjp_list(ds, loginRequest.getUser_id()));
 			OBloginResponse.setStockPosition(AD.StockPosition(ds, loginRequest.getUser_id()));
-			
+
 			responseModal.setData(OBloginResponse.getIntoJson());
 			responseModal.setStatus(true);
 			responseModal.setUserMessage("Login Successfully");

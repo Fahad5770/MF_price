@@ -15,17 +15,22 @@ public class OrderRequest {
 		private double discount;
 		private int is_promotion;
 		private int promotion_id;
+		private int price_id;
+		private int discount_id;
 
 		public OrderRequestProducts() {
 		}
 
-		public OrderRequestProducts(int product_id, int quantity, double discount, int is_promotion, int promotion_id) {
+		public OrderRequestProducts(int product_id, int quantity, double discount, int is_promotion, int promotion_id,
+				int price_id, int discount_id) {
 			super();
 			this.product_id = product_id;
 			this.quantity = quantity;
 			this.discount = discount;
 			this.is_promotion = is_promotion;
 			this.promotion_id = promotion_id;
+			this.price_id = price_id;
+			this.discount_id = discount_id;
 		}
 
 		public int getProduct_id() {
@@ -68,10 +73,27 @@ public class OrderRequest {
 			this.promotion_id = promotion_id;
 		}
 
+		public int getPrice_id() {
+			return price_id;
+		}
+
+		public void setPrice_id(int price_id) {
+			this.price_id = price_id;
+		}
+
+		public int getDiscount_id() {
+			return discount_id;
+		}
+
+		public void setDiscount_id(int discount_id) {
+			this.discount_id = discount_id;
+		}
+
 		@Override
 		public String toString() {
 			return "OrderRequestProducts [product_id=" + product_id + ", quantity=" + quantity + ", discount="
-					+ discount + ", is_promotion=" + is_promotion + ", promotion_id=" + promotion_id + "]";
+					+ discount + ", is_promotion=" + is_promotion + ", promotion_id=" + promotion_id + ", price_id="
+					+ price_id + ", discount_id=" + discount_id + "]";
 		}
 
 	}
@@ -124,7 +146,9 @@ public class OrderRequest {
 						((Number) productJson.get("product_id")).intValue(),
 						((Number) productJson.get("quantity")).intValue(), ((double) productJson.get("discount")),
 						(((Number) productJson.get("is_promotion")).intValue()),
-						((Number) productJson.get("promotion_id")).intValue());
+						((Number) productJson.get("promotion_id")).intValue(),
+						((Number) productJson.get("price_id")).intValue(),
+						((Number) productJson.get("discount_id")).intValue());
 				this.products.add(orderRequestProducts);
 			}
 		}

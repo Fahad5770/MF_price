@@ -239,6 +239,7 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 								<%
 									double TotalAmountOrdersBooked = 0;
 									double TotalAmountSales = 0;
+									double TotalDiscountOrdersBooked = 0;
 									
 									ResultSet rs = s.executeQuery("SELECT distinct package_id, package_label FROM inventory_products_view where category_id=1 "+WherePackage+" order by package_sort_order");
 									while(rs.next()){
@@ -249,12 +250,13 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 										//For Order
 										double PackwiseTotalOrder =0;
 										double QtyTotalOrder=0;
+										double QtyTotaldiscount=0;
 										
-										ResultSet rs323 = s2.executeQuery("SELECT sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount, ipv.unit_per_sku FROM mobile_order mo, mobile_order_products mop, inventory_products_view ipv where mo.id = mop.id and mop.product_id=ipv.product_id and mo.id in ("+OrderIDsQuery+") and ipv.package_id="+PackageID+" and ipv.category_id = 1 "+WhereDistributors+"");
+										ResultSet rs323 = s2.executeQuery("SELECT sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount, ipv.unit_per_sku, sum(mop.price_discount*raw_cases) price_discount FROM mobile_order mo, mobile_order_products mop, inventory_products_view ipv where mo.id = mop.id and mop.product_id=ipv.product_id and mo.id in ("+OrderIDsQuery+") and ipv.package_id="+PackageID+" and ipv.category_id = 1 "+WhereDistributors+"");
 										if(rs323.first()){
 											PackwiseTotalOrder = rs323.getDouble("amount");
 											QtyTotalOrder = rs323.getDouble("bottles");
-											
+											QtyTotaldiscount = rs323.getDouble("price_discount");
 										}
 										
 										//For Sales
@@ -296,6 +298,8 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 												
 											}
 											TotalAmountOrdersBooked += AmountOrdersBooked;
+											
+											TotalDiscountOrdersBooked += QtyTotaldiscount;
 													
 											
 											
@@ -369,14 +373,14 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 						    		    	</tr>				
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">Disc.</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalDiscountOrdersBooked!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalDiscountOrdersBooked));} %></td>
 						    					
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec">Disc.</td>
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceDiscount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceDiscount));} %></td>
 						    		    	</tr>		
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">Net</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderNetAmount));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderNetAmount - TotalDiscountOrdersBooked));} %></td>
 						    					
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec">Net</td>
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceNetAmount));} %></td>

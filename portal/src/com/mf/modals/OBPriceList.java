@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 public class OBPriceList {
 
     private int id;
+    private String label;
     private int product_id;
     private int package_id;
     private int brand_id;
@@ -19,12 +20,13 @@ public class OBPriceList {
     private double unit_price;
     
     // Constructor
-    public OBPriceList(int id, int product_id, int package_id, int brand_id,
+    public OBPriceList(int id, String label ,int product_id, int package_id, int brand_id,
                        String package_label, String brand_label,
                        String unit_per_case, String liquid_in_ml,
                        double raw_case_price, double unit_price
                       ) {
         this.id = id;
+        this.label = label;
         this.product_id = product_id;
         this.package_id = package_id;
         this.brand_id = brand_id;
@@ -76,6 +78,7 @@ public class OBPriceList {
         LinkedHashMap<String, Object> priceDetails = new LinkedHashMap<>();
 
         priceDetails.put("id", this.id);
+        priceDetails.put("label", this.label);
         priceDetails.put("ProductID", this.product_id);
         priceDetails.put("PackageID", this.package_id);
         priceDetails.put("BrandID", this.brand_id);

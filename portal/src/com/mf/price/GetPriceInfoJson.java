@@ -37,7 +37,7 @@ public class GetPriceInfoJson {
 			s.close();
 
 		} catch (SQLException e) {
-			System.out.println("User Details Error :- " + e);
+			System.out.println("Active Price Error :- " + e);
 
 		}
 
@@ -52,7 +52,8 @@ public class GetPriceInfoJson {
 			Statement s = ds.createStatement();
 			Statement s1 = ds.createStatement();
 
-			ResultSet rstPriceDisc = s.executeQuery("SELECT * FROM inventory_price_discount where id=1");
+			ResultSet rstPriceDisc = s.executeQuery(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=1");
 			while (rstPriceDisc.next()) {
 
 				int price_discount_id = rstPriceDisc.getInt("id");
@@ -62,9 +63,90 @@ public class GetPriceInfoJson {
 								+ price_discount_id + " ");
 				while (rstPriceDiscProducts.next()) {
 
-					PriceDiscount priceDiscount = new PriceDiscount(rstPriceDiscProducts.getInt("product_id"),
+					PriceDiscount priceDiscount = new PriceDiscount(price_discount_id,
+							rstPriceDisc.getString("discount_name"), rstPriceDiscProducts.getInt("product_id"),
 							rstPriceDiscProducts.getDouble("discount_value"),
-							rstPriceDiscProducts.getInt("is_percentage"));
+							rstPriceDiscProducts.getInt("is_percentage"), rstPriceDiscProducts.getInt("is_with_tax"));
+					priceDiscountArray.add(priceDiscount);
+
+				}
+
+			}
+
+			s.close();
+
+		} catch (SQLException e) {
+			System.out.println("Price Disc Details Error :- " + e);
+
+		}
+
+		return priceDiscountArray;
+	}
+
+	public static List<PriceDiscount> get_global_price_disc(Datasource ds) {
+		List<PriceDiscount> priceDiscountArray = new ArrayList<PriceDiscount>();
+
+		try {
+
+			Statement s = ds.createStatement();
+			Statement s1 = ds.createStatement();
+
+			ResultSet rstPriceDisc = s.executeQuery(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=1");
+			while (rstPriceDisc.next()) {
+
+				int price_discount_id = rstPriceDisc.getInt("id");
+
+				ResultSet rstPriceDiscProducts = s1
+						.executeQuery("SELECT * FROM inventory_price_discount_products where price_discount_id= "
+								+ price_discount_id + " ");
+				while (rstPriceDiscProducts.next()) {
+
+					PriceDiscount priceDiscount = new PriceDiscount(price_discount_id,
+							rstPriceDisc.getString("discount_name"), rstPriceDiscProducts.getInt("product_id"),
+							rstPriceDiscProducts.getDouble("discount_value"),
+							rstPriceDiscProducts.getInt("is_percentage"), rstPriceDiscProducts.getInt("is_with_tax"));
+					priceDiscountArray.add(priceDiscount);
+
+				}
+
+			}
+
+			s.close();
+
+		} catch (SQLException e) {
+			System.out.println("Price Disc Details Error :- " + e);
+
+		}
+
+		return priceDiscountArray;
+	}
+
+	public static List<PriceDiscount> get_active_price_disc(Datasource ds) {
+		List<PriceDiscount> priceDiscountArray = new ArrayList<PriceDiscount>();
+
+		try {
+
+			Statement s = ds.createStatement();
+			Statement s1 = ds.createStatement();
+
+			System.out.println(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			ResultSet rstPriceDisc = s.executeQuery(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			while (rstPriceDisc.next()) {
+
+				int price_discount_id = rstPriceDisc.getInt("id");
+
+				ResultSet rstPriceDiscProducts = s1
+						.executeQuery("SELECT * FROM inventory_price_discount_products where price_discount_id= "
+								+ price_discount_id + " ");
+				while (rstPriceDiscProducts.next()) {
+
+					PriceDiscount priceDiscount = new PriceDiscount(price_discount_id,
+							rstPriceDisc.getString("discount_name"), rstPriceDiscProducts.getInt("product_id"),
+							rstPriceDiscProducts.getDouble("discount_value"),
+							rstPriceDiscProducts.getInt("is_percentage"), rstPriceDiscProducts.getInt("is_with_tax"));
 					priceDiscountArray.add(priceDiscount);
 
 				}
@@ -218,21 +300,27 @@ public class GetPriceInfoJson {
 
 		try {
 			Statement s = ds.createStatement();
-//	        System.out.println(
-//		            "SELECT ipl.id, iplp.product_id, raw_case, discount, unit, " +
-//		    	            "ipl.is_filer, ipl.is_register, " +
-//		    	            "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, " +
-//		    	            "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, " +
-//		    	            "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, " +
-//		    	            "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, " +
-//		    	            "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, " +
-//		    	            "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml " +
-//		    	            "FROM inventory_price_list_products iplp " +
-//		    	            "JOIN inventory_price_list ipl ON iplp.id = ipl.id " +
-//		    	            "WHERE ipl.id IN (39,40,41,42)"
-//		    	        );
-			ResultSet rsDefaultPrice = s.executeQuery(
-					"SELECT ipl.id, iplp.product_id, raw_case, discount, unit, " + "ipl.is_filer, ipl.is_register, "
+			// System.out.println(
+			// "SELECT ipl.id, iplp.product_id, raw_case, discount, unit, " +
+			// "ipl.is_filer, ipl.is_register, " +
+			// "(SELECT package_id FROM inventory_products WHERE id = product_id)
+			// package_id, " +
+			// "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+			// +
+			// "(SELECT label FROM inventory_packages WHERE id = package_id) package_label,
+			// " +
+			// "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, " +
+			// "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id)
+			// unit_per_case, " +
+			// "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id)
+			// liquid_in_ml " +
+			// "FROM inventory_price_list_products iplp " +
+			// "JOIN inventory_price_list ipl ON iplp.id = ipl.id " +
+			// "WHERE ipl.id IN (39,40,41,42)"
+			// );
+			ResultSet rsDefaultPrice = s
+					.executeQuery("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+							+ "ipl.is_filer, ipl.is_register, "
 							+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
 							+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
 							+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
@@ -240,24 +328,17 @@ public class GetPriceInfoJson {
 							+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
 							+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
 							+ "FROM inventory_price_list_products iplp "
-							+ "JOIN inventory_price_list ipl ON iplp.id = ipl.id " + "WHERE ipl.id = 1 ");
+							+ "JOIN inventory_price_list ipl ON iplp.id = ipl.id "
+							+ "WHERE ipl.id in (1,39,40,41,42) ");
 
 			while (rsDefaultPrice.next()) {
-				int id = rsDefaultPrice.getInt("id");
-				int productId = rsDefaultPrice.getInt("product_id");
-				int packageId = rsDefaultPrice.getInt("package_id");
-				int brandId = rsDefaultPrice.getInt("brand_id");
 
-				String packageLabel = rsDefaultPrice.getString("package_label");
-				String brandLabel = rsDefaultPrice.getString("brand_label");
-				String unitPerCase = rsDefaultPrice.getString("unit_per_case");
-				String liquidInML = rsDefaultPrice.getString("liquid_in_ml");
-
-				double rawCasePrice = rsDefaultPrice.getDouble("raw_case");
-				double unitPrice = rsDefaultPrice.getDouble("unit");
-
-				OBPriceList priceList = new OBPriceList(id, productId, packageId, brandId, packageLabel, brandLabel,
-						unitPerCase, liquidInML, rawCasePrice, unitPrice);
+				OBPriceList priceList = new OBPriceList(rsDefaultPrice.getInt("id"), rsDefaultPrice.getString("label"),
+						rsDefaultPrice.getInt("product_id"), rsDefaultPrice.getInt("package_id"),
+						rsDefaultPrice.getInt("brand_id"), rsDefaultPrice.getString("package_label"),
+						rsDefaultPrice.getString("brand_label"), rsDefaultPrice.getString("unit_per_case"),
+						rsDefaultPrice.getString("liquid_in_ml"), rsDefaultPrice.getDouble("raw_case"),
+						rsDefaultPrice.getDouble("unit"));
 
 				PriceLists.add(priceList);
 			}
@@ -271,35 +352,102 @@ public class GetPriceInfoJson {
 		return PriceLists;
 	}
 
-	public static List<ActivePriceList> get_active_price_list(Datasource ds, String AllOutlets) {
-		List<ActivePriceList> ActivePriceLists = new ArrayList<ActivePriceList>();
+	public static List<OBPriceList> get_global_price_list(Datasource ds) {
+		List<OBPriceList> PriceLists = new ArrayList<>();
 
 		try {
-
 			Statement s = ds.createStatement();
+			System.out.println("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+					+ "ipl.is_filer, ipl.is_register, "
+					+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
+					+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+					+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
+					+ "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, "
+					+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
+					+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
+					+ "FROM inventory_price_list_products iplp " + "JOIN inventory_price_list ipl ON iplp.id = ipl.id "
+					+ "WHERE ipl.id in (1) ");
+			ResultSet rsDefaultPrice = s
+					.executeQuery("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+							+ "ipl.is_filer, ipl.is_register, "
+							+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
+							+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+							+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
+							+ "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, "
+							+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
+							+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
+							+ "FROM inventory_price_list_products iplp "
+							+ "JOIN inventory_price_list ipl ON iplp.id = ipl.id " + "WHERE ipl.id in (1) ");
 
-			if (AllOutlets.length() > 0) {
-				System.out.println(
-						"SELECT * FROM inventory_price_list_active_mview where outlet_id in(" + AllOutlets + ") ");
-				ResultSet rsPL = s.executeQuery(
-						"SELECT * FROM inventory_price_list_active_mview where outlet_id in(" + AllOutlets + ") ");
-				while (rsPL.next()) {
-					ActivePriceList activePriceList = new ActivePriceList(rsPL.getInt("price_list_id"),
-							rsPL.getLong("outlet_id"), rsPL.getInt("product_id"), rsPL.getDouble("raw_case"),
-							rsPL.getDouble("unit"));
+			while (rsDefaultPrice.next()) {
 
-					ActivePriceLists.add(activePriceList);
+				OBPriceList priceList = new OBPriceList(rsDefaultPrice.getInt("id"), rsDefaultPrice.getString("label"),
+						rsDefaultPrice.getInt("product_id"), rsDefaultPrice.getInt("package_id"),
+						rsDefaultPrice.getInt("brand_id"), rsDefaultPrice.getString("package_label"),
+						rsDefaultPrice.getString("brand_label"), rsDefaultPrice.getString("unit_per_case"),
+						rsDefaultPrice.getString("liquid_in_ml"), rsDefaultPrice.getDouble("raw_case"),
+						rsDefaultPrice.getDouble("unit"));
 
-				}
+				PriceLists.add(priceList);
 			}
 
 			s.close();
 
 		} catch (SQLException e) {
-			System.out.println("User Details Error :- " + e);
-
+			System.out.println("Global Price Error :- " + e);
 		}
 
-		return ActivePriceLists;
+		return PriceLists;
+	}
+
+	public static List<OBPriceList> get_active_price_list(Datasource ds) {
+		List<OBPriceList> PriceLists = new ArrayList<>();
+
+		try {
+			Statement s = ds.createStatement();
+			System.out.println("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+					+ "ipl.is_filer, ipl.is_register, "
+					+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
+					+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+					+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
+					+ "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, "
+					+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
+					+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
+					+ "FROM inventory_price_list_products iplp " + "JOIN inventory_price_list ipl ON iplp.id = ipl.id "
+					+ "WHERE curdate() BETWEEN valid_from AND valid_to AND is_active=1 and ipl.id > 42");
+			// id > 42 means no older than 42 IDs
+
+			ResultSet rsDefaultPrice = s
+					.executeQuery("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+							+ "ipl.is_filer, ipl.is_register, "
+							+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
+							+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+							+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
+							+ "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, "
+							+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
+							+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
+							+ "FROM inventory_price_list_products iplp "
+							+ "JOIN inventory_price_list ipl ON iplp.id = ipl.id "
+							+ "WHERE curdate() BETWEEN valid_from AND valid_to AND is_active=1 and ipl.id > 42");
+
+			while (rsDefaultPrice.next()) {
+
+				OBPriceList priceList = new OBPriceList(rsDefaultPrice.getInt("id"), rsDefaultPrice.getString("label"),
+						rsDefaultPrice.getInt("product_id"), rsDefaultPrice.getInt("package_id"),
+						rsDefaultPrice.getInt("brand_id"), rsDefaultPrice.getString("package_label"),
+						rsDefaultPrice.getString("brand_label"), rsDefaultPrice.getString("unit_per_case"),
+						rsDefaultPrice.getString("liquid_in_ml"), rsDefaultPrice.getDouble("raw_case"),
+						rsDefaultPrice.getDouble("unit"));
+
+				PriceLists.add(priceList);
+			}
+
+			s.close();
+
+		} catch (SQLException e) {
+			System.out.println("Active Price Error :- " + e);
+		}
+
+		return PriceLists;
 	}
 }

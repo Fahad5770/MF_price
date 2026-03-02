@@ -18,8 +18,8 @@ System.out.println("SessionUserID "+SessionUserID);
 		<ul data-role="listview" data-theme="d" class="nav-search" data-filter="true" data-filter-placeholder="Search..." data-filter-theme="a">
             <!-- <li data-icon="delete" data-theme="a"><%=request.getParameter("title") %></li>  -->
             <%
-            System.out.println("select group_id, group_name from feature_groups where active = 1 and group_id != 4 and group_id in (select distinct fe.group_id from user_access ua, features fe where ua.feature_id = fe.feature_id and ua.user_id = "+SessionUserID+" and fe.visible = 1) order by sort_order");
-            ResultSet rs = s.executeQuery("select group_id, group_name from feature_groups where active = 1 and group_id != 4 and group_id in (select distinct fe.group_id from user_access ua, features fe where ua.feature_id = fe.feature_id and ua.user_id = "+SessionUserID+" and fe.visible = 1) order by sort_order");
+            System.out.println("select group_id, group_name from feature_groups where active = 1 and group_id not in (4,7) and group_id in (select distinct fe.group_id from user_access ua, features fe where ua.feature_id = fe.feature_id and ua.user_id = "+SessionUserID+" and fe.visible = 1) order by sort_order");
+            ResultSet rs = s.executeQuery("select group_id, group_name from feature_groups where active = 1 and group_id not in (4,7) and group_id in (select distinct fe.group_id from user_access ua, features fe where ua.feature_id = fe.feature_id and ua.user_id = "+SessionUserID+" and fe.visible = 1) order by sort_order");
             while(rs.next()){
             %>
             <li data-icon="arrow-r" data-theme="b"><%=rs.getString(2) %></li>

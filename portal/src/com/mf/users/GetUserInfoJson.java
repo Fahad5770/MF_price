@@ -36,12 +36,16 @@ public class GetUserInfoJson {
 				user.setPassword(rsUser.getString("password"));
 
 				System.out.println(
-						"select distinct city from common_distributors where distributor_id in(select distributor_id from distributor_beat_plan_view v where assigned_to="
+						"select distinct city, region_id, distributor_id from common_distributors where distributor_id in(select distributor_id from distributor_beat_plan_view v where assigned_to="
 								+ user_id + ") limit 1");
 				ResultSet rsCity = s2.executeQuery(
-						"select distinct city from common_distributors where distributor_id in(select distributor_id from distributor_beat_plan_view v where assigned_to="
+						"select distinct city, region_id, distributor_id from common_distributors where distributor_id in(select distributor_id from distributor_beat_plan_view v where assigned_to="
 								+ user_id + ") limit 1");
-				user.setCity(((rsCity.first()) ? rsCity.getString("city") : "No City"));
+				if (rsCity.first()) {
+					user.setCity(rsCity.getString("city"));
+					user.setRegion_id(rsCity.getInt("region_id"));
+					user.setDistributor_id(rsCity.getLong("distributor_id"));
+				}
 			}
 			s2.close();
 			s.close();
@@ -71,8 +75,8 @@ public class GetUserInfoJson {
 			ResultSet rsUserPassword = s.executeQuery(
 					"select md5('" + password + "') as encrypt_password, password from users where ID=" + user_id);
 			if (rsUserPassword.first()) {
-				user_password = (rsUserPassword.getString("encrypt_password").equals(
-						rsUserPassword.getString("password")));
+				user_password = (rsUserPassword.getString("encrypt_password")
+						.equals(rsUserPassword.getString("password")));
 			}
 
 			s.close();
@@ -81,8 +85,8 @@ public class GetUserInfoJson {
 			System.out.println("User Info Error : " + e);
 
 		}
-		
-		///System.out.println(user_password);
+
+		/// System.out.println(user_password);
 		return user_password;
 
 	}

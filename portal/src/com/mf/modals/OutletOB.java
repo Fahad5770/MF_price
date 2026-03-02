@@ -23,9 +23,41 @@ public class OutletOB extends BeatPlans {
 	private String subAreaLabel;
 	private int isAlternative;
 	private int outletPciSubChannelID;
+	private int price_id = 0;
+	private int discount_id = 0;
 
 	public OutletOB() {
 		super();
+	}
+
+	public OutletOB(long outletID, String outletName, int dayNumber, String owner, String address, String telephone,
+			int nfcTagID, String orderCreatedOnDate, String subChannelLabel, double lat, double lng, int isFiler,
+			int isRegister, int isGeoFence, int radius, String areaLabel, String subAreaLabel, int isAlternative,
+			int outletPciSubChannelID, int beatPlan, long distributorID, String pjpLabel, int cityID, int price_id,
+			int discount_id) {
+		super(beatPlan, pjpLabel, distributorID, cityID);
+		this.outletID = outletID;
+		this.outletName = outletName;
+		this.dayNumber = dayNumber;
+		this.owner = owner;
+		this.address = address;
+		this.telephone = telephone;
+		this.nfcTagID = nfcTagID;
+		this.orderCreatedOnDate = orderCreatedOnDate;
+		this.subChannelLabel = subChannelLabel;
+		this.lat = lat;
+		this.lng = lng;
+		this.isFiler = isFiler;
+		this.isRegister = isRegister;
+		this.isGeoFence = isGeoFence;
+		this.Geo_Radius = radius;
+		this.areaLabel = areaLabel;
+		this.subAreaLabel = subAreaLabel;
+		this.isAlternative = isAlternative;
+		this.outletPciSubChannelID = outletPciSubChannelID;
+		this.price_id = price_id;
+		this.discount_id = discount_id;
+
 	}
 
 	public OutletOB(long outletID, String outletName, int dayNumber, String owner, String address, String telephone,
@@ -52,6 +84,7 @@ public class OutletOB extends BeatPlans {
 		this.subAreaLabel = subAreaLabel;
 		this.isAlternative = isAlternative;
 		this.outletPciSubChannelID = outletPciSubChannelID;
+
 	}
 
 	public LinkedHashMap<String, Object> getIntoJson() {
@@ -82,22 +115,24 @@ public class OutletOB extends BeatPlans {
 		outlet.put("SubAreaLabel", this.subAreaLabel);
 		outlet.put("IsAlternative", this.isAlternative);
 		outlet.put("OutletPciSubChannelID", this.outletPciSubChannelID);
+		outlet.put("price_id", this.price_id);
+		outlet.put("discount_id", this.discount_id);
 
 		return outlet;
 	}
 
+	// ===== Getters & Setters =====
+
 	@Override
 	public String toString() {
-		return "Outlet{" + "outletID=" + outletID + ", outletName='" + outletName + '\'' + ", dayNumber=" + dayNumber
-				+ ", owner='" + owner + '\'' + ", address='" + address + '\'' + ", telephone='" + telephone + '\''
-				+ ", nfcTagID=" + nfcTagID + ", orderCreatedOnDate='" + orderCreatedOnDate + '\''
-				+ ", subChannelLabel='" + subChannelLabel + '\'' + ", lat=" + lat + ", lng=" + lng + ", isFiler="
-				+ isFiler + ", isRegister=" + isRegister + ", isGeoFence=" + isGeoFence + ", Geo_Radius=" + Geo_Radius
-				+ ", areaLabel='" + areaLabel + '\'' + ", subAreaLabel='" + subAreaLabel + '\'' + ", isAlternative="
-				+ isAlternative + ", outletPciSubChannelID=" + outletPciSubChannelID + '}';
+		return "OutletOB [outletID=" + outletID + ", outletName=" + outletName + ", dayNumber=" + dayNumber + ", owner="
+				+ owner + ", address=" + address + ", telephone=" + telephone + ", nfcTagID=" + nfcTagID
+				+ ", orderCreatedOnDate=" + orderCreatedOnDate + ", subChannelLabel=" + subChannelLabel + ", lat=" + lat
+				+ ", lng=" + lng + ", isFiler=" + isFiler + ", isRegister=" + isRegister + ", isGeoFence=" + isGeoFence
+				+ ", Geo_Radius=" + Geo_Radius + ", areaLabel=" + areaLabel + ", subAreaLabel=" + subAreaLabel
+				+ ", isAlternative=" + isAlternative + ", outletPciSubChannelID=" + outletPciSubChannelID
+				+ ", price_id=" + price_id + ", discount_id=" + discount_id + "]";
 	}
-
-	// ===== Getters & Setters =====
 
 	public long getOutletID() {
 		return outletID;
@@ -250,4 +285,37 @@ public class OutletOB extends BeatPlans {
 	public void setOutletPciSubChannelID(int outletPciSubChannelID) {
 		this.outletPciSubChannelID = outletPciSubChannelID;
 	}
+
+	public int getGeo_Radius() {
+		return Geo_Radius;
+	}
+
+	public void setGeo_Radius(int geo_Radius) {
+		Geo_Radius = geo_Radius;
+	}
+
+	public int getIsAlternative() {
+		return isAlternative;
+	}
+
+	public void setIsAlternative(int isAlternative) {
+		this.isAlternative = isAlternative;
+	}
+
+	public int getPrice_id() {
+		return price_id;
+	}
+
+	public void setPrice_id(int price_id) {
+		this.price_id = price_id;
+	}
+
+	public int getDiscount_id() {
+		return discount_id;
+	}
+
+	public void setDiscount_id(int discount_id) {
+		this.discount_id = discount_id;
+	}
+
 }
