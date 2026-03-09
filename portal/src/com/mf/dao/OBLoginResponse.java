@@ -323,6 +323,7 @@ public class OBLoginResponse {
 
 		dataObject.put("global_price_discount", this.GlobalpriceDiscount);
 		dataObject.put("active_price_discount", this.ActivepriceDiscount);
+		
 		dataObject.put("price_discount_region", this.priceDiscountRegion);
 		dataObject.put("price_discount_distribution", this.priceDiscountDistribution);
 		dataObject.put("price_discount_channel", this.priceDiscountChannel);

@@ -56,6 +56,7 @@ public class Order implements IOrder {
 
 			Statement s = ds.createStatement();
 			Statement s2 = ds.createStatement();
+			
 
 			final OrderFunctions OF = new OrderFunctions();
 
@@ -104,13 +105,15 @@ public class Order implements IOrder {
 						UnitsPerSKU = rs_product.getInt(1);
 						LiquidInMLPerUnit = rs_product.getLong(2);
 					}
-
+					System.out.println("heer 1");
 					int TotalUnits = (quantity * UnitsPerSKU);
-
+					System.out.println("heer 11111");
 					long LiquidinML = LiquidInMLPerUnit * TotalUnits;
-
+					System.out.println("heer 1.2323");
 					// Price
 					double RateRawCase = 0, RateUnit = 0;
+					System.out.println("select raw_case, unit from inventory_price_list_products where product_id="
+							+ OReqProducts.getProduct_id() + " and id=" + OReqProducts.getPrice_id());
 					ResultSet rsPrice = s2
 							.executeQuery("select raw_case, unit from inventory_price_list_products where product_id="
 									+ OReqProducts.getProduct_id() + " and id=" + OReqProducts.getPrice_id());
@@ -120,33 +123,37 @@ public class Order implements IOrder {
 					}
 					double AmountRawCases = RateRawCase * (double) quantity;
 					double AmountUnits = RateUnit * (double) quantity;
-
+					System.out.println("heer 2");
 					// Discount
 
 					double discount_rate = 0;
 					int is_percentag = 0, is_with_tax = 0;
+					System.out.println(
+							"select discount_value, is_percentage,is_with_tax from inventory_price_discount_products where product_id="
+									+ OReqProducts.getProduct_id() + " and price_discount_id="
+									+ OReqProducts.getDiscount_id());
 					ResultSet rsPriceDiscount = s2.executeQuery(
 							"select discount_value, is_percentage,is_with_tax from inventory_price_discount_products where product_id="
 									+ OReqProducts.getProduct_id() + " and price_discount_id="
 									+ OReqProducts.getDiscount_id());
-					if (rsPrice.first()) {
+					if (rsPriceDiscount.first()) {
 						discount_rate = rsPriceDiscount.getDouble("discount_value");
 						is_percentag = rsPriceDiscount.getInt("is_percentage");
 						is_with_tax = rsPriceDiscount.getInt("is_with_tax");
 					}
-
+					System.out.println("heer 3");
 					double total_diacount = discount_rate * (double) quantity;
 					if (is_percentag == 1) {
-						double discount_amount = (AmountRawCases * discount_rate) / 100;
-						total_diacount = discount_amount * (double) quantity;
+					 total_diacount = (AmountRawCases * discount_rate) / 100;
+						
 					}
-
+					System.out.println("heer 4");
 					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax_2(OReqProducts.getProduct_id(),
 							OReq.getOutletId());
 
 					double income_tax_rate = ProductsTax.get("income_tax"), income_tax_amount = 0,
 							sales_tax_rate = ProductsTax.get("sales_tax"), sales_tax_amount = 0;
-
+					System.out.println("heer 5");
 					income_tax_amount = Utilities
 							.parseDouble(Utilities.getDisplayCurrencyFormatSimple(income_tax_rate * (double) quantity));
 
@@ -156,7 +163,7 @@ public class Order implements IOrder {
 					double TotalNetAmount = Utilities
 							.parseDouble(Utilities.getDisplayCurrencyFormatSimple((AmountRawCases)));
 					double InvoiveNetAmount = Utilities.parseDouble(Utilities
-							.getDisplayCurrencyFormatSimple((TotalNetAmount + sales_tax_amount + income_tax_amount)));
+							.getDisplayCurrencyFormatSimple((TotalNetAmount + sales_tax_amount + income_tax_amount - total_diacount)));
 
 					System.out.println(
 							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
@@ -166,8 +173,8 @@ public class Order implements IOrder {
 									+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
 									+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
 									+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
-									+ InvoiveNetAmount + ", 0,null");
-					s.executeUpdate(
+									+ InvoiveNetAmount + ", 0,null)");
+					s2.executeUpdate(
 							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
 									+ unedited_order_id + ", " + OReqProducts.getProduct_id() + ", " + quantity + ", "
 									+ "0, " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
@@ -175,7 +182,7 @@ public class Order implements IOrder {
 									+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
 									+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
 									+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
-									+ InvoiveNetAmount + ", 0,null");
+									+ InvoiveNetAmount + ", 0,null)");
 
 					TotalInvoiceAmount += AmountRawCases;
 					TotalPriceDiscount += total_diacount;
@@ -252,7 +259,7 @@ public class Order implements IOrder {
 											+ TotalAmount + ", " + income_tax_rate + ", " + income_tax_amount + ","
 											+ sales_tax_rate + "," + sales_tax_amount + " ," + NetAmount + ", 1, "
 											+ PromotionProducts[i].PROMOTION_ID + ")  ");
-							s.executeUpdate(
+							s2.executeUpdate(
 									"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
 											+ unedited_order_id + ", " + ProProductID + ", " + RawCasesAndUnits[0]
 											+ ", " + RawCasesAndUnits[1] + ", " + PromotionProducts[i].TOTAL_UNITS

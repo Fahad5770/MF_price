@@ -336,7 +336,7 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 									double TotalInvoiceWHTax = 0;
 									double TotalInvoiceDiscount = 0;
 									double TotalInvoiceNetAmount = 0;
-									ResultSet rs20 = s.executeQuery("select sum(invoice_amount), sum(wh_tax_amount), sum(discount), sum(net_amount) from inventory_sales_adjusted where id in ("+InvoiceIDsQuery+")");
+									ResultSet rs20 = s.executeQuery("select sum(invoice_amount), sum(wh_tax_amount), sum(price_discount), sum(net_amount) from inventory_sales_adjusted where id in ("+InvoiceIDsQuery+")");
 									if (rs20.first()){
 										TotalInvoiceAmount = rs20.getDouble(1);
 										TotalInvoiceWHTax = rs20.getDouble(2);

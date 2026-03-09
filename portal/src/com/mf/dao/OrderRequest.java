@@ -24,13 +24,21 @@ public class OrderRequest {
 		public OrderRequestProducts(int product_id, int quantity, double discount, int is_promotion, int promotion_id,
 				int price_id, int discount_id) {
 			super();
+			System.out.println("Start");
 			this.product_id = product_id;
+			System.out.println(product_id);
 			this.quantity = quantity;
+			System.out.println(quantity);
 			this.discount = discount;
+			System.out.println(discount);
 			this.is_promotion = is_promotion;
+			System.out.println(is_promotion);
 			this.promotion_id = promotion_id;
+			System.out.println(promotion_id);
 			this.price_id = price_id;
+			System.out.println(price_id);
 			this.discount_id = discount_id;
+			System.out.println(discount_id);
 		}
 
 		public int getProduct_id() {
@@ -122,18 +130,26 @@ public class OrderRequest {
 	public OrderRequest(JSONObject Payload) {
 		super();
 		this.userId = ((Number) Payload.get("user_id")).intValue();
+		System.out.println(userId);
 		this.isTimeOut = ((Number) Payload.get("isTimeOut")).intValue();
+		System.out.println(isTimeOut);
 		this.outletId = (Long) Payload.get("outlet_id");
+		System.out.println(outletId);
 		this.mobileRequestId = (String) Payload.get("mobile_request_id");
+		System.out.println(mobileRequestId);
 		this.startMobileTimestamp = (String) Payload.get("start_mobile_timestamp");
+		System.out.println(startMobileTimestamp);
 		this.endMobileTimestamp = (String) Payload.get("end_mobile_timestamp");
+		System.out.println(endMobileTimestamp);
 		this.deviceId = (String) Payload.get("device_id");
 		this.version = (String) Payload.get("version");
 		this.platform = (String) Payload.get("platform");
 		this.lat = (Double) Payload.get("lat");
 		this.lng = (Double) Payload.get("lng");
 		this.accuracy = Math.round((Double) Payload.get("accuracy"));
+		System.out.println(accuracy);
 		this.beatPlanId = ((Number) Payload.get("beat_plan_id")).intValue();
+		System.out.println(beatPlanId);
 		this.distributorId = (Long) Payload.get("distributor_id");
 		this.order_image = Base64.decodeBase64((String) Payload.get("order_image"));
 
