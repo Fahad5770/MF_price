@@ -25,7 +25,7 @@ public class Product {
 	public long LIQUID_IN_ML;
 	public boolean EXISTS = false;
 
-	public static double[] getSellingPrice_2(long SAPCode, long OutletID)
+	public static double[] getSellingPrice_2(long SAPCode, long OutletID, long UserID)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		Datasource ds = new Datasource();
 		ds.createConnection();
@@ -38,56 +38,207 @@ public class Product {
 
 		s.close();
 		ds.dropConnection();
-		return getSellingPrice_2(ProductID, OutletID);
+		return getSellingPrice_2(ProductID, OutletID, UserID);
 	}
 
-	public static double[] getSellingPrice_2(int ProductID, long OutletID)
+	public static double[] getSellingPrice_2(int ProductID, long OutletID, long UserID)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		Datasource ds = new Datasource();
-		double[] ret = new double[5];
+		double[] ret = new double[6];
+		boolean isPriceFound = false;
+		boolean isDiscountFound = false;
 		long PriceListID = 0L;
+		long PriceDiscountID = 0L;
 		ds.createConnection();
 		Statement s = ds.createStatement();
 		Statement s1 = ds.createStatement();
 		Statement s2 = ds.createStatement();
 		int isFiler = 0;
 		int isRegister = 0;
+		long DistributorId = 0;
+		int RegionID = 0;
 		// System.out.println("select is_filer, is_register from common_outlets where
 		// id=" + OutletID);
-		ResultSet rsOutlet = s.executeQuery("select is_filer, is_register from common_outlets where id=" + OutletID);
-		if (rsOutlet.first()) {
-			isFiler = rsOutlet.getInt("is_filer");
-			isRegister = rsOutlet.getInt("is_register");
+		System.out.println("userId: " + UserID);
+
+		ResultSet rsDistributor = s.executeQuery("select distributor_id from users where id=" + UserID);
+		if (rsDistributor.next()) {
+			DistributorId = rsDistributor.getLong("distributor_id");
 		}
+
+		ResultSet rsRegion = s1
+				.executeQuery("select region_id from common_distributors where distributor_id=" + DistributorId);
+		if (rsRegion.next()) {
+			RegionID = rsRegion.getInt("region_id");
+		}
+
+		/*
+		 * ResultSet rsOutlet =
+		 * s.executeQuery("select is_filer, is_register from common_outlets where id=" +
+		 * OutletID); if (rsOutlet.first()) { isFiler = rsOutlet.getInt("is_filer");
+		 * isRegister = rsOutlet.getInt("is_register"); }
+		 */
 
 		// System.out.println("SELECT id FROM pep.inventory_price_list where is_filer="
 		// + isFiler + " and is_register=" + isRegister + " and id > 38");
-		ResultSet rs2 = s1.executeQuery("SELECT id FROM pep.inventory_price_list where is_filer=" + isFiler
-				+ " and is_register=" + isRegister + " and id > 38");
-		if (rs2.first()) {
-			PriceListID = (long) rs2.getInt("id");
-		}
+		/*
+		 * ResultSet rs2 =
+		 * s1.executeQuery("SELECT id FROM pep.inventory_price_list where is_filer=" +
+		 * isFiler + " and is_register=" + isRegister + " and id > 38"); if
+		 * (rs2.first()) { PriceListID = (long) rs2.getInt("id"); }
+		 */
 
 		// System.out.println("select * from inventory_price_list_products where id=" +
 		// PriceListID + " and product_id=" + ProductID);
-		ResultSet rs3 = s.executeQuery(
-				"select * from inventory_price_list_products where id=" + PriceListID + " and product_id=" + ProductID);
 
-		if (rs3.first()) {
-			ret[0] = rs3.getDouble("raw_case");
-			ret[1] = rs3.getDouble("unit");
-			ret[2] = rs3.getDouble("discount");
-		} else {
-			// System.out.println("select * from inventory_price_list_products where id=1
-			// and product_id=" + ProductID);
-			ResultSet rs4 = s2
-					.executeQuery("select * from inventory_price_list_products where id=1 and product_id=" + ProductID);
-			if (rs4.first()) {
-				ret[0] = rs4.getDouble("raw_case");
-				ret[1] = rs4.getDouble("unit");
-				ret[2] = rs4.getDouble("discount");
+		ResultSet rs1 = s.executeQuery(
+				"select ipl.id,region_id from inventory_price_list ipl join inventory_price_list_regions iplg on ipl.id=iplg.price_list_id where region_id="
+						+ RegionID + " and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+		if (rs1.next()) {
+			PriceListID = rs1.getLong("id");
+			ResultSet rs2 = s.executeQuery("select * From inventory_price_list_products where id = " + PriceListID
+					+ " and product_id = " + ProductID);
+			if (rs2.next()) {
+				ret[0] = rs2.getDouble("raw_case");
+				ret[1] = rs2.getDouble("unit");
+				ret[2] = rs2.getDouble("discount");
+				isPriceFound = true;
+			} 
+
+		}
+		
+		if(!isPriceFound) {
+
+			ResultSet rsDistributorPrice = s.executeQuery(
+					"select ipl.id, ipld.distributor_id from inventory_price_list ipl join inventory_price_list_distributors ipld on ipl.id=ipld.price_list_id where ipld.distributor_id in ("
+							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			if (rsDistributorPrice.next()) {
+				PriceListID = rsDistributorPrice.getLong("id");
+				ResultSet rs3 = s.executeQuery("select * From inventory_price_list_products where id = "
+						+ PriceListID + " and product_id = " + ProductID);
+				if (rs3.next()) {
+					ret[0] = rs3.getDouble("raw_case");
+					ret[1] = rs3.getDouble("unit");
+					ret[2] = rs3.getDouble("discount");
+					isPriceFound = true;
+				}
+
+			} 
+		}
+		
+		 if(!isPriceFound){
+
+			ResultSet rsDefaultPrice = s
+					.executeQuery("SELECT ipl.id, ipl.label ,iplp.product_id, raw_case, discount, unit, "
+							+ "ipl.is_filer, ipl.is_register, "
+							+ "(SELECT package_id FROM inventory_products WHERE id = product_id) package_id, "
+							+ "(SELECT brand_id FROM inventory_products WHERE id = product_id) brand_id, "
+							+ "(SELECT label FROM inventory_packages WHERE id = package_id) package_label, "
+							+ "(SELECT label FROM inventory_brands WHERE id = brand_id) brand_label, "
+							+ "(SELECT unit_per_case FROM inventory_packages WHERE id = package_id) unit_per_case, "
+							+ "(SELECT liquid_in_ml FROM inventory_packages WHERE id = package_id) liquid_in_ml "
+							+ "FROM inventory_price_list_products iplp "
+							+ "JOIN inventory_price_list ipl ON iplp.id = ipl.id "
+							+ "WHERE ipl.id in (1) and iplp.product_id = " + ProductID);
+			if (rsDefaultPrice.next()) {
+				ret[0] = rsDefaultPrice.getDouble("raw_case");
+				ret[1] = rsDefaultPrice.getDouble("unit");
+				ret[2] = rsDefaultPrice.getDouble("discount");
+				isPriceFound = true;
+			}
+
+		}
+
+		 System.out.println(
+					"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+							+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+		ResultSet rsRegionDiscount = s.executeQuery(
+				"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+						+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+		if (rsRegionDiscount.next()) {
+			RegionID = rsRegionDiscount.getInt("region_id");
+			PriceDiscountID = rsRegionDiscount.getInt("id");
+			ResultSet rsDiscount = s
+					.executeQuery("select * from inventory_price_discount_products where price_discount_id="
+							+ PriceDiscountID + " and product_id=" + ProductID);
+			if (rsDiscount.next()) {
+				double discountValue = rsDiscount.getDouble("discount_value");
+				int isWithTax = rsDiscount.getShort("is_with_tax");
+				int isPercentage = rsDiscount.getShort("is_percentage");
+				ret[3] = discountValue;
+				ret[4] = isWithTax;
+				ret[5] = isPercentage;
+				isDiscountFound = true;
+			} 
+
+		}
+		
+		if(!isDiscountFound) {
+
+			System.out.println(
+					"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			ResultSet rsDistributorDiscount = s.executeQuery(
+					"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			if (rsDistributorDiscount.next()) {
+				PriceDiscountID = rsDistributorDiscount.getInt("id");
+				ResultSet rsDiscount1 = s
+						.executeQuery("select * from inventory_price_discount_products where price_discount_id="
+								+ PriceDiscountID + " and product_id=" + ProductID);
+				if (rsDiscount1.next()) {
+					double discountValue = rsDiscount1.getDouble("discount_value");
+					int isWithTax = rsDiscount1.getShort("is_with_tax");
+					int isPercentage = rsDiscount1.getShort("is_percentage");
+					ret[3] = discountValue;
+					ret[4] = isWithTax;
+					ret[5] = isPercentage;
+					isDiscountFound = true;
+				} 
 			}
 		}
+		
+		if(!isDiscountFound) {
+			
+			System.out.println(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_price_discount ipd join inventory_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1 "
+							+ " AND pci_sub_channel_id IN(select pic_channel_id from common_outlets where id="
+							+ OutletID + ")");
+			ResultSet rsChannelDiscount = s.executeQuery(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_price_discount ipd join inventory_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1 "
+							+ " AND pci_sub_channel_id IN(select pic_channel_id from common_outlets where id="
+							+ OutletID + ")");
+			if(rsChannelDiscount.next()) {
+			PriceDiscountID = rsChannelDiscount.getInt("id");
+			ResultSet rsDiscount2 = s
+					.executeQuery("select * from inventory_price_discount_products where price_discount_id="
+							+ PriceDiscountID + " and product_id=" + ProductID);
+			if (rsDiscount2.next()) {
+				double discountValue = rsDiscount2.getDouble("discount_value");
+				int isWithTax = rsDiscount2.getShort("is_with_tax");
+				int isPercentage = rsDiscount2.getShort("is_percentage");
+				ret[3] = discountValue;
+				ret[4] = isWithTax;
+				ret[5] = isPercentage;
+				isDiscountFound = true;
+
+			}
+			}
+
+		}
+		/*
+		 * ResultSet rs3 = s.executeQuery(
+		 * "select * from inventory_price_list_products where id=" + PriceListID +
+		 * " and product_id=" + ProductID);
+		 * 
+		 * if (rs3.first()) { ret[0] = rs3.getDouble("raw_case"); ret[1] =
+		 * rs3.getDouble("unit"); ret[2] = rs3.getDouble("discount"); } else { //
+		 * System.out.println("select * from inventory_price_list_products where id=1 //
+		 * and product_id=" + ProductID); ResultSet rs4 = s2
+		 * .executeQuery("select * from inventory_price_list_products where id=1 and product_id="
+		 * + ProductID); if (rs4.first()) { ret[0] = rs4.getDouble("raw_case"); ret[1] =
+		 * rs4.getDouble("unit"); ret[2] = rs4.getDouble("discount"); } }
+		 */
 
 		/*
 		 * rs4 = s.

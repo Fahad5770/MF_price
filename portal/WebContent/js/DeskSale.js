@@ -1410,14 +1410,18 @@ function getProductInfoJson(ProductID) {
 					$('#ProductInfoSpan').html(
 							json.PackageLabel + " - " + json.BrandLabel);
 					$('#DeskSaleRate').val(json.RawCasePrice);
-					
-					$('#DeskSaleDiscount').val(json.Discount);
+					$('#DeskSaleAmount').val('0');
+					$('#DeskSaleNetAmount').val('0');
+					$('#DeskSaleDiscount').val(json.DiscountValue);
 					$('#DSDiscountId').val(json.DiscountId);
+					
 
 					
 					UnitPrice = parseFloat(json.UnitPrice);
 					$('#DeskSaleUnitRate').val(json.UnitPrice);
-					$('#DeskSaleTax').val(json.SalesTax + json.IncomeTax);
+					$('#DeskSaleTax').val(parseFloat(json.SalesTax + json.IncomeTax).toFixed(2));
+					$('#isWithTax').val(json.IsWithTax);
+					$('#isPercentage').val(json.IsPercentage);
 
 				} else {
 					// $("#DeskSaleDistributorName").val("Invalid ID");
@@ -1644,10 +1648,35 @@ function DeskSaleCalculate() {
 		Tax = $('#DeskSaleTax').val() * RawCases;
 		$('#DeskSaleTax').val(parseFloat(Tax).toFixed(2))
 	}
+	
 
+	
+	
+	
 	var Amount = (RawCases * Rate) + (Units * UnitPrice);
-	var NetAmount = Amount - Discount  + Tax ;
-
+	var NetAmount = Amount;
+	var isWithTax = $('#isWithTax').val();
+	console.log('isWithTax:'+isWithTax);
+	var isPercentage = $('#isPercentage').val();
+	console.log('isPercentage:'+isPercentage);
+	console.log('Tax:'+Tax);
+	console.log('Amount:'+Amount);
+	if(isWithTax == '1'){
+		NetAmount += Tax;
+		if(isPercentage == '0' || isPercentage == '1'){
+			NetAmount -= Discount;
+		}else{
+			NetAmount -= (NetAmount * Discount / 100)
+		}
+	}else{
+		if(isPercentage == '0' || isPercentage == '1'){
+			NetAmount -= Discount;
+		}else{
+			NetAmount -= (NetAmount * Discount / 100)
+		}
+		NetAmount += Tax;
+	}
+	console.log('net_amount:'+NetAmount);
 	if (Amount > 0) {
 		$('#DeskSaleAmount').val(parseFloat(Amount).toFixed(2));
 	} else {

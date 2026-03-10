@@ -57,7 +57,12 @@ public class GetProductInfo extends HttpServlet {
 		if (session.getAttribute("UserID") == null) {
 			response.sendRedirect(Utilities.getSessionExpiredPageURL(request));
 		}
-
+		
+		long UserId = 0;
+		if (session.getAttribute("UserID") != null) {
+			UserId = Long.parseLong((String) session.getAttribute("UserID"));
+		}
+		
 		long SapCode = Utilities.parseLong(request.getParameter("ProductCode"));
 		long OutletID = Utilities.parseLong(request.getParameter("OutletID"));
 
@@ -110,13 +115,14 @@ public class GetProductInfo extends HttpServlet {
 
 				// System.out.println(request.getParameter("OutletID"));
 				if (request.getParameter("OutletID") != null) {
-					double PriceArray[] = Product.getSellingPrice_2(SapCode, OutletID);
+					double PriceArray[] = Product.getSellingPrice_2(SapCode, OutletID,UserId);
 
 					obj.put("RawCasePricewithoutDisc", PriceArray[0]);
 					obj.put("UnitPrice", PriceArray[1]);
 					obj.put("Discount", PriceArray[2]);
-					obj.put("DiscountId", PriceArray[3]);
-
+					obj.put("DiscountValue", PriceArray[3]);
+					obj.put("IsWithTax", PriceArray[4]);
+					obj.put("IsPercentage", PriceArray[5]);
 					
 					double RawCasePrice = PriceArray[0] + PriceArray[2];
 					
@@ -125,7 +131,7 @@ public class GetProductInfo extends HttpServlet {
 					
 					System.out.println("Discount" + PriceArray[2]);
 
-					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax2(rs.getInt(6), OutletID);
+					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(rs.getInt(6), OutletID);
 
 					obj.put("SalesTax", ProductsTax.get("sales_tax"));
 					obj.put("IncomeTax", ProductsTax.get("income_tax"));

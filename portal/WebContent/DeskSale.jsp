@@ -185,6 +185,8 @@ long region_id= (rsRegion.first()) ? rsRegion.getLong("region_id") : 0;
 			</td>
 			<td valign="top" style="width:10%">
 				<input  type="text" placeholder="Tax" id="DeskSaleTax" name="DeskSaleTax" data-mini="true" readonly="readonly" >
+				<input type="hidden" id="isWithTax" name="isWithTax" value="0" >
+				<input type="hidden" id="isPercentage" name="isPercentage" value="1" >
 			</td>
 			
 			<td valign="top" style="width:10%">

@@ -43,13 +43,13 @@ public class DeskSaleExecute extends HttpServlet {
 
 		HttpSession session = request.getSession();
 
-		String UserID = null;
+		long UserID = 0;
 
 		if (session.getAttribute("UserID") != null) {
-			UserID = (String) session.getAttribute("UserID");
+			UserID = Long.parseLong((String) session.getAttribute("UserID"));
 		}
 
-		if (UserID == null) {
+		if (UserID == 0) {
 			response.sendRedirect(com.pbc.util.Utilities.getSessionExpiredPageURL(request));
 		}
 
@@ -212,7 +212,7 @@ public class DeskSaleExecute extends HttpServlet {
 							long TotalUnits = (RawCases[i] * UnitsPerSKU) + Units[i];
 							long LiquidInMLValue = TotalUnits * LiquidInMLPerUnit;
 
-							double UnitRates[] = Product.getSellingPrice_2(ProductID[i], OutletID);
+							double UnitRates[] = Product.getSellingPrice_2(ProductID[i], OutletID,UserID);
 							double RateRawCase = UnitRates[0];
 							double RateUnit = UnitRates[1];
 
@@ -229,7 +229,7 @@ public class DeskSaleExecute extends HttpServlet {
 							System.out.println("UserID : " + UserID);
 							HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(ProductID[i], OutletID);
 
-							WHTaxAmount = ProductsTax.get("wh_tax") * RawCases[i];
+							WHTaxAmount = ProductsTax.get("sales_tax") * RawCases[i];
 
 							double SalesTaxAmount = ProductsTax.get("income_tax") * RawCases[i];
 							
@@ -273,19 +273,15 @@ public class DeskSaleExecute extends HttpServlet {
 								return;
 							}
 							System.out.println(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,sales_tax_rate, sales_tax_amount total_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
-											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + HandDiscountRate
-											+ ", " + HandDiscountAmount + "," + RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + UnitAmount + ", " + ItemTotalAmount + ", "
-											+ WHTaxAmount + "," + SalesTaxAmount + "," + ItemNetAmount + ") ");
+											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + RateRawCase + ", " + RateUnit + ", "
+											+ RawCaseAmount + ", " + UnitAmount + ", 0,0,0,0,0,0,0,0,0,0) ");
 							s.executeUpdate(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, price_discount,price_discount_amount, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, sales_tax_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
-											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + HandDiscountRate
-											+ ", " + HandDiscountAmount + "," + RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + UnitAmount + ", " + ItemTotalAmount + ", "
-											+ WHTaxAmount + "," + SalesTaxAmount + "," + ItemNetAmount + ") ");
+											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", "+ RateRawCase + ", " + RateUnit + ", "
+											+ RawCaseAmount + ", " + UnitAmount + ", 0,0,0,0,0,0,0,0,0,0) ");
 						}
 
 						InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));
