@@ -215,11 +215,13 @@ public class DeskSaleExecute extends HttpServlet {
 							double UnitRates[] = Product.getSellingPrice_2(ProductID[i], OutletID,UserID);
 							double RateRawCase = UnitRates[0];
 							double RateUnit = UnitRates[1];
-							double discountValue = UnitRates[3];
-
+							double discountRate = UnitRates[3];
+							double discountAmount = discountRate * RawCases[i];
 							double RawCaseAmount = RawCases[i] * RateRawCase;
 							double UnitAmount = Units[i] * RateUnit;
-
+							int isWithTax = (int) UnitRates[4];
+							int isPercentage = (int) UnitRates[5];
+							long priceDiscountId = (long) UnitRates[6];
 							
 
 							double ItemTotalAmount = Utilities.parseDouble(
@@ -230,16 +232,19 @@ public class DeskSaleExecute extends HttpServlet {
 							System.out.println("UserID : " + UserID);
 							HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(ProductID[i], OutletID);
 
+							double salesTaxRate = ProductsTax.get("sales_tax");
+							double salesTaxAmount = salesTaxRate * RawCases[i];
 							WHTaxAmount = ProductsTax.get("sales_tax") * RawCases[i];
 
-							double SalesTaxAmount = ProductsTax.get("income_tax") * RawCases[i];
+							double IncomeTaxRate = ProductsTax.get("income_tax");
+							double IncomeTaxAmount = IncomeTaxRate * RawCases[i];
 							
 							double ItemNetAmount = Utilities.parseDouble(
 									Utilities.getDisplayCurrencyFormatSimple((ItemTotalAmount + ItemWHTaxAmount)));
 
 							InvoiceAmount += ItemTotalAmount;
 							InvoiceWHTaxAmount += WHTaxAmount;
-							InvoiceSaleTaxAmount += SalesTaxAmount;
+							InvoiceSaleTaxAmount += IncomeTaxAmount;
 							InvoiceNetAmount += ItemNetAmount;
 
 							StockPosting sp = new StockPosting();
@@ -274,15 +279,15 @@ public class DeskSaleExecute extends HttpServlet {
 								return;
 							}
 							System.out.println(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
 											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + UnitAmount + ", 0,0, "+discountValue+" ,0,0,0,0,0,0,0) ");
+											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+") ");
 							s.executeUpdate(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
 											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", "+ RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + UnitAmount + ", 0,0, "+discountValue+" ,0,0,0,0,0,0,0) ");
+											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+") ");
 						}
 
 						InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));

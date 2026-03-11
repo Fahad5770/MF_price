@@ -44,7 +44,7 @@ public class Product {
 	public static double[] getSellingPrice_2(int ProductID, long OutletID, long UserID)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		Datasource ds = new Datasource();
-		double[] ret = new double[6];
+		double[] ret = new double[8];
 		boolean isPriceFound = false;
 		boolean isDiscountFound = false;
 		long PriceListID = 0L;
@@ -157,7 +157,8 @@ public class Product {
 						+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 		if (rsRegionDiscount.next()) {
 			RegionID = rsRegionDiscount.getInt("region_id");
-			PriceDiscountID = rsRegionDiscount.getInt("id");
+			PriceDiscountID = rsRegionDiscount.getLong("id");
+			ret[6] = PriceDiscountID;
 			ResultSet rsDiscount = s
 					.executeQuery("select * from inventory_price_discount_products where price_discount_id="
 							+ PriceDiscountID + " and product_id=" + ProductID);
@@ -182,7 +183,8 @@ public class Product {
 					"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
 							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
 			if (rsDistributorDiscount.next()) {
-				PriceDiscountID = rsDistributorDiscount.getInt("id");
+				PriceDiscountID = rsDistributorDiscount.getLong("id");
+				ret[6] = PriceDiscountID;
 				ResultSet rsDiscount1 = s
 						.executeQuery("select * from inventory_price_discount_products where price_discount_id="
 								+ PriceDiscountID + " and product_id=" + ProductID);
@@ -209,7 +211,35 @@ public class Product {
 							+ " AND pci_sub_channel_id IN(select pic_channel_id from common_outlets where id="
 							+ OutletID + ")");
 			if(rsChannelDiscount.next()) {
-			PriceDiscountID = rsChannelDiscount.getInt("id");
+			PriceDiscountID = rsChannelDiscount.getLong("id");
+			ret[6] = PriceDiscountID;
+			ResultSet rsDiscount2 = s
+					.executeQuery("select * from inventory_price_discount_products where price_discount_id="
+							+ PriceDiscountID + " and product_id=" + ProductID);
+			if (rsDiscount2.next()) {
+				double discountValue = rsDiscount2.getDouble("discount_value");
+				int isWithTax = rsDiscount2.getShort("is_with_tax");
+				int isPercentage = rsDiscount2.getShort("is_percentage");
+				ret[3] = discountValue;
+				ret[4] = isWithTax;
+				ret[5] = isPercentage;
+				
+				isDiscountFound = true;
+
+			}
+			}
+
+		}
+		
+		if(!isDiscountFound) {
+			
+			System.out.println(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=1 and ipdp.product_id = "+ProductID);
+			ResultSet rstPriceDisc = s.executeQuery(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=1 and ipdp.product_id = "+ProductID);
+			if(rstPriceDisc.next()) {
+			PriceDiscountID = rstPriceDisc.getLong("id");
+			ret[6] = PriceDiscountID;
 			ResultSet rsDiscount2 = s
 					.executeQuery("select * from inventory_price_discount_products where price_discount_id="
 							+ PriceDiscountID + " and product_id=" + ProductID);
@@ -224,7 +254,9 @@ public class Product {
 
 			}
 			}
-
+		
+		
+		
 		}
 		/*
 		 * ResultSet rs3 = s.executeQuery(
