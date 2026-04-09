@@ -126,6 +126,10 @@ public class GetProductInfo extends HttpServlet {
 					
 					double RawCasePrice = PriceArray[0] + PriceArray[2];
 					
+					double discountAmount = (RawCasePrice * PriceArray[3]) / 100;
+
+					obj.put("CalculatedDiscountValue", discountAmount);
+					
 					obj.put("RawCasePrice", Utilities.getDisplayCurrencyFormatAbbreviatedOneDecimal(RawCasePrice));
 
 					

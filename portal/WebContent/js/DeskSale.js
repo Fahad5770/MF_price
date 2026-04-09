@@ -1412,7 +1412,13 @@ function getProductInfoJson(ProductID) {
 					$('#DeskSaleRate').val(json.RawCasePrice);
 					$('#DeskSaleAmount').val('0');
 					$('#DeskSaleNetAmount').val('0');
-					$('#DeskSaleDiscount').val(json.DiscountValue);
+					
+					if(json.IsPercentage == '2'){
+					$('#DeskSaleDiscount').val(json.CalculatedDiscountValue);
+					}else if(json.IsPercentage == '1'){
+						$('#DeskSaleDiscount').val(json.DiscountValue);
+					}
+					
 					$('#DSDiscountId').val(json.DiscountId);
 					
 
@@ -1663,17 +1669,11 @@ function DeskSaleCalculate() {
 	console.log('Amount:'+Amount);
 	if(isWithTax == '1'){
 		NetAmount += Tax;
-		if(isPercentage == '0' || isPercentage == '1'){
 			NetAmount -= Discount;
-		}else{
-			NetAmount -= (NetAmount * Discount / 100)
-		}
+
 	}else{
-		if(isPercentage == '0' || isPercentage == '1'){
-			NetAmount -= Discount;
-		}else{
-			NetAmount -= (NetAmount * Discount / 100)
-		}
+		NetAmount -= Discount;
+
 		NetAmount += Tax;
 	}
 	console.log('net_amount:'+NetAmount);
