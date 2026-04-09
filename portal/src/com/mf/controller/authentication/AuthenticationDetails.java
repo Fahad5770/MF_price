@@ -592,7 +592,7 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
 								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 				ResultSet rsRegionDiscount = s.executeQuery(
-						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg. ipd.id=ipdp.price_discount_id  where region_id="
 								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 
 				while (rsRegionDiscount.next()) {

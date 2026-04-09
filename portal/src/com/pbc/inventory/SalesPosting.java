@@ -28,8 +28,8 @@ public class SalesPosting
          final boolean isReturned = false;
          final Statement s = ds.createStatement();
          final Statement s2 = ds.createStatement();
-         double SalesTaxRate = 0.0;
-         double WHTaxRate = 0.0;
+         double sales_tax_amount_f = 0.0;
+         double wh_tax_amount_f = 0.0;
          boolean isValid = false;
          String CreatedOnDate = "";
          String DistributorID = "";
@@ -40,16 +40,16 @@ public class SalesPosting
          final ResultSet rs = s.executeQuery("select * from inventory_sales_invoices where id = " + InvoiceID);
          if (rs.first()) {
              isValid = true;
-             SalesTaxRate = rs.getDouble("sales_tax_rate");
-             WHTaxRate = rs.getDouble("wh_tax_rate");
+             sales_tax_amount_f = rs.getDouble("sales_tax_amount");
+             wh_tax_amount_f = rs.getDouble("wh_tax_amount");
              CreatedOnDate = rs.getString("created_on");
              DistributorID = rs.getString("distributor_id");
              OrderID = rs.getString("order_id");
              BookedBy = rs.getString("booked_by");
              //System.out.println("replace into inventory_sales_adjusted (id, uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_rate, wh_tax_rate, adjusted_on, adjusted_by, beat_plan_id, brand_discount_amount) values (" + InvoiceID + ", " + rs.getString("uvid") + ", " + rs.getString("order_id") + ", '" + rs.getString("created_on") + "', " + rs.getString("created_by") + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("booked_by") + ", " + rs.getString("type_id") + "," + SalesTaxRate + ", " + WHTaxRate + ", now(), " + UserID + ", " + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount")+" ) ");
-             s2.executeUpdate("replace into inventory_sales_adjusted (id, uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_rate, wh_tax_rate, adjusted_on, adjusted_by, beat_plan_id, brand_discount_amount) values (" + InvoiceID + ", " + rs.getString("uvid") + ", " + rs.getString("order_id") + ", '" + rs.getString("created_on") + "', " + rs.getString("created_by") + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("booked_by") + ", " + rs.getString("type_id") + "," + SalesTaxRate + ", " + WHTaxRate + ", now(), " + UserID + ", " + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount")+" ) ");
+             s2.executeUpdate("replace into inventory_sales_adjusted (id, uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_amount, wh_tax_amount, adjusted_on, adjusted_by, beat_plan_id, brand_discount_amount) values (" + InvoiceID + ", " + rs.getString("uvid") + ", " + rs.getString("order_id") + ", '" + rs.getString("created_on") + "', " + rs.getString("created_by") + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("booked_by") + ", " + rs.getString("type_id") + "," + sales_tax_amount_f + ", " + wh_tax_amount_f + ", now(), " + UserID + ", " + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount")+" ) ");
              //System.out.println("update inventory_sales_adjusted isa set order_created_on_date = (select date(created_on) from mobile_order where id = " + rs.getString("order_id") + ") where isa.id = " + InvoiceID);
-             s2.executeUpdate("update inventory_sales_adjusted isa set order_created_on_date = (select date(created_on) from mobile_order where id = " + rs.getString("order_id") + ") where isa.id = " + InvoiceID);
+             s2.executeUpdate("update inventory_sales_adjusted isa set order_created_on_date = (select date(mobile_timestamp) from mobile_order where id = " + rs.getString("order_id") + ") where isa.id = " + InvoiceID);
            //  System.out.println("update inventory_sales_adjusted isa set created_on_date = date('" + rs.getString("created_on") + "') where isa.id = " + InvoiceID);
              s2.executeUpdate("update inventory_sales_adjusted isa set created_on_date = date('" + rs.getString("created_on") + "') where isa.id = " + InvoiceID);
          }
@@ -59,15 +59,19 @@ public class SalesPosting
              double InvoiceAmount = 0.0;
              double InvoiceWHTaxAmount = 0.0;
              double InvoiceNetAmount = 0.0;
-            // System.out.println("SELECT isip.discount, isip.product_id, isip.is_promotion, ipv.unit_per_sku, ipv.unit_per_catron, ipv.liquid_in_ml, isip.product_id,  isip.rate_raw_cases, isip.rate_units, isip.total_units units_sold, ifnull((select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from inventory_sales_dispatch_adjusted_products isdap where isdap.invoice_id = " + InvoiceID + ") tab1 where tab1.product_id = isip.product_id and tab1.promotion_id = ifnull(isip.promotion_id,0) " + "),0) units_returned, isip.promotion_id, isip.hand_discount_rate, isip.hand_discount_id, ipv.package_id, ipv.brand_id, ipv.lrb_type_id FROM inventory_sales_invoices_products  isip join inventory_products_view ipv on isip.product_id = ipv.product_id where isip.id = " + InvoiceID);
-             final ResultSet rs2 = s.executeQuery("SELECT isip.discount, isip.product_id, isip.is_promotion, ipv.unit_per_sku, ipv.unit_per_catron, ipv.liquid_in_ml, isip.product_id,  isip.rate_raw_cases, isip.rate_units, isip.total_units units_sold, ifnull((select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from inventory_sales_dispatch_adjusted_products isdap where isdap.invoice_id = " + InvoiceID + ") tab1 where tab1.product_id = isip.product_id and tab1.promotion_id = ifnull(isip.promotion_id,0) " + "),0) units_returned, isip.promotion_id, isip.hand_discount_rate, isip.hand_discount_id, ipv.package_id, ipv.brand_id, ipv.lrb_type_id FROM inventory_sales_invoices_products  isip join inventory_products_view ipv on isip.product_id = ipv.product_id where isip.id = " + InvoiceID);
+             System.out.println("SELECT isip.net_amount,isip.price_discount_id, isip.price_discount, isip.price_discount_amount, isip.is_percentage_discount, isip.is_with_tax_discount, isip.wh_tax_amount, isip.sales_tax_amount, isip.product_id, isip.is_promotion, ipv.unit_per_sku, ipv.unit_per_catron, ipv.liquid_in_ml, isip.product_id,  isip.rate_raw_cases, isip.rate_units, isip.total_units units_sold, ifnull((select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from inventory_sales_dispatch_adjusted_products isdap where isdap.invoice_id = " + InvoiceID + ") tab1 where tab1.product_id = isip.product_id and tab1.promotion_id = ifnull(isip.promotion_id,0) " + "),0) units_returned, isip.promotion_id, isip.hand_discount_rate, isip.hand_discount_id, ipv.package_id, ipv.brand_id, ipv.lrb_type_id FROM inventory_sales_invoices_products  isip join inventory_products_view ipv on isip.product_id = ipv.product_id where isip.id = " + InvoiceID);
+             final ResultSet rs2 = s.executeQuery("SELECT isip.net_amount,isip.price_discount_id, isip.price_discount, isip.price_discount_amount, isip.is_percentage_discount, isip.is_with_tax_discount, isip.wh_tax_amount, isip.sales_tax_amount, isip.product_id, isip.is_promotion, ipv.unit_per_sku, ipv.unit_per_catron, ipv.liquid_in_ml, isip.product_id,  isip.rate_raw_cases, isip.rate_units, isip.total_units units_sold, ifnull((select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from inventory_sales_dispatch_adjusted_products isdap where isdap.invoice_id = " + InvoiceID + ") tab1 where tab1.product_id = isip.product_id and tab1.promotion_id = ifnull(isip.promotion_id,0) " + "),0) units_returned, isip.promotion_id, isip.hand_discount_rate, isip.hand_discount_id, ipv.package_id, ipv.brand_id, ipv.lrb_type_id FROM inventory_sales_invoices_products  isip join inventory_products_view ipv on isip.product_id = ipv.product_id where isip.id = " + InvoiceID);
              while (rs2.next()) {
                  final int LRBTypeID = rs2.getInt("lrb_type_id");
                  final int PackageID = rs2.getInt("package_id");
                  final int BrandID = rs2.getInt("brand_id");
                  final String PromotionID = rs2.getString("promotion_id");
                  final int ProductID = rs2.getInt("product_id");
-                 final double ProductDiscount = rs2.getDouble("discount");
+                 int price_discount_id = rs2.getInt("price_discount_id");
+                 double price_discount = rs2.getDouble("price_discount");
+                 double price_discount_amount = rs2.getDouble("price_discount_amount");
+                 int is_percentage_discount = rs2.getInt("is_percentage_discount");
+                 int is_with_tax_discount = rs2.getInt("is_with_tax_discount");
                  final int UnitsPerSKU = rs2.getInt("unit_per_sku");
                  final long LiquidInMLPerUnit = rs2.getLong("liquid_in_ml");
                  final int TotalUnits = rs2.getInt("units_sold") - rs2.getInt("units_returned");
@@ -86,26 +90,23 @@ public class SalesPosting
                      if (HandDiscountID != 0L) {
                          HandDiscountIDInsert = new StringBuilder().append(HandDiscountID).toString();
                      }
+                     
+                     final double wh_tax_amount = rs2.getDouble("wh_tax_amount");
+                     final double sales_tax_amount = rs2.getDouble("sales_tax_amount");
                      final double AmountRawCases = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(RawCases * RateRawCase));
                      final double AmountUnits = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(Units * RateUnit));
                      final double TotalAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(AmountRawCases + AmountUnits));
-                     double WHTaxAmount = 0.0;
-                 //    if (LRBTypeID == 5 || LRBTypeID == 6) {
-                         WHTaxAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(TotalAmount * WHTaxRate / 100.0));
-//                     }
-//                     else {
-//                         WHTaxRate = 0.0;
-//                     }
-                     final double NetAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(TotalAmount + WHTaxAmount));
+                   
+                     final double NetAmount = rs2.getDouble("net_amount");
                      final int isPromotion = rs2.getInt("is_promotion");
                      if (isPromotion == 0) {
                          InvoiceAmount += TotalAmount;
-                         InvoiceWHTaxAmount += WHTaxAmount;
+                         InvoiceWHTaxAmount += sales_tax_amount + wh_tax_amount;
                          InvoiceNetAmount += NetAmount;
                      }
                      ifProductExists = true;
-                   //  System.out.println("insert into inventory_sales_adjusted_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, discount, wh_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, cache_created_on_date, cache_distributor_id, cache_package_id, cache_brand_id, cache_order_id, cache_booked_by, cache_units_per_sku, cache_lrb_type_id) values (" + InvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + ProductDiscount + ", " + WHTaxAmount + " ," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", date('" + CreatedOnDate + "'), " + DistributorID + ", " + PackageID + ", " + BrandID + ", " + OrderID + ", " + BookedBy + "," + UnitsPerSKU + ", " + LRBTypeID + ")  ");
-                     s2.executeUpdate("insert into inventory_sales_adjusted_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, discount, wh_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, cache_created_on_date, cache_distributor_id, cache_package_id, cache_brand_id, cache_order_id, cache_booked_by, cache_units_per_sku, cache_lrb_type_id) values (" + InvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + ProductDiscount + ", " + WHTaxAmount + " ," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", date('" + CreatedOnDate + "'), " + DistributorID + ", " + PackageID + ", " + BrandID + ", " + OrderID + ", " + BookedBy + "," + UnitsPerSKU + ", " + LRBTypeID + ")  ");
+                     System.out.println("insert into inventory_sales_adjusted_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, wh_tax_amount,  sales_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, cache_created_on_date, cache_distributor_id, cache_package_id, cache_brand_id, cache_order_id, cache_booked_by, cache_units_per_sku, cache_lrb_type_id) values (" + InvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", "  + price_discount_id+ ", " + price_discount + ", " + price_discount_amount + ", " + is_percentage_discount + ", " + is_with_tax_discount+", " + wh_tax_amount +","+  sales_tax_amount + " ," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", date('" + CreatedOnDate + "'), " + DistributorID + ", " + PackageID + ", " + BrandID + ", " + OrderID + ", " + BookedBy + "," + UnitsPerSKU + ", " + LRBTypeID + ")  ");
+                     s2.executeUpdate("insert into inventory_sales_adjusted_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, wh_tax_amount,  sales_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, cache_created_on_date, cache_distributor_id, cache_package_id, cache_brand_id, cache_order_id, cache_booked_by, cache_units_per_sku, cache_lrb_type_id) values (" + InvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + price_discount_id+ ", " + price_discount + ", " + price_discount_amount + ", " + is_percentage_discount + ", " + is_with_tax_discount+", " + wh_tax_amount +","+  sales_tax_amount + " ," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", date('" + CreatedOnDate + "'), " + DistributorID + ", " + PackageID + ", " + BrandID + ", " + OrderID + ", " + BookedBy + "," + UnitsPerSKU + ", " + LRBTypeID + ")  ");
 
                
                  
@@ -113,8 +114,8 @@ public class SalesPosting
                  InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));
                  InvoiceWHTaxAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceWHTaxAmount));
                  InvoiceNetAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceNetAmount));
-                 final double TotalAmountExSalesTax = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount / (SalesTaxRate + 100.0) * 100.0));
-                 final double SalesTaxAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount - TotalAmountExSalesTax));
+                // final double TotalAmountExSalesTax = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount / (SalesTaxRate + 100.0) * 100.0));
+                // final double SalesTaxAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount - TotalAmountExSalesTax));
                  String InoviceTotalAmountString = new StringBuilder(String.valueOf(InvoiceNetAmount)).toString();
                  if (InoviceTotalAmountString.indexOf(".") != -1) {
                      final double Fraction = Utilities.parseDouble(InoviceTotalAmountString.substring(InoviceTotalAmountString.indexOf("."), InoviceTotalAmountString.length()));
@@ -125,7 +126,7 @@ public class SalesPosting
                  }
                  final double FractionAmount = Utilities.parseDouble(InoviceTotalAmountString) - InvoiceNetAmount;
                //  System.out.println("update inventory_sales_adjusted set invoice_amount = " + InvoiceAmount + ", sales_tax_amount  = " + SalesTaxAmount + ", wh_tax_amount = " + InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount + ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount) + ", net_amount = " + InoviceTotalAmountString + " where id = " + InvoiceID);
-                s2.executeUpdate("update inventory_sales_adjusted set invoice_amount = " + InvoiceAmount + ", sales_tax_amount  = " + SalesTaxAmount + ", wh_tax_amount = " + InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount + ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount) + ", net_amount = " + InoviceTotalAmountString + " where id = " + InvoiceID);
+                s2.executeUpdate("update inventory_sales_adjusted set invoice_amount = " + InvoiceAmount + ", sales_tax_amount  = " + sales_tax_amount_f + ", wh_tax_amount = " + wh_tax_amount_f + ", total_amount = " + InvoiceNetAmount + ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount) + ", net_amount = " + InoviceTotalAmountString + " where id = " + InvoiceID);
                //  System.out.println("update inventory_sales_adjusted_products isa set cache_order_created_on_date = (select date(created_on) from mobile_order where id = " + OrderID + ") where isa.id = " + InvoiceID);
                 s2.executeUpdate("update inventory_sales_adjusted_products isa set cache_order_created_on_date = (select date(created_on) from mobile_order where id = " + OrderID + ") where isa.id = " + InvoiceID);
              }
@@ -184,8 +185,8 @@ public class SalesPosting
          final boolean isReturned = false;
          final Statement s = ds.createStatement();
          final Statement s2 = ds.createStatement();
-         double SalesTaxRate = 0.0;
-         double WHTaxRate = 0.0;
+         double sales_tax_amount = 0.0;
+         double wh_tax_amount = 0.0;
          boolean isValid = false;
          long outletId=0, orderBooker = 0;
          final ResultSet rs = s.executeQuery("select * from mobile_order where id = " + OrderID);
@@ -193,11 +194,11 @@ public class SalesPosting
         	 outletId=rs.getLong("outlet_id");
         	 orderBooker=rs.getLong("created_by");
              isValid = true;
-             SalesTaxRate = rs.getDouble("sales_tax_rate");
-             WHTaxRate = rs.getDouble("wh_tax_rate");
+             sales_tax_amount = rs.getDouble("sales_tax_amount");
+             wh_tax_amount = rs.getDouble("wh_tax_amount");
              s2.executeUpdate("delete from inventory_sales_invoices where order_id = " + OrderID);
-            System.out.println("insert into inventory_sales_invoices (uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_rate, wh_tax_rate, beat_plan_id, brand_discount_amount) values (" + UVID + ", " + OrderID + ", now(), " + UserID + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("created_by") + ", 3," + SalesTaxRate + ", " + WHTaxRate + "," + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount") + ")");
-            s2.executeUpdate("insert into inventory_sales_invoices (uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_rate, wh_tax_rate, beat_plan_id, brand_discount_amount) values (" + UVID + ", " + OrderID + ", now(), " + UserID + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("created_by") + ", 3," + SalesTaxRate + ", " + WHTaxRate + "," + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount") + ")");
+            System.out.println("insert into inventory_sales_invoices (uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_amount, wh_tax_amount, beat_plan_id, brand_discount_amount) values (" + UVID + ", " + OrderID + ", now(), " + UserID + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("created_by") + ", 3," + sales_tax_amount + ", " + wh_tax_amount + "," + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount") + ")");
+            s2.executeUpdate("insert into inventory_sales_invoices (uvid, order_id, created_on, created_by, outlet_id, distributor_id, region_id, booked_by, type_id, sales_tax_amount, wh_tax_amount, beat_plan_id, brand_discount_amount) values (" + UVID + ", " + OrderID + ", now(), " + UserID + ", " + rs.getString("outlet_id") + ", " + rs.getString("distributor_id") + ", " + rs.getString("region_id") + ", " + rs.getString("created_by") + ", 3," + sales_tax_amount + ", " + wh_tax_amount + "," + rs.getString("beat_plan_id") + ", "+rs.getDouble("brand_discount_amount") + ")");
          }
          if (isValid) {
              long SaleInvoiceID = 0L;
@@ -220,12 +221,16 @@ public class SalesPosting
              double InvoiceNetAmount = 0.0;
              final double InvoicePromotionAmount = 0.0;
              int LrbTypeID = 0;
-             final ResultSet rs3 = s.executeQuery("SELECT mop.discount, mop.wh_tax_amount, mop.sales_tax_amount, mop.price_discount , mop.rate_raw_cases, mop.product_id, mop.is_promotion, ipv.unit_per_sku, ipv.liquid_in_ml, mop.product_id,  mop.rate_raw_cases, mop.rate_units, mop.total_units units_sold, mop.promotion_id, mop.hand_discount_rate, mop.hand_discount_id, (select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from mobile_order_products_backorder mopb where mopb.id = " + OrderID + ") tab1 where tab1.product_id = mop.product_id and tab1.promotion_id = ifnull(mop.promotion_id,0)" + ") units_returned,ipv.lrb_type_id FROM mobile_order_products mop join inventory_products_view ipv on mop.product_id = ipv.product_id where mop.id = " + OrderID);
+             final ResultSet rs3 = s.executeQuery("SELECT  mop.net_amount,mop.price_discount_id, mop.price_discount, mop.price_discount_amount, mop.is_percentage_discount, mop.is_with_tax_discount, mop.wh_tax_amount, mop.sales_tax_amount, mop.rate_raw_cases, mop.product_id, mop.is_promotion, ipv.unit_per_sku, ipv.liquid_in_ml, mop.product_id,  mop.rate_raw_cases, mop.rate_units, mop.total_units units_sold, mop.promotion_id, mop.hand_discount_rate, mop.hand_discount_id, (select tab1.total_units from (select product_id, total_units, ifnull(promotion_id,0) promotion_id from mobile_order_products_backorder mopb where mopb.id = " + OrderID + ") tab1 where tab1.product_id = mop.product_id and tab1.promotion_id = ifnull(mop.promotion_id,0)" + ") units_returned,ipv.lrb_type_id FROM mobile_order_products mop join inventory_products_view ipv on mop.product_id = ipv.product_id where mop.id = " + OrderID);
              while (rs3.next()) {
                  final String PromotionID = rs3.getString("promotion_id");
                  final int ProductID = rs3.getInt("product_id");
-                 final double Discount = rs3.getDouble("discount");
-                 final double ProductDiscount = rs3.getDouble("price_discount");
+                 int price_discount_id = rs3.getInt("price_discount_id");
+                 double price_discount = rs3.getDouble("price_discount");
+                 double price_discount_amount = rs3.getDouble("price_discount_amount");
+                 int is_percentage_discount = rs3.getInt("is_percentage_discount");
+                 int is_with_tax_discount = rs3.getInt("is_with_tax_discount");
+                 
                  final int UnitsPerSKU = rs3.getInt("unit_per_sku");
                  final long LiquidInMLPerUnit = rs3.getLong("liquid_in_ml");
                  LrbTypeID = rs3.getInt("lrb_type_id");
@@ -268,7 +273,7 @@ public class SalesPosting
                     
                      
                     
-                     final double NetAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(TotalAmount +  wh_tax + saleTax));
+                     final double NetAmount = rs3.getDouble("net_amount");
                      final int isPromotion = rs3.getInt("is_promotion");
                      if (isPromotion == 0) {
                          InvoiceAmount += TotalAmount;
@@ -276,8 +281,8 @@ public class SalesPosting
                          InvoiceSalesTaxAmount += saleTax;
                          InvoiceNetAmount += NetAmount;
                      }
-                     System.out.println("insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, price_discount, discount, wh_tax_amount,sales_tax_amount,net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, salesTax) values (" + SaleInvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + ProductDiscount + ", "+Discount+", " + wh_tax + " ," + saleTax + "," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", "+saleTax+")  ");
-                     s2.executeUpdate("insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, price_discount, discount, wh_tax_amount,sales_tax_amount,net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, salesTax) values (" + SaleInvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + ProductDiscount + ", "+Discount+", " + wh_tax + " ," + saleTax + "," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", "+saleTax+")  ");
+                     System.out.println("insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, wh_tax_amount,sales_tax_amount,net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, salesTax) values (" + SaleInvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + price_discount_id+ ", " + price_discount + ", " + price_discount_amount + ", " + is_percentage_discount + ", " + is_with_tax_discount+", " + wh_tax + " ," + saleTax + "," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", "+saleTax+")  ");
+                     s2.executeUpdate("insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, wh_tax_amount,sales_tax_amount,net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id, salesTax) values (" + SaleInvoiceID + ", " + ProductID + ", " + RawCases + ", " + Units + ", " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", " + price_discount_id+ ", " + price_discount + ", " + price_discount_amount + ", " + is_percentage_discount + ", " + is_with_tax_discount+", " + wh_tax + " ," + saleTax + "," + NetAmount + ", " + isPromotion + ", " + PromotionID + "," + HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert + ", "+saleTax+")  ");
                  }
              }
              InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));

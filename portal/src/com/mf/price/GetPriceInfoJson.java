@@ -92,7 +92,7 @@ public class GetPriceInfoJson {
 			Statement s1 = ds.createStatement();
 
 			ResultSet rstPriceDisc = s.executeQuery(
-					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=1");
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.price_discount_id where ipd.id=1");
 			while (rstPriceDisc.next()) {
 
 				int price_discount_id = rstPriceDisc.getInt("id");
@@ -131,9 +131,9 @@ public class GetPriceInfoJson {
 			Statement s1 = ds.createStatement();
 
 			System.out.println(
-					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.price_discount_id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
 			ResultSet rstPriceDisc = s.executeQuery(
-					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_price_discount ipd join inventory_price_discount_products ipdp on ipd.id=ipdp.price_discount_id where curdate() BETWEEN valid_from AND valid_to and is_active=1");
 			while (rstPriceDisc.next()) {
 
 				int price_discount_id = rstPriceDisc.getInt("id");
@@ -146,7 +146,7 @@ public class GetPriceInfoJson {
 					PriceDiscount priceDiscount = new PriceDiscount(price_discount_id,
 							rstPriceDisc.getString("discount_name"), rstPriceDiscProducts.getInt("product_id"),
 							rstPriceDiscProducts.getDouble("discount_value"),
-							rstPriceDiscProducts.getInt("is_percentage"), rstPriceDiscProducts.getInt("is_with_tax"));
+							((rstPriceDiscProducts.getInt("is_percentage") == 1) ?0 : 1 ), rstPriceDiscProducts.getInt("is_with_tax"));
 					priceDiscountArray.add(priceDiscount);
 
 				}

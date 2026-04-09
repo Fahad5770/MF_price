@@ -270,7 +270,7 @@
 										"SELECT isip.product_id,isip.raw_cases,isip.net_amount,isip.id,isip.hand_discount_amount ,isip.wh_tax_amount, isip.product_id, ipv.sap_code, ipv.package_id, ipv.package_label, ipv.brand_id, ipv.brand_label, isip.total_units, isip.rate_units, isip.total_amount, isip.is_promotion, ipv.unit_per_sku,isip.hand_discount_amount, ipv.lrb_type_id FROM inventory_sales_invoices_products isip, inventory_products_view ipv where isip.product_id=ipv.product_id and isip.id="
 												+ InvoiceID + " order by isip.is_promotion, ipv.package_label, ipv.brand_label"); */
 								ResultSet rs2 = s2.executeQuery(
-										"SELECT isip.product_id,isip.raw_cases,isip.net_amount,isip.sales_tax_amount,isip.id,isip.hand_discount_amount ,isip.wh_tax_amount, isip.product_id, ipv.sap_code, ipv.package_id, ipv.package_label, ipv.brand_id, ipv.brand_label, isip.rate_raw_cases, isip.total_units, isip.rate_units, isip.total_amount, isip.is_promotion, ipv.unit_per_sku,isip.hand_discount_amount, ipv.lrb_type_id FROM inventory_sales_invoices_products isip, inventory_products_view ipv where isip.product_id=ipv.product_id and isip.id="
+										"SELECT isip.price_discount_amount,isip.price_discount,isip.income_tax_amount,isip.product_id,isip.raw_cases,isip.net_amount,isip.sales_tax_amount,isip.id,isip.hand_discount_amount ,isip.wh_tax_amount, isip.product_id, ipv.sap_code, ipv.package_id, ipv.package_label, ipv.brand_id, ipv.brand_label, isip.rate_raw_cases, isip.total_units, isip.rate_units, isip.total_amount, isip.is_promotion, ipv.unit_per_sku,isip.hand_discount_amount, ipv.lrb_type_id FROM inventory_sales_invoices_products isip, inventory_products_view ipv where isip.product_id=ipv.product_id and isip.id="
 												+ InvoiceID + " order by isip.is_promotion, ipv.package_label, ipv.brand_label");
 								while (rs2.next()) {
 									int PackageID = rs2.getInt("package_id");
@@ -289,36 +289,28 @@
 									int product_id = rs2.getInt("product_id");
 									
 									
-									double WHTax = rs2.getDouble("wh_tax_amount");
+									double IncomeTax = rs2.getDouble("income_tax_amount");
 									double SalesTax = rs2.getDouble("sales_tax_amount");
 									if(IsPromotion==1){
 										raw_cases=0;
 									}
 									
-									double Tax = WHTax+SalesTax;
+									double Tax = IncomeTax+SalesTax;
 									
-									if(Tax==0 && IsPromotion==0){
-										ResultSet rsTax = s3.executeQuery(
-												"select wh_tax_amount,sales_tax_amount from mobile_order_products where id="+rs.getLong("order_id")+" and product_id="+product_id);
-									if(rsTax.first()){
-										Tax = rsTax.getDouble("wh_tax_amount") +rsTax.getDouble("sales_tax_amount");
-									}
-									}
+									
 									
 									
 									totalTax += Tax;
-									double PriceDiscounts[] = Product.getSellingPrice_2(rs2.getInt("product_id"), OutletID);
+								
 									//double Discount = rs2.getDouble("hand_discount_amount");
 									//System.out.println("");
-									double PriceDiscount = PriceDiscounts[2] * raw_cases;
+									double price_discount_amount = rs2.getDouble("price_discount_amount");
 									
-									double SingleDiscount = PriceDiscounts[2];
+								//	double SingleDiscount = rs2.getDouble("price_discount");
 									
 									int ProductID = rs2.getInt("product_id");
 
-									double HandToHandDisc = rs2.getDouble("hand_discount_amount");
-
-									TotalAmountHandDisc += HandToHandDisc;
+								
 									//System.out.println("HandToHandDisc "+HandToHandDisc);
 									////////Updated patch by Zulqurnan on 26/10/2017 - for price list rates
 
@@ -366,9 +358,9 @@
 
 							
 										
-										double discount= HandToHandDisc + PriceDiscount;
-										TotalAmountHandDisc +=discount;
-										totalDiscount += PriceDiscount;
+									
+										TotalAmountHandDisc +=price_discount_amount;
+										totalDiscount += price_discount_amount;
 						%>
 						<tr>
 							<td class="formattedRow"><%=ProductCode%></td>
@@ -380,20 +372,20 @@
 								<%if (IsPromotion == 0) { %>
 								
 							<td class="formattedRow"
-								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat((Rate/*+SingleDiscount*/))%></td>
+								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat((Rate))%></td>
 							<%-- Rate --%>
 							<td class="formattedRow"
-								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat((Rate * raw_cases)/*+PriceDiscount*/)%></td>
+								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(rs2.getDouble("total_amount"))%></td>
 							<%-- NetAmount --%>
 							<!-- 	<td class="formattedRow"
 								style="text-align: right; padding-right: 5px;"></td> -->
 							<td class="formattedRow"
-								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(PriceDiscount)%></td>
+								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(price_discount_amount)%></td>
 							<td class="formattedRow"
 								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(Tax)%></td>
 							<%-- NetAmount --%>
 							<td class="formattedRow"
-								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat((Rate * raw_cases) + Tax)%></td>
+								style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(NetAmount)%></td>
 							<%-- NetAmount --%>
 							<%} %>
 
@@ -447,7 +439,7 @@
 						<tr>
 							<td colspan="7" style="text-align: right; padding-right: 5px">Grand
 								Total:</td>
-							<td style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(TotalAmountBase)%></td>
+							<td style="text-align: right; padding-right: 5px;"><%=Utilities.getDisplayCurrencyFormat(TotalAmountBase )%></td>
 						</tr>
 
 						<tr>
@@ -499,7 +491,7 @@
 							<td <%//FinalNetAmount = FinalNetAmount + taxAmount;
 					
 							%>
-							style="text-align: right; padding-right: 5px; border: 1px solid #000"><b><%=Utilities.getDisplayCurrencyFormat(Math.round(( (TotalAmountBase + totalTax) - totalDiscount)))%></b></td>
+							style="text-align: right; padding-right: 5px; border: 1px solid #000"><b><%=Utilities.getDisplayCurrencyFormat(Math.round(TotalAmountBase + totalTax - totalDiscount))%></b></td>
 						</tr>
 
 					</table>

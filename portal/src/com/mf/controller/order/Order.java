@@ -143,7 +143,7 @@ public class Order implements IOrder {
 					}
 					System.out.println("heer 3");
 					double total_diacount = discount_rate * (double) quantity;
-					if (is_percentag == 1) {
+					if (is_percentag == 2) {
 					 total_diacount = (AmountRawCases * discount_rate) / 100;
 						
 					}
@@ -223,7 +223,7 @@ public class Order implements IOrder {
 							Product PromotionProduct = new Product(1, PromotionProducts[i].PACKAGE_ID, BrandID);
 							ProProductID = PromotionProduct.PRODUCT_ID;
 
-							double rates[] = Product.getSellingPrice_2(PromotionProduct.SAP_CODE, OReq.getOutletId());
+							double rates[] = Product.getSellingPrice_2(PromotionProduct.SAP_CODE, OReq.getOutletId(), OReq.getUserId());
 							ProSellingPriceRawCase = rates[0];
 							ProSellingPriceUnit = rates[1];
 							ProLiquidInML = PromotionProduct.LIQUID_IN_ML;

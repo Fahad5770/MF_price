@@ -251,12 +251,12 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 										double PackwiseTotalOrder =0;
 										double QtyTotalOrder=0;
 										double QtyTotaldiscount=0;
-										
-										ResultSet rs323 = s2.executeQuery("SELECT sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount, ipv.unit_per_sku, sum(mop.price_discount*raw_cases) price_discount FROM mobile_order mo, mobile_order_products mop, inventory_products_view ipv where mo.id = mop.id and mop.product_id=ipv.product_id and mo.id in ("+OrderIDsQuery+") and ipv.package_id="+PackageID+" and ipv.category_id = 1 "+WhereDistributors+"");
+										System.out.println("SELECT sum(CASE WHEN is_percentage_discount = 2  THEN  ROUND((mop.total_amount * mop.price_discount / 100),2) ELSE mop.price_discount END) AS calculated_discount, sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount, ipv.unit_per_sku FROM mobile_order mo, mobile_order_products mop, inventory_products_view ipv where mo.id = mop.id and mop.product_id=ipv.product_id and mo.id in ("+OrderIDsQuery+") and ipv.package_id="+PackageID+" and ipv.category_id = 1 "+WhereDistributors+"");
+										ResultSet rs323 = s2.executeQuery("SELECT sum(CASE WHEN is_percentage_discount = 2  THEN   ROUND((mop.total_amount * mop.price_discount / 100),2) ELSE mop.price_discount END) AS calculated_discount, sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount, ipv.unit_per_sku FROM mobile_order mo, mobile_order_products mop, inventory_products_view ipv where mo.id = mop.id and mop.product_id=ipv.product_id and mo.id in ("+OrderIDsQuery+") and ipv.package_id="+PackageID+" and ipv.category_id = 1 "+WhereDistributors+"");
 										if(rs323.first()){
 											PackwiseTotalOrder = rs323.getDouble("amount");
 											QtyTotalOrder = rs323.getDouble("bottles");
-											QtyTotaldiscount = rs323.getDouble("price_discount");
+											QtyTotaldiscount = rs323.getDouble("calculated_discount");
 										}
 										
 										//For Sales
@@ -347,7 +347,7 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 									double TotalOrderWHTax = 0;
 									double TotalOrderNetAmount = 0;
 									
-									ResultSet rs21 = s.executeQuery("select sum(invoice_amount), sum(wh_tax_amount), sum(net_amount) from mobile_order where id in ("+OrderIDsQuery+")");
+									ResultSet rs21 = s.executeQuery("select sum(invoice_amount), sum(wh_tax_amount + sales_tax_amount), sum(net_amount) from mobile_order where id in ("+OrderIDsQuery+")");
 									if (rs21.first()){
 										TotalOrderAmount = rs21.getDouble(1);
 										TotalOrderWHTax = rs21.getDouble(2);
@@ -360,30 +360,30 @@ String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where
 					   	            	</tr>				
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">Amount</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderAmount));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderAmount!=0){ out.print(TotalOrderAmount);} %></td>
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" >Amount</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" ><%if (TotalInvoiceAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceAmount));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" ><%if (TotalInvoiceAmount!=0){ out.print(/*Utilities.getDisplayCurrencyFormatRounded(*/TotalInvoiceAmount)/*)*/;} %></td>
 						    		    	</tr>				
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">W.H. Tax</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderWHTax!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderWHTax));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderWHTax!=0){ out.print(/**Utilities.getDisplayCurrencyFormatRounded(*/TotalOrderWHTax)/*)*/;} %></td>
 					    					
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec">W.H. Tax</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceWHTax!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceWHTax));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceWHTax!=0){ out.print(/*Utilities.getDisplayCurrencyFormatRounded(*/TotalInvoiceWHTax)/*)*/;} %></td>
 						    		    	</tr>				
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">Disc.</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalDiscountOrdersBooked!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalDiscountOrdersBooked));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalDiscountOrdersBooked!=0){ out.print(/*Utilities.getDisplayCurrencyFormatRounded(*/TotalDiscountOrdersBooked)/*)*/;} %></td>
 						    					
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec">Disc.</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceDiscount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceDiscount));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceDiscount!=0){ out.print(/*Utilities.getDisplayCurrencyFormatRounded(*/TotalInvoiceDiscount)/*)*/;} %></td>
 						    		    	</tr>		
 											<tr style="font-size: 12px;">
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec" colspan="2">Net</td>
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderNetAmount - TotalDiscountOrdersBooked));} %></td>
 						    					
 						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec">Net</td>
-						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalInvoiceNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalInvoiceNetAmount));} %></td>
+						    					<td style="text-align:right; border-left: 1px solid #ececec; border-right: 1px solid #ececec"><%if (TotalOrderNetAmount!=0){ out.print(Utilities.getDisplayCurrencyFormatRounded(TotalOrderNetAmount));} %></td>
 						    		    	</tr>				
 						    		    			
 								</table>
