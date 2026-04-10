@@ -214,14 +214,21 @@ public class DeskSaleExecute extends HttpServlet {
 
 							double UnitRates[] = Product.getSellingPrice_2(ProductID[i], OutletID,UserID);
 							double RateRawCase = UnitRates[0];
+							double RawCaseAmount = RawCases[i] * RateRawCase;
 							double RateUnit = UnitRates[1];
 							double discountRate = UnitRates[3];
-							double discountAmount = discountRate * RawCases[i];
-							double RawCaseAmount = RawCases[i] * RateRawCase;
-							double UnitAmount = Units[i] * RateUnit;
-							int isWithTax = (int) UnitRates[4];
+						//	double discountAmount = discountRate * RawCases[i];
+							double discountAmount = discountRate *  RawCases[i];
 							int isPercentage = (int) UnitRates[5];
 							long priceDiscountId = (long) UnitRates[6];
+							if (isPercentage == 2) {
+								discountAmount = (RawCaseAmount * discountRate) / 100;
+								
+							}
+						
+							double UnitAmount = Units[i] * RateUnit;
+							int isWithTax = (int) UnitRates[4];
+							
 							
 
 							double ItemTotalAmount = Utilities.parseDouble(
