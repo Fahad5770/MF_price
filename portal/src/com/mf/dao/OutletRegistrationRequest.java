@@ -109,7 +109,10 @@ public class OutletRegistrationRequest {
 						((Number) productJson.get("product_id")).intValue(),
 						((Number) productJson.get("quantity")).intValue(), ((double) productJson.get("discount")),
 						(((Number) productJson.get("is_promotion")).intValue()),
-						((Number) productJson.get("promotion_id")).intValue());
+						((Number) productJson.get("promotion_id")).intValue(),
+						((Number) productJson.get("price_id")).intValue(),
+						((Number) productJson.get("discount_id")).intValue(),
+						((Number) productJson.get("extra_discount_id")).intValue());
 				this.products.add(orderRequestProducts);
 			}
 		}

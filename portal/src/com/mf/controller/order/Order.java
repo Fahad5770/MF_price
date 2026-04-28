@@ -60,7 +60,6 @@ public class Order implements IOrder {
 			
 
 			final OrderFunctions OF = new OrderFunctions();
-			final SalesPosting SP = new SalesPosting();
 
 			// check orde3r existence
 			if (OF.GetOrderExists(ds, OReq.getMobileRequestId())) {
@@ -372,8 +371,7 @@ public class Order implements IOrder {
 
 			ds.commit();
 
-			SP.splitOrder_2(unedited_order_id);
-			//OF.splitOrder(unedited_order_id);
+			OF.splitOrder(unedited_order_id);
 			responseModal.setSuccessResponse("Order has submitted.", new LinkedHashMap<String, Object>());
 		} catch (Exception e) {
 

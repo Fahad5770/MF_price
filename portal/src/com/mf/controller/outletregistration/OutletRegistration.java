@@ -18,6 +18,7 @@ import org.json.simple.JSONObject;
 
 import com.mf.controller.order.OrderFunctions;
 import com.mf.dao.OrderRequest.OrderRequestProducts;
+import com.mf.dao.OrderRequest;
 import com.mf.dao.OutletRegistrationRequest;
 import com.mf.interfaces.IOutletRegistration;
 import com.mf.modals.ResponseModal;
@@ -157,22 +158,19 @@ public class OutletRegistration implements IOutletRegistration {
 			final OrderFunctions OF = new OrderFunctions();
 
 			if (ORQ.getIsOrder() == 1) {
-				System.out.println("in order");
 
 				System.out.println(
-						"insert into mobile_order_unregistered (beat_plan_id, Request_id,mobile_order_no, app_version, outlet_id, created_on, created_by, uuid, platform, lat, lng, accuracy, mobile_timestamp, is_nfc,is_cooler_present,is_bar_code_present,is_spot_sale) values "
-								+ "(" + ORQ.getBeatPlanId() + "," + outletRequestId + "," + ORQ.getMobileRequestId()
-								+ ", '" + ORQ.getVersion() + "' ," + outletRequestId + ", now(), " + ORQ.getUserId()
-								+ ", '" + ORQ.getDeviceId() + "', '" + ORQ.getPlatform() + "', " + ORQ.getLat() + ", "
-								+ ORQ.getLng() + ", " + ORQ.getAccuracy() + ", '" + ORQ.getStartMobileTimestamp()
-								+ "', 0,0,0,0) ");
+						"insert into mobile_order_unregistered (app_version, mobile_order_no, outlet_id, created_on, created_by, uuid, platform, lat, lng, accuracy, mobile_timestamp, is_nfc,is_cooler_present,is_bar_code_present,is_spot_sale) values "
+								+ "('" + ORQ.getVersion() + "', " + ORQ.getMobileRequestId() + ", " + outletRequestId
+								+ ", now(), " + ORQ.getUserId() + ", '" + ORQ.getDeviceId() + "', '" + ORQ.getPlatform()
+								+ "', " + ORQ.getLat() + ", " + ORQ.getLng() + ", " + ORQ.getAccuracy() + ", '"
+								+ ORQ.getEndMobileTimestamp() + "', 0,0,0,0) ");
 				s.executeUpdate(
-						"insert into mobile_order_unregistered (beat_plan_id, Request_id,mobile_order_no, app_version, outlet_id, created_on, created_by, uuid, platform, lat, lng, accuracy, mobile_timestamp, is_nfc,is_cooler_present,is_bar_code_present,is_spot_sale) values "
-								+ "(" + ORQ.getBeatPlanId() + "," + outletRequestId + "," + ORQ.getMobileRequestId()
-								+ ", '" + ORQ.getVersion() + "' ," + outletRequestId + ", now(), " + ORQ.getUserId()
-								+ ", '" + ORQ.getDeviceId() + "', '" + ORQ.getPlatform() + "', " + ORQ.getLat() + ", "
-								+ ORQ.getLng() + ", " + ORQ.getAccuracy() + ", '" + ORQ.getStartMobileTimestamp()
-								+ "', 0,0,0,0) ");
+						"insert into mobile_order_unregistered (app_version, mobile_order_no, outlet_id, created_on, created_by, uuid, platform, lat, lng, accuracy, mobile_timestamp, is_nfc,is_cooler_present,is_bar_code_present,is_spot_sale) values "
+								+ "('" + ORQ.getVersion() + "', " + ORQ.getMobileRequestId() + ", " + outletRequestId
+								+ ", now(), " + ORQ.getUserId() + ", '" + ORQ.getDeviceId() + "', '" + ORQ.getPlatform()
+								+ "', " + ORQ.getLat() + ", " + ORQ.getLng() + ", " + ORQ.getAccuracy() + ", '"
+								+ ORQ.getEndMobileTimestamp() + "', 0,0,0,0) ");
 
 				long unedited_order_id = 0;
 				ResultSet rs2 = s.executeQuery("select LAST_INSERT_ID()");
@@ -180,82 +178,145 @@ public class OutletRegistration implements IOutletRegistration {
 					unedited_order_id = rs2.getLong(1);
 				}
 
-				double TotalInvoiceAmount = 0, TotalInvoiceWHTaxAmount = 0, TotalInvoiceSalesTaxAmount = 0,
-						TotalInvoiceNetAmount = 0, TotalPriceDiscount = 0, TotalSpotDiscountAmount = 0,
-						TotalInvoiveNetAmount = 0;
+				double TotalInvoiceAmount = 0, TotalInvoiceIncomeTaxAmount = 0, TotalInvoiceSalesTaxAmount = 0,
+						TotalInvoiceNetAmount = 0, TotalPriceDiscount = 0, TotalExtraPriceDiscount = 0, TotalInvoiveNetAmount = 0;
 
 				// Add Products
-				for (OrderRequestProducts product : ORQ.getProducts()) {
-					int quantity = product.getQuantity();
-					if (product.getIs_promotion() == 0) {
+				for (OrderRequest.OrderRequestProducts OReqProducts : ORQ.getProducts()) {
+					int quantity = OReqProducts.getQuantity();
+					if (OReqProducts.getIs_promotion() == 0) {
 
 						int UnitsPerSKU = 0;
 						long LiquidInMLPerUnit = 0;
 						System.out.println(
 								"SELECT unit_per_sku, liquid_in_ml FROM inventory_products_view where product_id = "
-										+ product.getProduct_id());
+										+ OReqProducts.getProduct_id());
 						ResultSet rs_product = s2.executeQuery(
 								"SELECT unit_per_sku, liquid_in_ml FROM inventory_products_view where product_id = "
-										+ product.getProduct_id());
+										+ OReqProducts.getProduct_id());
 						if (rs_product.first()) {
 							UnitsPerSKU = rs_product.getInt(1);
 							LiquidInMLPerUnit = rs_product.getLong(2);
 						}
-
+						System.out.println("heer 1");
 						int TotalUnits = (quantity * UnitsPerSKU);
-
+						System.out.println("heer 11111");
 						long LiquidinML = LiquidInMLPerUnit * TotalUnits;
+						System.out.println("heer 1.2323");
+						// Price
+						double RateRawCase = 0, RateUnit = 0;
+						System.out.println("select raw_case, unit from inventory_price_list_products where product_id="
+								+ OReqProducts.getProduct_id() + " and id=" + OReqProducts.getPrice_id());
+						ResultSet rsPrice = s2
+								.executeQuery("select raw_case, unit from inventory_price_list_products where product_id="
+										+ OReqProducts.getProduct_id() + " and id=" + OReqProducts.getPrice_id());
+						if (rsPrice.first()) {
+							RateRawCase = rsPrice.getDouble("raw_case");
+							RateUnit = rsPrice.getDouble("unit");
+						}
+						double AmountRawCases = RateRawCase * (double) quantity;
+						double AmountUnits = RateUnit * (double) quantity;
+						System.out.println("heer 2");
+						
+						// Extra Discount
+						double extra_discount_rate = 0;
+						int extra_disc_is_percentag = 0, extra_disc_is_with_tax = 0;
+						System.out.println(
+								"select discount_value, is_percentage,is_with_tax from inventory_extra_price_discount_products where product_id="
+										+ OReqProducts.getProduct_id() + " and price_discount_id="
+										+ OReqProducts.getExtra_discount_id());
+						ResultSet rsExtraPriceDiscount = s2.executeQuery(
+								"select discount_value, is_percentage,is_with_tax from inventory_extra_price_discount_products where product_id="
+										+ OReqProducts.getProduct_id() + " and price_discount_id="
+										+ OReqProducts.getExtra_discount_id());
+						if (rsExtraPriceDiscount.first()) {
+							extra_discount_rate = rsExtraPriceDiscount.getDouble("discount_value");
+							extra_disc_is_percentag = rsExtraPriceDiscount.getInt("is_percentage");
+							extra_disc_is_with_tax = rsExtraPriceDiscount.getInt("is_with_tax");
+						}
+						System.out.println("heer 3");
+						double total_extra_diacount = extra_discount_rate * (double) quantity;
+						if (extra_disc_is_percentag == 2) {
+							total_extra_diacount = (AmountRawCases * extra_discount_rate) / 100;	
+						}
+						
+						
+						// Discount
 
-						double UnitRates[] = Product.getSellingPrice_2(product.getProduct_id(), 1);
-						double RateRawCase = UnitRates[0];
-						double price_discount = UnitRates[2];
-						// double SpotDiscountPercentage = OReqProducts.getDiscount();
-						double SpotDiscountPercentage = 0;
+						double discount_rate = 0;
+						int is_percentag = 0, is_with_tax = 0;
+						System.out.println(
+								"select discount_value, is_percentage,is_with_tax from inventory_price_discount_products where product_id="
+										+ OReqProducts.getProduct_id() + " and price_discount_id="
+										+ OReqProducts.getDiscount_id());
+						ResultSet rsPriceDiscount = s2.executeQuery(
+								"select discount_value, is_percentage,is_with_tax from inventory_price_discount_products where product_id="
+										+ OReqProducts.getProduct_id() + " and price_discount_id="
+										+ OReqProducts.getDiscount_id());
+						if (rsPriceDiscount.first()) {
+							discount_rate = rsPriceDiscount.getDouble("discount_value");
+							is_percentag = rsPriceDiscount.getInt("is_percentage");
+							is_with_tax = rsPriceDiscount.getInt("is_with_tax");
+						}
+						System.out.println("heer 3");
+						double total_diacount = discount_rate * (double) quantity;
+						if (is_percentag == 2) {
+						 total_diacount = (AmountRawCases * discount_rate) / 100;
+							
+						}
+						System.out.println("heer 4");
+						HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax_2(OReqProducts.getProduct_id(),
+								outletRequestId);
 
-						double AmountRawCases = RateRawCase * quantity;
-						double SpotDiscountAmount = ((SpotDiscountPercentage * AmountRawCases) / 100);
+						double income_tax_rate = ProductsTax.get("income_tax"), income_tax_amount = 0,
+								sales_tax_rate = ProductsTax.get("sales_tax"), sales_tax_amount = 0;
+						System.out.println("heer 5");
+						income_tax_amount = Utilities
+								.parseDouble(Utilities.getDisplayCurrencyFormatSimple(income_tax_rate * (double) quantity));
 
-						HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(product.getProduct_id(), 1);
+						sales_tax_amount = Utilities
+								.parseDouble(Utilities.getDisplayCurrencyFormatSimple(sales_tax_rate * quantity));
 
-						double WHTaxAmount = Utilities.parseDouble(
-								Utilities.getDisplayCurrencyFormatSimple((ProductsTax.get("wh_tax") * quantity)));
-
-						double SalesTaxAmount = Utilities.parseDouble(
-								Utilities.getDisplayCurrencyFormatSimple((ProductsTax.get("income_tax") * quantity)));
-						double TotalNetAmount = Utilities.parseDouble(
-								Utilities.getDisplayCurrencyFormatSimple((AmountRawCases - SpotDiscountAmount)));
+						double TotalNetAmount = Utilities
+								.parseDouble(Utilities.getDisplayCurrencyFormatSimple((AmountRawCases)));
 						double InvoiveNetAmount = Utilities.parseDouble(Utilities
-								.getDisplayCurrencyFormatSimple((TotalNetAmount + WHTaxAmount + SalesTaxAmount)));
+								.getDisplayCurrencyFormatSimple((TotalNetAmount + sales_tax_amount + income_tax_amount - total_diacount - total_extra_diacount)));
 
 						System.out.println(
-								"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount, total_amount, wh_tax_amount, sales_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
-										+ unedited_order_id + ", " + product.getProduct_id() + ", " + quantity + ", "
-										+ quantity + ", " + quantity + ", " + TotalUnits + ", " + LiquidinML + ", "
-										+ RateRawCase + ", " + RateRawCase + ", " + AmountRawCases + ", "
-										+ price_discount + "," + +TotalNetAmount + ", " + WHTaxAmount + ","
-										+ SalesTaxAmount + "," + InvoiveNetAmount + ", 0,null, "
-										+ SpotDiscountPercentage + ", " + SpotDiscountAmount + ", null )");
-						s.executeUpdate(
-								"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount, total_amount, wh_tax_amount, sales_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
-										+ unedited_order_id + ", " + product.getProduct_id() + ", " + quantity + ", "
-										+ quantity + ", " + quantity + ", " + TotalUnits + ", " + LiquidinML + ", "
-										+ RateRawCase + ", " + RateRawCase + ", " + AmountRawCases + ", "
-										+ price_discount + ", " + +TotalNetAmount + ", " + WHTaxAmount + ","
-										+ SalesTaxAmount + "," + InvoiveNetAmount + ", 0,null, "
-										+ SpotDiscountPercentage + ", " + SpotDiscountAmount + ", null )");
+								"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id,extra_price_discount_id,extra_price_discount,extra_price_discount_amount,is_extra_percentage_discount,is_extra_with_tax_discount) values ("
+										+ unedited_order_id + ", " + OReqProducts.getProduct_id() + ", " + quantity + ", "
+										+ "0, " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
+										+ ", " + AmountRawCases + ", " + AmountUnits + "," + OReqProducts.getDiscount_id()
+										+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
+										+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
+										+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
+										+ InvoiveNetAmount + ", 0,null,"+ OReqProducts.getExtra_discount_id()
+										+ "," + extra_discount_rate + "," + total_extra_diacount + "," + extra_disc_is_percentag 
+										+ "," + extra_disc_is_with_tax + ")");
+						s2.executeUpdate(
+								"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id,extra_price_discount_id,extra_price_discount,extra_price_discount_amount,is_extra_percentage_discount,is_extra_with_tax_discount) values ("
+										+ unedited_order_id + ", " + OReqProducts.getProduct_id() + ", " + quantity + ", "
+										+ "0, " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
+										+ ", " + AmountRawCases + ", " + AmountUnits + "," + OReqProducts.getDiscount_id()
+										+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
+										+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
+										+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
+										+ InvoiveNetAmount + ", 0,null,"+ OReqProducts.getExtra_discount_id()
+										+ "," + extra_discount_rate + "," + total_extra_diacount + "," + extra_disc_is_percentag
+										+ "," + extra_disc_is_with_tax + ")");
 
 						TotalInvoiceAmount += AmountRawCases;
-						TotalPriceDiscount += price_discount;
-						TotalSpotDiscountAmount += SpotDiscountAmount;
+						TotalPriceDiscount += total_diacount;
+						TotalExtraPriceDiscount += total_extra_diacount;
 						TotalInvoiceNetAmount += TotalNetAmount;
 						TotalInvoiveNetAmount += InvoiveNetAmount;
-						TotalInvoiceWHTaxAmount = WHTaxAmount;
-						TotalInvoiceSalesTaxAmount = SalesTaxAmount;
+						TotalInvoiceIncomeTaxAmount = income_tax_amount;
+						TotalInvoiceSalesTaxAmount = sales_tax_amount;
 
 					} else {
 
-						PromotionItem PromotionProducts[] = Product.getPromotionItems(1, product.getProduct_id(),
-								quantity);
+						PromotionItem PromotionProducts[] = Product.getPromotionItems(outletRequestId,
+								OReqProducts.getProduct_id(), quantity);
 
 						for (int i = 0; i < PromotionProducts.length; i++) {
 
@@ -269,7 +330,7 @@ public class OutletRegistration implements IOutletRegistration {
 
 							int BrandID = 0;
 							int SelectedBrandID = OF.getBrandID(PromotionProducts[i].PROMOTION_ID,
-									product.getProduct_id(), product.getPromotion_id());
+									OReqProducts.getProduct_id(), OReqProducts.getPromotion_id());
 
 							if (PromotionProducts[i].BRANDS.size() > 0) {
 								BrandID = PromotionProducts[i].BRANDS.get(0);
@@ -284,43 +345,51 @@ public class OutletRegistration implements IOutletRegistration {
 								Product PromotionProduct = new Product(1, PromotionProducts[i].PACKAGE_ID, BrandID);
 								ProProductID = PromotionProduct.PRODUCT_ID;
 
-								double rates[] = Product.getSellingPrice_2(PromotionProduct.SAP_CODE, 1);
+								double rates[] = Product.getSellingPrice_2(PromotionProduct.SAP_CODE, outletRequestId, ORQ.getUserId());
 								ProSellingPriceRawCase = rates[0];
 								ProSellingPriceUnit = rates[1];
 								ProLiquidInML = PromotionProduct.LIQUID_IN_ML;
 
-								double AmountRawCases = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(
-										(RawCasesAndUnits[0] * ProSellingPriceRawCase)));
+								double AmountRawCases = Utilities.parseDouble(Utilities
+										.getDisplayCurrencyFormatSimple((RawCasesAndUnits[0] * ProSellingPriceRawCase)));
 								double AmountUnits = Utilities.parseDouble(Utilities
 										.getDisplayCurrencyFormatSimple((RawCasesAndUnits[1] * ProSellingPriceUnit)));
 
 								HashMap<String, Double> ProductsTax = AlmoizFormulas
-										.ProductsTax(product.getProduct_id(), 1);
-								double WHTaxAmount = ProductsTax.get("wh_tax");
+										.ProductsTax_2(OReqProducts.getProduct_id(), outletRequestId);
 
-								double SalesTaxAmount = ProductsTax.get("income_tax");
+								double income_tax_rate = ProductsTax.get("income_tax"), income_tax_amount = 0,
+										sales_tax_rate = ProductsTax.get("sales_tax"), sales_tax_amount = 0;
+
+								income_tax_amount = Utilities.parseDouble(
+										Utilities.getDisplayCurrencyFormatSimple(income_tax_rate * (double) quantity));
+
+								sales_tax_amount = Utilities
+										.parseDouble(Utilities.getDisplayCurrencyFormatSimple(sales_tax_rate * quantity));
 
 								double TotalAmount = Utilities.parseDouble(
 										Utilities.getDisplayCurrencyFormatSimple((AmountRawCases + AmountUnits)));
 								// double WHTaxAmount = WHTaxAmount;
-								double NetAmount = Utilities.parseDouble(
-										Utilities.getDisplayCurrencyFormatSimple((TotalAmount + WHTaxAmount)));
+								double NetAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(
+										(TotalAmount + sales_tax_amount + income_tax_amount)));
 								System.out.println(
-										"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+										"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
 												+ unedited_order_id + ", " + ProProductID + ", " + RawCasesAndUnits[0]
 												+ ", " + RawCasesAndUnits[1] + ", " + PromotionProducts[i].TOTAL_UNITS
 												+ ", " + ProLiquidInML + ", " + ProSellingPriceRawCase + ", "
-												+ ProSellingPriceUnit + ", " + AmountRawCases + ", " + AmountUnits
-												+ ", " + TotalAmount + ", " + WHTaxAmount + "," + SalesTaxAmount + " ,"
-												+ NetAmount + ", 1, " + PromotionProducts[i].PROMOTION_ID + ")  ");
-								s.executeUpdate(
-										"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+												+ ProSellingPriceUnit + ", " + AmountRawCases + ", " + AmountUnits + ", "
+												+ TotalAmount + ", " + income_tax_rate + ", " + income_tax_amount + ","
+												+ sales_tax_rate + "," + sales_tax_amount + " ," + NetAmount + ", 1, "
+												+ PromotionProducts[i].PROMOTION_ID + ")  ");
+								s2.executeUpdate(
+										"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
 												+ unedited_order_id + ", " + ProProductID + ", " + RawCasesAndUnits[0]
 												+ ", " + RawCasesAndUnits[1] + ", " + PromotionProducts[i].TOTAL_UNITS
 												+ ", " + ProLiquidInML + ", " + ProSellingPriceRawCase + ", "
-												+ ProSellingPriceUnit + ", " + AmountRawCases + ", " + AmountUnits
-												+ ", " + TotalAmount + ", " + WHTaxAmount + "," + SalesTaxAmount + " ,"
-												+ NetAmount + ", 1, " + PromotionProducts[i].PROMOTION_ID + ")  ");
+												+ ProSellingPriceUnit + ", " + AmountRawCases + ", " + AmountUnits + ", "
+												+ TotalAmount + ", " + income_tax_rate + ", " + income_tax_amount + ","
+												+ sales_tax_rate + "," + sales_tax_amount + " ," + NetAmount + ", 1, "
+												+ PromotionProducts[i].PROMOTION_ID + ")  ");
 
 							}
 
@@ -335,8 +404,7 @@ public class OutletRegistration implements IOutletRegistration {
 					double Fraction = Utilities.parseDouble(InoviceTotalAmountString
 							.substring(InoviceTotalAmountString.indexOf("."), InoviceTotalAmountString.length()));
 
-					InoviceTotalAmountString = InoviceTotalAmountString.substring(0,
-							InoviceTotalAmountString.indexOf("."));
+					InoviceTotalAmountString = InoviceTotalAmountString.substring(0, InoviceTotalAmountString.indexOf("."));
 
 					if (Fraction != 0) {
 						InoviceTotalAmountString = (Utilities.parseInt(InoviceTotalAmountString) + 1) + "";
@@ -347,21 +415,17 @@ public class OutletRegistration implements IOutletRegistration {
 				System.out.println(TotalInvoiveNetAmount);
 
 				double FractionAmount = Utilities.parseDouble(InoviceTotalAmountString) - TotalInvoiveNetAmount;
-
 				// Update prices
-
 				System.out.println("update mobile_order_unregistered set invoice_amount = " + TotalInvoiceAmount
-						+ ", sales_tax_amount  = " + TotalInvoiceSalesTaxAmount + ", wh_tax_amount = "
-						+ TotalInvoiceWHTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
+						+ ", sales_tax_amount  = " + TotalInvoiceSalesTaxAmount + ", income_tax_amount = "
+						+ TotalInvoiceIncomeTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
 						+ ", fraction_adjustment = " + FractionAmount + ", net_amount = " + InoviceTotalAmountString
-						+ ", price_discount=" + TotalPriceDiscount + ", spot_discount_amount=" + TotalSpotDiscountAmount
-						+ " where id = " + unedited_order_id);
+						+ ", price_discount=" + TotalPriceDiscount + ",extra_price_discount ="+ TotalExtraPriceDiscount + " where id = " + unedited_order_id);
 				s.executeUpdate("update mobile_order_unregistered set invoice_amount = " + TotalInvoiceAmount
 						+ ", sales_tax_amount  = " + TotalInvoiceSalesTaxAmount + ", wh_tax_amount = "
-						+ TotalInvoiceWHTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
+						+ TotalInvoiceIncomeTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
 						+ ", fraction_adjustment = " + FractionAmount + ", net_amount = " + InoviceTotalAmountString
-						+ ", price_discount=" + TotalPriceDiscount + ", spot_discount_amount=" + TotalSpotDiscountAmount
-						+ " where id = " + unedited_order_id);
+						+ ", price_discount=" + TotalPriceDiscount + ",extra_price_discount ="+ TotalExtraPriceDiscount + " where id = " + unedited_order_id);
 
 			}
 

@@ -44,10 +44,13 @@ public class Product {
 	public static double[] getSellingPrice_2(int ProductID, long OutletID, long UserID)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		Datasource ds = new Datasource();
-		double[] ret = new double[8];
+		double[] ret = new double[16];
+		//double[] ret1 = new double[8];
 		boolean isPriceFound = false;
+		boolean isExtraDiscountFound = false;
 		boolean isDiscountFound = false;
 		long PriceListID = 0L;
+		long ExtraPriceDiscountID = 0L;
 		long PriceDiscountID = 0L;
 		ds.createConnection();
 		Statement s = ds.createStatement();
@@ -57,6 +60,7 @@ public class Product {
 		int isRegister = 0;
 		long DistributorId = 0;
 		int RegionID = 0;
+		int ExtraDiscRegionID = 0;
 		// System.out.println("select is_filer, is_register from common_outlets where
 		// id=" + OutletID);
 		System.out.println("userId: " + UserID);
@@ -149,6 +153,116 @@ public class Product {
 
 		}
 
+		 System.out.println(
+					"select ipd.id, ipdg.region_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+							+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+		ResultSet rsRegionExtraDiscount = s.executeQuery(
+				"select ipd.id, ipdg.region_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+						+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+		if (rsRegionExtraDiscount.next()) {
+			ExtraDiscRegionID = rsRegionExtraDiscount.getInt("region_id");
+			ExtraPriceDiscountID = rsRegionExtraDiscount.getLong("id");
+			ret[9] = ExtraPriceDiscountID;
+			ResultSet rsDiscount = s
+					.executeQuery("select * from inventory_extra_price_discount_products where price_discount_id="
+							+ ExtraPriceDiscountID + " and product_id=" + ProductID);
+			if (rsDiscount.next()) {
+				double extradiscountValue = rsDiscount.getDouble("discount_value");
+				int isExtraWithTax = rsDiscount.getShort("is_with_tax");
+				int isExtraPercentage = rsDiscount.getShort("is_percentage");
+				ret[10] = extradiscountValue;
+				ret[11] = isExtraWithTax;
+				ret[12] = isExtraPercentage;
+				isExtraDiscountFound = true;
+			} 
+
+		}
+		
+		if(!isExtraDiscountFound) {
+
+			System.out.println(
+					"select ipd.id, ipdd.distributor_id from  inventory_extra_price_discount ipd join inventory_extra_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			ResultSet rsDistributorDiscount = s.executeQuery(
+					"select ipd.id, ipdd.distributor_id from  inventory_extra_price_discount ipd join inventory_extra_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+							+ DistributorId + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			if (rsDistributorDiscount.next()) {
+				ExtraPriceDiscountID = rsDistributorDiscount.getLong("id");
+				ret[9] = ExtraPriceDiscountID;
+				ResultSet rsExtraDiscount1 = s
+						.executeQuery("select * from inventory_extra_price_discount_products where price_discount_id="
+								+ ExtraPriceDiscountID + " and product_id=" + ProductID);
+				if (rsExtraDiscount1.next()) {
+					double extradiscountValue = rsExtraDiscount1.getDouble("discount_value");
+					int isExtraWithTax = rsExtraDiscount1.getShort("is_with_tax");
+					int isExtraPercentage = rsExtraDiscount1.getShort("is_percentage");
+					ret[10] = extradiscountValue;
+					ret[11] = isExtraWithTax;
+					ret[12] = isExtraPercentage;
+					isExtraDiscountFound = true;
+				} 
+			}
+		}
+		
+		if(!isExtraDiscountFound) {
+			
+			System.out.println(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1 "
+							+ " AND pci_sub_channel_id IN(select pic_channel_id from common_outlets where id="
+							+ OutletID + ")");
+			ResultSet rsExtraChannelDiscount = s.executeQuery(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1 "
+							+ " AND pci_sub_channel_id IN(select pic_channel_id from common_outlets where id="
+							+ OutletID + ")");
+			if(rsExtraChannelDiscount.next()) {
+				ExtraPriceDiscountID = rsExtraChannelDiscount.getLong("id");
+			ret[9] = ExtraPriceDiscountID;
+			ResultSet rsExtraDiscount2 = s
+					.executeQuery("select * from inventory_extra_price_discount_products where price_discount_id="
+							+ ExtraPriceDiscountID + " and product_id=" + ProductID);
+			if (rsExtraDiscount2.next()) {
+				double extradiscountValue = rsExtraDiscount2.getDouble("discount_value");
+				int isExtraWithTax = rsExtraDiscount2.getShort("is_with_tax");
+				int isExtraPercentage = rsExtraDiscount2.getShort("is_percentage");
+				ret[10] = extradiscountValue;
+				ret[11] = isExtraWithTax;
+				ret[12] = isExtraPercentage;
+				
+				isExtraDiscountFound = true;
+
+			}
+			}
+
+		}
+		
+		if(!isExtraDiscountFound) {
+			
+			System.out.println(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_extra_price_discount ipd join inventory_extra_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=3 and ipdp.product_id = "+ProductID);
+			ResultSet rstExtraPriceDisc = s.executeQuery(
+					"select ipd.id, ipd.discount_name, ipdp.product_id, ipdp.discount_value, ipdp.is_percentage, ipdp.is_with_tax from inventory_extra_price_discount ipd join inventory_extra_price_discount_products ipdp on ipd.id=ipdp.id where ipd.id=3 and ipdp.product_id = "+ProductID);
+			if(rstExtraPriceDisc.next()) {
+				ExtraPriceDiscountID = rstExtraPriceDisc.getLong("id");
+			ret[9] = ExtraPriceDiscountID;
+			ResultSet rsExtraDiscount2 = s
+					.executeQuery("select * from inventory_extra_price_discount_products where price_discount_id="
+							+ ExtraPriceDiscountID + " and product_id=" + ProductID);
+			if (rsExtraDiscount2.next()) {
+				double extradiscountValue = rsExtraDiscount2.getDouble("discount_value");
+				int isExtraWithTax = rsExtraDiscount2.getShort("is_with_tax");
+				int isExtraPercentage = rsExtraDiscount2.getShort("is_percentage");
+				ret[10] = extradiscountValue;
+				ret[11] = isExtraWithTax;
+				ret[12] = isExtraPercentage;
+				isExtraDiscountFound = true;
+
+			}
+			}
+		
+		
+		
+		}
+		 
 		 System.out.println(
 					"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
 							+ RegionID + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");

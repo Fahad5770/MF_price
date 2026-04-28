@@ -67,8 +67,8 @@ public class OrderFunctions implements IOrderFunctions {
 						InvoiceIncomeTaxAmount = rs2.getDouble("income_tax_amount");
 						OutletID = rs2.getLong("outlet_id");
 						System.out.println(
-								"insert into mobile_order (app_version,price_discount, mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by,brand_discount_amount, sales_tax_amount, wh_tax_amount, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id, is_spot_sale) values ('"
-										+ rs2.getString("app_version") + "'," + rs2.getString("price_discount") + ", "
+								"insert into mobile_order (app_version,price_discount, extra_price_discount, mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by,brand_discount_amount, sales_tax_amount, wh_tax_amount, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id, is_spot_sale) values ('"
+										+ rs2.getString("app_version") + "'," + rs2.getString("price_discount") + ", " + rs2.getString("extra_price_discount")+ ","
 										+ OrderSequence + rs2.getString("mobile_order_no") + ", " + OutletID + ", "
 										+ DistributorID
 										+ ", (select region_id from common_distributors where distributor_id = "
@@ -86,8 +86,8 @@ public class OrderFunctions implements IOrderFunctions {
 										+ "), (SELECT if(asm_id = 0, null,asm_id) FROM distributor_beat_plan where id = "
 										+ PJP_ID + "),'" + rs2.getString("is_spot_sale") + "' )");
 						s3.executeUpdate(
-								"insert into mobile_order (app_version,price_discount, mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by,brand_discount_amount, sales_tax_amount, wh_tax_amount, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id, is_spot_sale) values ('"
-										+ rs2.getString("app_version") + "'," + rs2.getString("price_discount") + ", "
+								"insert into mobile_order (app_version,price_discount, extra_price_discount, mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by,brand_discount_amount, sales_tax_amount, wh_tax_amount, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id, is_spot_sale) values ('"
+										+ rs2.getString("app_version") + "'," + rs2.getString("price_discount") + ", " + rs2.getString("extra_price_discount")+ ","
 										+ OrderSequence + rs2.getString("mobile_order_no") + ", " + OutletID + ", "
 										+ DistributorID
 										+ ", (select region_id from common_distributors where distributor_id = "
@@ -141,6 +141,13 @@ public class OrderFunctions implements IOrderFunctions {
 						double price_discount_amount = rs3.getDouble("price_discount_amount");
 						int is_percentage_discount = rs3.getInt("is_percentage_discount");
 						int is_with_tax_discount = rs3.getInt("is_with_tax_discount");
+						
+						int extra_price_discount_id = rs3.getInt("extra_price_discount_id");
+						double extra_price_discount = rs3.getDouble("extra_price_discount");
+						double extra_price_discount_amount = rs3.getDouble("extra_price_discount_amount");
+						int is_extra_percentage_discount = rs3.getInt("is_extra_percentage_discount");
+						int is_extra_with_tax_discount = rs3.getInt("is_extra_with_tax_discount");
+						
 						double income_tax_rate = rs3.getDouble("income_tax_rate"),
 								income_tax_amount = rs3.getDouble("income_tax_amount"),
 								sales_tax_rate = rs3.getDouble("sales_tax_rate"),
@@ -153,23 +160,23 @@ public class OrderFunctions implements IOrderFunctions {
 						ProductIDArray.add(ProductID);
 						TotalUnitsArray.add(TotalUnits * 1L);
 						System.out.println(
-								"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id,price_discount , price_discount_amount, is_percentage_discount, is_with_tax_discount, total_amount, income_tax_rate, income_tax_amount, sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+								"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id,price_discount , price_discount_amount, is_percentage_discount, is_with_tax_discount, total_amount, income_tax_rate, income_tax_amount, sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id, extra_price_discount_id,extra_price_discount , extra_price_discount_amount, is_extra_percentage_discount, is_extra_with_tax_discount) values ("
 										+ SplitOrderID + ", " + ProductID + ", " + RawCases + ", " + Units + ", "
 										+ TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", "
 										+ AmountRawCases + ", " + AmountUnits + "," + price_discount_id + ","
 										+ price_discount + " ," + price_discount_amount + ", " + is_percentage_discount
 										+ "," + is_with_tax_discount + "," + TotalAmount + ", " + income_tax_rate + ","
 										+ income_tax_amount + "," + sales_tax_rate + "," + sales_tax_amount + ","
-										+ NetAmount + ", 0, " + PromotionID + ")");
+										+ NetAmount + ", 0, " + PromotionID + ","+ extra_price_discount_id +","+ extra_price_discount +","+ extra_price_discount_amount +","+ is_extra_percentage_discount +","+ is_extra_with_tax_discount +")");
 						s3.executeUpdate(
-								"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id,price_discount , price_discount_amount, is_percentage_discount, is_with_tax_discount, total_amount, income_tax_rate, income_tax_amount, sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+								"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id,price_discount , price_discount_amount, is_percentage_discount, is_with_tax_discount, total_amount, income_tax_rate, income_tax_amount, sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id, extra_price_discount_id,extra_price_discount , extra_price_discount_amount, is_extra_percentage_discount, is_extra_with_tax_discount) values ("
 										+ SplitOrderID + ", " + ProductID + ", " + RawCases + ", " + Units + ", "
 										+ TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit + ", "
 										+ AmountRawCases + ", " + AmountUnits + "," + price_discount_id + ","
 										+ price_discount + " ," + price_discount_amount + ", " + is_percentage_discount
 										+ "," + is_with_tax_discount + "," + TotalAmount + ", " + income_tax_rate + ","
 										+ income_tax_amount + "," + sales_tax_rate + "," + sales_tax_amount + ","
-										+ NetAmount + ", 0, " + PromotionID + ")");
+										+ NetAmount + ", 0, " + PromotionID + ","+ extra_price_discount_id +","+ extra_price_discount +","+ extra_price_discount_amount +","+ is_extra_percentage_discount +","+ is_extra_with_tax_discount +")");
 						s3.executeUpdate("update mobile_order_unedited_products set is_processed = 1 where id = "
 								+ OrderID + " and product_id = " + ProductID + " and is_promotion = 0");
 					}
