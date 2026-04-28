@@ -17,12 +17,13 @@ public class OrderRequest {
 		private int promotion_id;
 		private int price_id;
 		private int discount_id;
+		private int extra_discount_id;
 
 		public OrderRequestProducts() {
 		}
 
 		public OrderRequestProducts(int product_id, int quantity, double discount, int is_promotion, int promotion_id,
-				int price_id, int discount_id) {
+				int price_id, int discount_id, int extra_discount_id) {
 			super();
 			System.out.println("Start");
 			this.product_id = product_id;
@@ -39,6 +40,8 @@ public class OrderRequest {
 			System.out.println(price_id);
 			this.discount_id = discount_id;
 			System.out.println(discount_id);
+			this.extra_discount_id = extra_discount_id;
+			System.out.println(extra_discount_id);
 		}
 
 		public int getProduct_id() {
@@ -96,12 +99,20 @@ public class OrderRequest {
 		public void setDiscount_id(int discount_id) {
 			this.discount_id = discount_id;
 		}
+		
+		public int getExtra_discount_id() {
+			return extra_discount_id;
+		}
+
+		public void setExtra_discount_id(int extra_discount_id) {
+			this.extra_discount_id = extra_discount_id;
+		}
 
 		@Override
 		public String toString() {
 			return "OrderRequestProducts [product_id=" + product_id + ", quantity=" + quantity + ", discount="
 					+ discount + ", is_promotion=" + is_promotion + ", promotion_id=" + promotion_id + ", price_id="
-					+ price_id + ", discount_id=" + discount_id + "]";
+					+ price_id + ", discount_id=" + discount_id + ", extra_discount_id=" + extra_discount_id + "]";
 		}
 
 	}
@@ -164,7 +175,8 @@ public class OrderRequest {
 						(((Number) productJson.get("is_promotion")).intValue()),
 						((Number) productJson.get("promotion_id")).intValue(),
 						((Number) productJson.get("price_id")).intValue(),
-						((Number) productJson.get("discount_id")).intValue());
+						((Number) productJson.get("discount_id")).intValue(),
+						((Number) productJson.get("extra_discount_id")).intValue());
 				this.products.add(orderRequestProducts);
 			}
 		}

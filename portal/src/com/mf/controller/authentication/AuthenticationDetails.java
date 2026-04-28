@@ -564,11 +564,38 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 		return price_disc_array;
 	}
+	
+	public JSONArray get_extra_global_price_disc(Datasource ds) {
+
+		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_extra_global_price_disc(ds);
+
+		JSONArray price_disc_array = new JSONArray();
+
+		for (PriceDiscount pd : priceDiscountList) {
+			price_disc_array.add(pd.getIntoJson());
+		}
+
+		return price_disc_array;
+	}
 
 	@Override
 	public JSONArray get_active_price_disc(Datasource ds) {
 
 		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_active_price_disc(ds);
+
+		JSONArray price_disc_array = new JSONArray();
+
+		for (PriceDiscount pd : priceDiscountList) {
+			price_disc_array.add(pd.getIntoJson());
+		}
+
+		return price_disc_array;
+	}
+	
+
+	public JSONArray get_extra_active_price_disc(Datasource ds) {
+
+		List<PriceDiscount> priceDiscountList = GetPriceInfoJson.get_extra_active_price_disc(ds);
 
 		JSONArray price_disc_array = new JSONArray();
 
@@ -592,7 +619,39 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
 								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 				ResultSet rsRegionDiscount = s.executeQuery(
-						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg. ipd.id=ipdp.price_discount_id  where region_id="
+						"select ipd.id, ipdg.region_id from inventory_price_discount ipd join inventory_price_discount_region ipdg on ipd.id=ipdg.price_discount_id  where region_id=" 
+								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsRegionDiscount.next()) {
+					LinkedHashMap<String, Object> RegionDiscount = new LinkedHashMap<>();
+
+					RegionDiscount.put("discount_id", rsRegionDiscount.getInt("id"));
+					RegionDiscount.put("region_id", rsRegionDiscount.getInt("region_id"));
+					region_discount_array.add(RegionDiscount);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
+		}
+
+		return region_discount_array;
+	}
+	
+	public JSONArray get_extra_price_disc_region(Datasource ds, int region_id) {
+
+		JSONArray region_discount_array = new JSONArray();
+
+		try {
+			if (region_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipd.id, ipdg.region_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_region ipdg on ipd.id=ipdg.price_discount_id where region_id="
+								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsRegionDiscount = s.executeQuery(
+						"select ipd.id, ipdg.region_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_region ipdg on ipd.id=ipdg.price_discount_id  where region_id="
 								+ region_id + " and  curdate() BETWEEN valid_from AND valid_to and is_active=1");
 
 				while (rsRegionDiscount.next()) {
@@ -642,6 +701,36 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 
 		return distributor_discount_array;
 	}
+	
+	public JSONArray get_extra_price_disc_channel(Datasource ds) {
+
+		JSONArray distributor_discount_array = new JSONArray();
+
+		try {
+
+			Statement s = ds.createStatement();
+
+			System.out.println(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+			ResultSet rsDistributorDiscount = s.executeQuery(
+					"select ipd.id, ipdc.pci_sub_channel_id from inventory_extra_price_discount ipd join inventory_extra_price_discount_channel ipdc on ipd.id=ipdc.price_discount_id where  curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+			while (rsDistributorDiscount.next()) {
+				LinkedHashMap<String, Object> DistributorDiscount = new LinkedHashMap<>();
+
+				DistributorDiscount.put("discount_id", rsDistributorDiscount.getInt("id"));
+				DistributorDiscount.put("channel_id", rsDistributorDiscount.getInt("pci_sub_channel_id"));
+				distributor_discount_array.add(DistributorDiscount);
+			}
+
+			s.close();
+
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
+		}
+
+		return distributor_discount_array;
+	}
 
 	@Override
 	public JSONArray get_price_disc_distributor(Datasource ds, long distributor_id) {
@@ -657,6 +746,38 @@ public class AuthenticationDetails implements IAuthenticationDetails {
 								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
 				ResultSet rsDistributorDiscount = s.executeQuery(
 						"select ipd.id, ipdd.distributor_id from  inventory_price_discount ipd join inventory_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+
+				while (rsDistributorDiscount.next()) {
+					LinkedHashMap<String, Object> DistributorDiscount = new LinkedHashMap<>();
+
+					DistributorDiscount.put("discount_id", rsDistributorDiscount.getInt("id"));
+					DistributorDiscount.put("distributor_id", rsDistributorDiscount.getInt("distributor_id"));
+					distributor_discount_array.add(DistributorDiscount);
+				}
+
+				s.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("Region Discount Error :- " + e);
+		}
+
+		return distributor_discount_array;
+	}
+	
+	public JSONArray get_extra_price_disc_distributor(Datasource ds, long distributor_id) {
+
+		JSONArray distributor_discount_array = new JSONArray();
+
+		try {
+			if (distributor_id != 0) {
+				Statement s = ds.createStatement();
+
+				System.out.println(
+						"select ipd.id, ipdd.distributor_id from  inventory_extra_price_discount ipd join inventory_extra_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
+								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
+				ResultSet rsDistributorDiscount = s.executeQuery(
+						"select ipd.id, ipdd.distributor_id from  inventory_extra_price_discount ipd join inventory_extra_price_discount_distributor ipdd on ipd.id=ipdd.price_discount_id where distributor_id in ("
 								+ distributor_id + ") and curdate() BETWEEN valid_from AND valid_to and is_active=1");
 
 				while (rsDistributorDiscount.next()) {

@@ -250,11 +250,11 @@ public class Authentication implements IAuthentication {
 			OBloginResponse.setPriceDiscountChannel(AD.get_price_disc_channel(ds));
 			
 			//Extra Discount work
-			OBloginResponse.setExtraGlobalpriceDiscount(AD.get_global_price_disc(ds));
-			OBloginResponse.setExtraActivepriceDiscount(AD.get_active_price_disc(ds));
-			OBloginResponse.setExtraPriceDiscountRegion(AD.get_price_disc_region(ds, user.getRegion_id()));
-			OBloginResponse.setExtraPriceDiscountDistribution(AD.get_price_disc_distributor(ds, user.getDistributor_id()));
-			OBloginResponse.setExtraPriceDiscountChannel(AD.get_price_disc_channel(ds));
+			OBloginResponse.setExtraGlobalpriceDiscount(AD.get_extra_global_price_disc(ds));
+			OBloginResponse.setExtraActivepriceDiscount(AD.get_extra_active_price_disc(ds));
+			OBloginResponse.setExtraPriceDiscountRegion(AD.get_extra_price_disc_region(ds, user.getRegion_id()));
+			OBloginResponse.setExtraPriceDiscountDistribution(AD.get_extra_price_disc_distributor(ds, user.getDistributor_id()));
+			OBloginResponse.setExtraPriceDiscountChannel(AD.get_extra_price_disc_channel(ds));
 
 			OBloginResponse.setSalesTax(AD.get_sales_tax(ds));
 			OBloginResponse.setIncomeTax(AD.get_income_tax(ds));

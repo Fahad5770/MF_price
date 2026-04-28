@@ -85,4 +85,6 @@ public interface IAuthenticationDetails {
 
 	public JSONArray get_price_disc_region(Datasource ds, int userId);
 
+	JSONArray get_extra_global_price_disc(Datasource ds);
+
 }

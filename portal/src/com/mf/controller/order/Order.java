@@ -38,6 +38,7 @@ public class Order implements IOrder {
 		return insertOrder(jsonData, request, 1);
 	}
 
+	@SuppressWarnings("static-access")
 	private ResponseModal insertOrder(JSONObject jsonData, HttpServletRequest request, int attendanceType) {
 		ResponseModal responseModal = new ResponseModal();
 
@@ -59,10 +60,11 @@ public class Order implements IOrder {
 			
 
 			final OrderFunctions OF = new OrderFunctions();
+			final SalesPosting SP = new SalesPosting();
 
 			// check orde3r existence
 			if (OF.GetOrderExists(ds, OReq.getMobileRequestId())) {
-				responseModal.setErrorResponse("Order Already Exists : " + OReq.getMobileRequestId());
+				responseModal.setErrorResponse("Order Already Exists : " + OReq.getMobileRequestId()); 
 				return responseModal;
 			}
 
@@ -86,7 +88,7 @@ public class Order implements IOrder {
 			}
 
 			double TotalInvoiceAmount = 0, TotalInvoiceIncomeTaxAmount = 0, TotalInvoiceSalesTaxAmount = 0,
-					TotalInvoiceNetAmount = 0, TotalPriceDiscount = 0, TotalInvoiveNetAmount = 0;
+					TotalInvoiceNetAmount = 0, TotalPriceDiscount = 0, TotalExtraPriceDiscount = 0, TotalInvoiveNetAmount = 0;
 
 			// Add Products
 			for (OrderRequest.OrderRequestProducts OReqProducts : OReq.getProducts()) {
@@ -124,6 +126,30 @@ public class Order implements IOrder {
 					double AmountRawCases = RateRawCase * (double) quantity;
 					double AmountUnits = RateUnit * (double) quantity;
 					System.out.println("heer 2");
+					
+					// Extra Discount
+					double extra_discount_rate = 0;
+					int extra_disc_is_percentag = 0, extra_disc_is_with_tax = 0;
+					System.out.println(
+							"select discount_value, is_percentage,is_with_tax from inventory_extra_price_discount_products where product_id="
+									+ OReqProducts.getProduct_id() + " and price_discount_id="
+									+ OReqProducts.getExtra_discount_id());
+					ResultSet rsExtraPriceDiscount = s2.executeQuery(
+							"select discount_value, is_percentage,is_with_tax from inventory_extra_price_discount_products where product_id="
+									+ OReqProducts.getProduct_id() + " and price_discount_id="
+									+ OReqProducts.getExtra_discount_id());
+					if (rsExtraPriceDiscount.first()) {
+						extra_discount_rate = rsExtraPriceDiscount.getDouble("discount_value");
+						extra_disc_is_percentag = rsExtraPriceDiscount.getInt("is_percentage");
+						extra_disc_is_with_tax = rsExtraPriceDiscount.getInt("is_with_tax");
+					}
+					System.out.println("heer 3");
+					double total_extra_diacount = extra_discount_rate * (double) quantity;
+					if (extra_disc_is_percentag == 2) {
+						total_extra_diacount = (AmountRawCases * extra_discount_rate) / 100;	
+					}
+					
+					
 					// Discount
 
 					double discount_rate = 0;
@@ -163,29 +189,34 @@ public class Order implements IOrder {
 					double TotalNetAmount = Utilities
 							.parseDouble(Utilities.getDisplayCurrencyFormatSimple((AmountRawCases)));
 					double InvoiveNetAmount = Utilities.parseDouble(Utilities
-							.getDisplayCurrencyFormatSimple((TotalNetAmount + sales_tax_amount + income_tax_amount - total_diacount)));
+							.getDisplayCurrencyFormatSimple((TotalNetAmount + sales_tax_amount + income_tax_amount - total_diacount - total_extra_diacount)));
 
 					System.out.println(
-							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id,extra_price_discount_id,extra_price_discount,extra_price_discount_amount,is_extra_percentage_discount,is_extra_with_tax_discount) values ("
 									+ unedited_order_id + ", " + OReqProducts.getProduct_id() + ", " + quantity + ", "
 									+ "0, " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
 									+ ", " + AmountRawCases + ", " + AmountUnits + "," + OReqProducts.getDiscount_id()
 									+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
 									+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
 									+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
-									+ InvoiveNetAmount + ", 0,null)");
+									+ InvoiveNetAmount + ", 0,null,"+ OReqProducts.getExtra_discount_id()
+									+ "," + extra_discount_rate + "," + total_extra_diacount + "," + extra_disc_is_percentag 
+									+ "," + extra_disc_is_with_tax + ")");
 					s2.executeUpdate(
-							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id) values ("
+							"replace into mobile_order_unedited_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, price_discount_id ,price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount,  total_amount, income_tax_rate, income_tax_amount,sales_tax_rate, sales_tax_amount, net_amount, is_promotion, promotion_id,extra_price_discount_id,extra_price_discount,extra_price_discount_amount,is_extra_percentage_discount,is_extra_with_tax_discount) values ("
 									+ unedited_order_id + ", " + OReqProducts.getProduct_id() + ", " + quantity + ", "
 									+ "0, " + TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
 									+ ", " + AmountRawCases + ", " + AmountUnits + "," + OReqProducts.getDiscount_id()
 									+ "," + discount_rate + "," + total_diacount + "," + is_percentag + ", "
 									+ is_with_tax + ", " + TotalNetAmount + ", " + income_tax_rate + ","
 									+ income_tax_amount + "," + sales_tax_rate + ", " + sales_tax_amount + ","
-									+ InvoiveNetAmount + ", 0,null)");
+									+ InvoiveNetAmount + ", 0,null,"+ OReqProducts.getExtra_discount_id()
+									+ "," + extra_discount_rate + "," + total_extra_diacount + "," + extra_disc_is_percentag
+									+ "," + extra_disc_is_with_tax + ")");
 
 					TotalInvoiceAmount += AmountRawCases;
 					TotalPriceDiscount += total_diacount;
+					TotalExtraPriceDiscount += total_extra_diacount;
 					TotalInvoiceNetAmount += TotalNetAmount;
 					TotalInvoiveNetAmount += InvoiveNetAmount;
 					TotalInvoiceIncomeTaxAmount = income_tax_amount;
@@ -298,12 +329,12 @@ public class Order implements IOrder {
 					+ ", sales_tax_amount  = " + TotalInvoiceSalesTaxAmount + ", income_tax_amount = "
 					+ TotalInvoiceIncomeTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
 					+ ", fraction_adjustment = " + FractionAmount + ", net_amount = " + InoviceTotalAmountString
-					+ ", price_discount=" + TotalPriceDiscount + " where id = " + unedited_order_id);
+					+ ", price_discount=" + TotalPriceDiscount + ",extra_price_discount ="+ TotalExtraPriceDiscount + " where id = " + unedited_order_id);
 			s.executeUpdate("update mobile_order_unedited set invoice_amount = " + TotalInvoiceAmount
 					+ ", sales_tax_amount  = " + TotalInvoiceSalesTaxAmount + ", wh_tax_amount = "
 					+ TotalInvoiceIncomeTaxAmount + ", total_amount = " + TotalInvoiceNetAmount
 					+ ", fraction_adjustment = " + FractionAmount + ", net_amount = " + InoviceTotalAmountString
-					+ ", price_discount=" + TotalPriceDiscount + " where id = " + unedited_order_id);
+					+ ", price_discount=" + TotalPriceDiscount + ",extra_price_discount ="+ TotalExtraPriceDiscount + " where id = " + unedited_order_id);
 
 			Date today = new Date();
 			int month = AlmoizDateUtils.getMonthNumberByDate(today);
@@ -341,7 +372,8 @@ public class Order implements IOrder {
 
 			ds.commit();
 
-			OF.splitOrder(unedited_order_id);
+			SP.splitOrder_2(unedited_order_id);
+			//OF.splitOrder(unedited_order_id);
 			responseModal.setSuccessResponse("Order has submitted.", new LinkedHashMap<String, Object>());
 		} catch (Exception e) {
 
