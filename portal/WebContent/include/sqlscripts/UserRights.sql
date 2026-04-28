@@ -1,0 +1,1 @@
+select u.id, u.display_name, u.department, fg.group_name, f.feature_id, f.feature_name from user_access ua join users u on ua.user_id = u.id join features f on ua.feature_id = f.feature_id join feature_groups fg on f.group_id = fg.group_id where f.active = 1 and u.is_active = 1 order by department, ua.user_id, f.group_id, f.feature_id;

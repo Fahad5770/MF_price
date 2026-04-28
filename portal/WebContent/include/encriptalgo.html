@@ -1,0 +1,30 @@
+<script>
+
+var url = "order_no=255928114182743&outlet_id=1623&created_on=2014-01-28 18:27:44&created_by=2559&sales_tax_rate=117&wh_tax_rate=0.5&uuid=103bc5b34287a8b7&platform=4.2.1&lat=31.489727&lng=74.3336007&accuracy=27&product_id=33&quantity=5&unit_quantity=0&is_promotion=0&promotion_id=0&product_id=11&quantity=5&unit_quantity=0&is_promotion=0&promotion_id=0&product_id=48&quantity=0&unit_quantity=1&is_promotion=1&promotion_id=12&product_id=2&quantity=0&unit_quantity=2&is_promotion=1&promotion_id=3&timestamp=28/1/2014 19:13";
+
+//var url = "accuracy=27&product_id=1&timestamp=22/01/2014 14:04";
+//var url = "i";
+
+function EncryptSessionID(qry){
+	var ret = "";
+	for (var i = 0; i < qry.length; i++ ) {
+		var ch = (qry.charCodeAt(i) * 5) - 21;
+		ret += ch+",";
+	}
+	
+	var ret2 = "";
+	for (var i = 0; i < ret.length; i++) {
+		var ch = (ret.charCodeAt(i) * 5) - 21;
+		ret2 += ch+"0a";
+	}
+	
+	return ret2;
+}
+
+var ul = EncryptSessionID(url);
+alert(ul.length);
+
+location="dectest.jsp?SessionID="+EncryptSessionID(url);
+
+
+</script>

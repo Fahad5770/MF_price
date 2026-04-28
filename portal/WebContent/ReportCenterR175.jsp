@@ -1,0 +1,343 @@
+<%@page import="com.mysql.jdbc.Util"%>
+<%@page import="com.pbc.util.Datasource"%>
+<%@page import="java.sql.Connection"%>
+<%@page import="java.sql.Statement"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.pbc.util.Utilities"%>
+<%@page import="java.util.Date"%>
+<%@page import="com.pbc.common.Distributor"%>
+<%@page import="com.pbc.util.UserAccess"%>
+<%@page import="java.util.ArrayList"%>
+<script>
+
+function redirect(url){
+	document.getElementById("check").action = url;
+	document.getElementById("check").submit();
+}
+
+</script>
+
+<style>
+td{
+font-size: 8pt;
+}
+
+</style>
+
+
+<%
+long UniqueSessionID = Utilities.parseLong(request.getParameter("UniqueSessionID"));
+
+
+long SessionUserID = Long.parseLong((String)session.getAttribute("UserID"));
+int FeatureID = 212;
+
+if(UserAccess.isAuthorized(FeatureID, SessionUserID, request) == false){
+	response.sendRedirect("AccessDenied.jsp");
+}
+
+Datasource ds = new Datasource();
+ds.createConnectionToReplica();
+Connection c = ds.getConnection();
+Statement s = c.createStatement();
+Statement s2 = c.createStatement();
+Statement s3 = c.createStatement();
+
+Statement s4 = c.createStatement();
+Statement s5 = c.createStatement();
+Statement s6 = c.createStatement();
+
+//Date date = Utilities.parseDate(request.getParameter("Date"));
+
+
+Date StartDate = (Date)session.getAttribute(UniqueSessionID+"_SR1StartDate");
+Date EndDate = (Date)session.getAttribute(UniqueSessionID+"_SR1EndDate");
+
+if(session.getAttribute(UniqueSessionID+"_SR1StartDate") == null){
+	StartDate = new Date();
+}
+
+if(session.getAttribute(UniqueSessionID+"_SR1EndDate") == null){
+	EndDate = new Date();
+}
+
+//out.print("StartDate = "+StartDate);
+//out.print("EndDate = "+EndDate);
+
+
+long SelectedPackagesArray[] = null;
+if (session.getAttribute(UniqueSessionID+"_SR1SelectedPackages") != null){
+   	SelectedPackagesArray = (long[])session.getAttribute(UniqueSessionID+"_SR1SelectedPackages");           	
+}
+
+String PackageIDs = "";
+String WherePackage = "";
+
+if(SelectedPackagesArray!= null && SelectedPackagesArray.length > 0){
+	for(int i = 0; i < SelectedPackagesArray.length; i++){
+		if(i == 0){
+			PackageIDs += SelectedPackagesArray[i]+"";
+		}else{
+			PackageIDs += ", "+SelectedPackagesArray[i]+"";
+		}
+	}
+	WherePackage = " and package_id in ("+PackageIDs+") ";
+}
+
+//HOD
+
+
+String HODIDs="";
+long SelectedHODArray[] = null;
+if (session.getAttribute(UniqueSessionID+"_SR1SelectedHOD") != null){
+	SelectedHODArray = (long[])session.getAttribute(UniqueSessionID+"_SR1SelectedHOD");
+	HODIDs = Utilities.serializeForSQL(SelectedHODArray);
+}
+
+String WhereHOD = "";
+if (HODIDs.length() > 0){
+	WhereHOD = " and distributor_id in (SELECT distributor_id FROM common_distributors where snd_id in ("+HODIDs+")) ";	
+}
+
+
+//RSM
+
+
+String RSMIDs="";
+long SelectedRSMArray[] = null;
+if (session.getAttribute(UniqueSessionID+"_SR1SelectedRSM") != null){
+	SelectedRSMArray = (long[])session.getAttribute(UniqueSessionID+"_SR1SelectedRSM");
+	RSMIDs = Utilities.serializeForSQL(SelectedRSMArray);
+}
+
+String WhereRSM = "";
+if (RSMIDs.length() > 0){
+	WhereRSM = " and rsm_id in ("+RSMIDs+") ";	
+}
+
+
+//Distributor
+
+long SelectedDistributorsArray[] = null;
+boolean IsDistributorSelected=false;
+if (session.getAttribute(UniqueSessionID+"_SR1SelectedDistributors") != null){
+	SelectedDistributorsArray = (long[])session.getAttribute(UniqueSessionID+"_SR1SelectedDistributors"); 
+	IsDistributorSelected = true;
+}else{
+
+	/*
+	Distributor UserDistributor[] = UserAccess.getUserFeatureDistributorSecondarySales(SessionUserID, FeatureID);
+	SelectedDistributorsArray = new long[UserDistributor.length];
+	
+	for(int x=0;x<UserDistributor.length;x++){
+		SelectedDistributorsArray[x] = UserDistributor[x].DISTRIBUTOR_ID;
+		
+		long DistributorArray[] = new long[1];
+		DistributorArray[0] = UserDistributor[x].DISTRIBUTOR_ID;
+		session.setAttribute(UniqueSessionID+"_SR1SelectedDistributors",DistributorArray);
+		break;
+	}*/
+}
+
+String DistributorIDs = "";
+String WhereDistributors = "";
+if(SelectedDistributorsArray != null && SelectedDistributorsArray.length > 0){
+	for(int i = 0; i < SelectedDistributorsArray.length ; i++){
+		
+		if(i == 0){
+			DistributorIDs += SelectedDistributorsArray[i];
+		}else{
+			DistributorIDs += ", "+SelectedDistributorsArray[i];
+		}
+	}
+	WhereDistributors = " and distributor_id in ("+DistributorIDs+") ";
+	//out.print(WhereDistributors);
+}
+
+//PJP
+
+
+String PJPIDs="";
+long SelectedPJPArray[] = null;
+if (session.getAttribute(UniqueSessionID+"_SR1SelectedPJP") != null){
+	SelectedPJPArray = (long[])session.getAttribute(UniqueSessionID+"_SR1SelectedPJP");
+	PJPIDs = Utilities.serializeForSQL(SelectedPJPArray);
+}
+
+String WherePJP = "";
+if (PJPIDs.length() > 0){
+	WherePJP = " and codv.outlet_id in (SELECT distinct outlet_id FROM distributor_beat_plan_schedule where id in("+PJPIDs+"))";	
+}
+
+%>
+
+
+
+<ul data-role="listview" data-inset="true"  style="font-size:10pt; font-weight: normal; margin-top:-10px;" data-icon="false">
+<li data-role="list-divider" data-theme="a">Pre-Selling Market Coverage</li>
+<li>
+
+
+<table style="width: 100%; margin-top:-8px" cellpadding="0" cellspacing="0">
+	<tr>
+		
+		<td style="width: 100%" valign="top">
+			<table border=0 style="font-size:13px; font-weight: 400; width:100%" cellpadding="0" cellspacing="0"  adata-role="table" class="GridWithBorder">
+					
+					 <thead>
+					    <tr style="font-size:11px;">
+							<th data-priority="1"  style="text-align:center; ">&nbsp;</th>
+							<%
+							int PackageCount = 0;
+							
+							ResultSet rs = s2.executeQuery("SELECT distinct package_id, package_label FROM pep.inventory_products_view ipv where is_visible = 1 and ipv.product_id in (select distinct product_id from inventory_sales_adjusted_products)");
+							int PacakgeID=0;
+							int OutletID=0;
+							double GrandTotal=0;
+							while(rs.next()){
+							
+								PackageCount++;
+							
+							%>
+							<th data-priority="1"  style="text-align:center; "><%=rs.getString("package_label")%></th>
+							<%
+							}
+							
+							long PackageTotal[] = new long[PackageCount];
+							int PackageTotalUnitPerSKU[] = new int[PackageCount];
+							for (int i = 0; i < PackageTotal.length; i++){
+								PackageTotal[i] = 0;
+								PackageTotalUnitPerSKU[i]=0;
+							}
+							%>							
+					    </tr>
+					  </thead> 
+					<tbody>
+						<%
+						//System.out.println("select * from common_outlets_distributors_view codv,common_outlets co where co.id = codv.outlet_id and co.distributor_id in (select * from common_distributors where is_active=1 and type_id=2"+WhereHOD+WhereRSM+")");
+						ResultSet rs1 = s.executeQuery("SELECT distinct rsm_id,(select display_name from users where id=rsm_id) name from common_distributors where rsm_id is not null and rsm_id != 1"+WhereRSM); 
+						while(rs1.next()){
+							
+						%>
+						<tr>
+								<td style="background-color:#F6F6F6; font-weight: bold;"><%=rs1.getLong("rsm_id") + " - "+ rs1.getString("name") %></td>
+							<%
+							
+							double SalesOutlet=0;
+							double TotalOutlet=1;
+							
+							
+							ResultSet rs22 = s2.executeQuery("SELECT distinct package_id, package_label FROM pep.inventory_products_view ipv where is_visible = 1 and ipv.product_id in (select distinct product_id from inventory_sales_adjusted_products)");
+							
+							while(rs22.next()){
+								
+								
+								
+								ResultSet rs221 = s4.executeQuery("SELECT count(distinct isa.outlet_id) outlet_count FROM inventory_sales_adjusted isa join inventory_sales_adjusted_products isap on isa.id=isap.id join common_distributors cd on isa.distributor_id=cd.distributor_id join inventory_products ip on isap.product_id=ip.id where cd.rsm_id="+rs1.getLong("rsm_id")+" and ip.package_id="+rs22.getLong("package_id")+" and  isa.type_id = 3 and isa.created_on between "+Utilities.getSQLDate(StartDate)+" and "+Utilities.getSQLDateNext(EndDate));
+								if(rs221.first()){
+									SalesOutlet = rs221.getDouble("outlet_count");
+								}
+								
+								ResultSet rs222 = s4.executeQuery("select count(distinct outlet_id) total_outlet from distributor_beat_plan_view where rsm_id="+rs1.getLong("rsm_id")+" and distributor_id in (select distinct distributor_id from inventory_sales_adjusted)");
+								if(rs222.first()){
+									TotalOutlet = rs222.getDouble("total_outlet");
+								}
+								
+							%>
+							
+							<td style="background-color:#F6F6F6; text-align:center; font-weight: bold;"><%=Utilities.getDisplayCurrencyFormatRounded((SalesOutlet/TotalOutlet)*100) %>%</td>
+							
+							<%
+							}
+							%>
+							</tr>
+							
+							<%
+							
+							//System.out.println("SELECT sm_id,(select display_name from users where id=sm_id) sm_name, tdm_id,(select display_name from users where id=tdm_id) tdm_name FROM pep.distributor_beat_plan dbp join common_distributors cd on dbp.distributor_id = cd.distributor_id where cd.rsm_id = "+rs1.getLong("rsm_id")+" and dbp.tdm_id is not null");
+							ResultSet rs2 = s3.executeQuery("SELECT distinct sm_id,(select display_name from users where id=sm_id) sm_name, cd.tdm_id, (select name from users where id = cd.tdm_id) tdm_name FROM pep.distributor_beat_plan dbp join common_distributors cd on dbp.distributor_id = cd.distributor_id where cd.rsm_id = "+rs1.getLong("rsm_id")+" and dbp.tdm_id is not null");
+							int cc=0;
+							while(rs2.next()){
+								%>
+								<tr>
+								<%
+								
+								long TDM_ID = rs2.getLong("tdm_id");
+								
+								
+								%>
+								<td style="padding-left: 15px;"><%=rs2.getLong("tdm_id") + " - "+ rs2.getString("tdm_name") %></td>
+								<%
+								
+								
+								double SalesOutlet1=0;
+								double TotalOutlet1=0;
+								
+								ResultSet rs33 = s2.executeQuery("SELECT distinct package_id, package_label FROM pep.inventory_products_view ipv where is_visible = 1 and ipv.product_id in (select distinct product_id from inventory_sales_adjusted_products)");
+								while(rs33.next()){
+									
+									
+
+									
+									
+									ResultSet rs221 = s4.executeQuery("SELECT count(distinct isa.outlet_id) outlet_count FROM inventory_sales_adjusted isa join inventory_sales_adjusted_products isap on isa.id=isap.id join distributor_beat_plan dbp on isa.beat_plan_id=dbp.id join inventory_products ip on isap.product_id=ip.id where dbp.tdm_id="+TDM_ID+" and ip.package_id="+rs33.getLong("package_id")+" and  isa.type_id = 3 and isa.created_on between "+Utilities.getSQLDate(StartDate)+" and "+Utilities.getSQLDateNext(EndDate));
+									if(rs221.first()){
+										SalesOutlet1 = rs221.getDouble("outlet_count");
+									}
+									
+									ResultSet rs222 = s4.executeQuery("select count(distinct outlet_id) total_outlet from distributor_beat_plan_view where tdm_id="+TDM_ID+" and distributor_id in (select distinct distributor_id from inventory_sales_adjusted)");
+									if(rs222.first()){
+										TotalOutlet1 = rs222.getDouble("total_outlet");
+									}
+									
+									
+							%>
+							
+							<td style="text-align:center"><%=Utilities.getDisplayCurrencyFormatRounded((SalesOutlet1/TotalOutlet1)*100)%>%</td>
+							
+							<%							
+								}	
+							}
+							%>
+							</tr>
+							
+							<%
+							
+							
+						
+						}
+						%>
+						
+						<!-- 
+						<tr>
+						<td style="font-weight:bold">Total</td>
+						<%
+						
+						for (int i = 0; i < PackageTotal.length; i++){
+							
+							%>
+							<td style="text-align: right;"><%=Utilities.convertToRawCases(PackageTotal[i],PackageTotalUnitPerSKU[i])%></td> 
+						<%
+						}
+						%>
+						</tr>
+						
+						 -->
+						
+					</tbody>
+					
+				</table>
+		</td>
+	</tr>
+</table>
+
+	</li>	
+</ul>
+
+<%
+s3.close();
+s2.close();
+s.close();
+c.close();
+ds.dropConnection();
+%>

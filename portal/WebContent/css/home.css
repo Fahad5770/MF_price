@@ -1,0 +1,57 @@
+#homediv{
+  width: 95% ;
+  max-width:1800px;
+  margin-left: auto ;
+  margin-right: auto ;
+}
+#workflowhomediv{
+  width: 99% ;
+  max-width:1700px;
+  min-width:800px;
+  margin-left: 0px;
+  margin-top: 0px;
+  margin-right: auto ;
+  padding-top: 0px;
+}
+#workflowbar{
+	float: left;
+	width: 22%;
+	padding-left: 1px;
+	padding-top: 1px;
+}
+#workflowform{
+	padding-left: 31px;
+	float: left;
+	width: 75%;
+	margin-top: 0;
+	padding-top: 0;
+}		
+.workflow_form_font{
+	font-size: 10pt;
+	font-weight: 400;
+}
+.CreateWorkflowAllowEdititing .ui-slider-switch { width: 100% }
+
+#weathertext{width: 250px; border: 1px solid #cccccc; display: none;}
+#placetitle{font-size: 36px; border-bottom: 1px solid #cccccc; text-transform: capitalize;}
+#temperature{font-family: arial; font-size: 18px; font-weight: bold;}
+.contents{font-family: arial; color: #999999; font-size: 12px; line-height: 15px;}
+#statustext{text-align: left;}
+#forecastimage{width: 120px;}
+
+.workflow_left_nav_item{
+	font-size: 14px;
+}
+
+table.GridWithBorder th, table.GridWithBorder td{
+		border:1px solid #eee;padding:5px;padding-top:7px;padding-bottom:7px;vertical-align:top;text-align:left;
+	}
+	table.GridWithBorder {
+		border-collapse:collapse;width:100%;
+	}	
+	table.GridWithoutBorder th, table.GridWithoutBorder td{
+		padding:5px;padding-top:7px;padding-bottom:7px;vertical-align:top;text-align:left;
+	}
+	table.GridWithoutBorder {
+		border-collapse:collapse;width:100%;
+	}	
