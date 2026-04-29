@@ -75,10 +75,14 @@ int OrderID = Utilities.parseInt(request.getParameter("OrderID"));
 		
 		double totalWH=0, totalSalesTax=0;
 		double brandDiscount = 0.0;
-		ResultSet rs3 = s.executeQuery("SELECT mop.sales_tax_amount,mo.brand_discount_amount,mop.wh_tax_amount,(select lrb_type_id from inventory_products where id=product_id) lrb_type_id,product_id, (select package_id from inventory_products where id=product_id) package_id, (select label from inventory_packages where id=package_id) package_name, (select unit_per_case from inventory_packages where id=package_id) unit_per_case, (select brand_id from inventory_products where id=product_id) brand_id, (select label from inventory_brands where id=brand_id) brand_name, total_units, rate_raw_cases, mop.total_amount, mo.created_on, mop.is_promotion FROM mobile_order_products mop join mobile_order mo on mop.id = mo.id where mo.id="+OrderID+" order by mop.is_promotion");
+		double TotalDiscount = 0.0;
+		ResultSet rs3 = s.executeQuery("SELECT mop.sales_tax_amount,mo.brand_discount_amount, mop.price_discount_amount,mop.extra_price_discount_amount ,mop.wh_tax_amount,(select lrb_type_id from inventory_products where id=product_id) lrb_type_id,product_id, (select package_id from inventory_products where id=product_id) package_id, (select label from inventory_packages where id=package_id) package_name, (select unit_per_case from inventory_packages where id=package_id) unit_per_case, (select brand_id from inventory_products where id=product_id) brand_id, (select label from inventory_brands where id=brand_id) brand_name, total_units, rate_raw_cases, mop.total_amount, mo.created_on, mop.is_promotion FROM mobile_order_products mop join mobile_order mo on mop.id = mo.id where mo.id="+OrderID+" order by mop.is_promotion");
 		while(rs3.next()){
 			
 			double WHTaxAmount=0;
+			double PriceDiscount = 0.0;
+			double ExtraPriceDiscount = 0.0;
+			double totalDiscount = 0.0;
 			
 			int isPromotion = rs3.getInt("is_promotion");
 			/*if(rs3.getInt("lrb_type_id")==2) {
@@ -86,7 +90,9 @@ int OrderID = Utilities.parseInt(request.getParameter("OrderID"));
 			}*/
 			
 			 brandDiscount = rs3.getDouble("brand_discount_amount");
-			
+			 PriceDiscount = rs3.getDouble("price_discount_amount");
+			 ExtraPriceDiscount = rs3.getDouble("extra_price_discount_amount");
+			 totalDiscount = PriceDiscount + ExtraPriceDiscount;
 			
 			 double saleTax = 0.0;
 		     double wh_tax_amount = 0.0;
@@ -104,6 +110,7 @@ int OrderID = Utilities.parseInt(request.getParameter("OrderID"));
                
                 totalWH += wh_tax_amount;
                 totalSalesTax += saleTax;
+                TotalDiscount += totalDiscount;
 		        /******************* Tax Calculation *********************/
 		        }/* else {
 		          if (rs3.getInt("lrb_type_id") !=1) {
@@ -152,8 +159,8 @@ int OrderID = Utilities.parseInt(request.getParameter("OrderID"));
 				<td align="right"><%=Utilities.getDisplayCurrencyFormat(totalSalesTax)%></td>
 			</tr>
 			<tr>
-				<td align="right"><b>Brand Discount</b></td>
-				<td align="right"><%=Utilities.getDisplayCurrencyFormat(brandDiscount)%></td>
+				<td align="right"><b>Total Discount</b></td>
+				<td align="right"><%=Utilities.getDisplayCurrencyFormat(TotalDiscount)%></td>
 			</tr>
 			<tr>
 				<td align="right"><b>Net Amount</b></td>

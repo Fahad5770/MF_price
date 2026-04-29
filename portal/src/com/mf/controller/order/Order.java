@@ -215,11 +215,11 @@ public class Order implements IOrder {
 
 					TotalInvoiceAmount += AmountRawCases;
 					TotalPriceDiscount += total_diacount;
-					TotalExtraPriceDiscount += total_extra_diacount;
+					TotalExtraPriceDiscount += total_extra_diacount; 
 					TotalInvoiceNetAmount += TotalNetAmount;
 					TotalInvoiveNetAmount += InvoiveNetAmount;
-					TotalInvoiceIncomeTaxAmount = income_tax_amount;
-					TotalInvoiceSalesTaxAmount = sales_tax_amount;
+					TotalInvoiceIncomeTaxAmount += income_tax_amount;
+					TotalInvoiceSalesTaxAmount += sales_tax_amount;
 
 				} else {
 
