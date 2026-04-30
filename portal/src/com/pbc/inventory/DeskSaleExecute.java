@@ -192,6 +192,8 @@ public class DeskSaleExecute extends HttpServlet {
 						double InvoiceWHTaxAmount = 0;
 						double InvoiceSaleTaxAmount = 0;
 						double InvoiceNetAmount = 0;
+						double TotalPriceDiscount = 0;
+						double TotalExtraPriceDiscount = 0;
 
 						for (int i = 0; i < ProductID.length; i++) {
 
@@ -223,9 +225,19 @@ public class DeskSaleExecute extends HttpServlet {
 							long priceDiscountId = (long) UnitRates[6];
 							if (isPercentage == 2) {
 								discountAmount = (RawCaseAmount * discountRate) / 100;
-								
+
 							}
-						
+
+							// Extra Discount — slots [9..12] from getSellingPrice_2
+							long extraPriceDiscountId = (long) UnitRates[9];
+							double extraDiscountRate = UnitRates[10];
+							int isExtraWithTax = (int) UnitRates[11];
+							int isExtraPercentage = (int) UnitRates[12];
+							double extraDiscountAmount = extraDiscountRate * RawCases[i];
+							if (isExtraPercentage == 2) {
+								extraDiscountAmount = (RawCaseAmount * extraDiscountRate) / 100;
+							}
+
 							double UnitAmount = Units[i] * RateUnit;
 							int isWithTax = (int) UnitRates[4];
 							
@@ -253,6 +265,8 @@ public class DeskSaleExecute extends HttpServlet {
 							InvoiceWHTaxAmount += WHTaxAmount;
 							InvoiceSaleTaxAmount += IncomeTaxAmount;
 							InvoiceNetAmount += ItemNetAmount;
+							TotalPriceDiscount += discountAmount;
+							TotalExtraPriceDiscount += extraDiscountAmount;
 
 							StockPosting sp = new StockPosting();
 
@@ -286,15 +300,15 @@ public class DeskSaleExecute extends HttpServlet {
 								return;
 							}
 							System.out.println(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount, extra_price_discount_id, extra_price_discount, extra_price_discount_amount, is_extra_percentage_discount, is_extra_with_tax_discount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
 											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", " + RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+") ");
+											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+", "+extraPriceDiscountId+", "+extraDiscountRate+", "+extraDiscountAmount+", "+isExtraPercentage+", "+isExtraWithTax+") ");
 							s.executeUpdate(
-									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount) values ("
+									"insert into inventory_sales_invoices_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units,price_discount_id, price_discount, price_discount_amount, is_percentage_discount, is_with_tax_discount, income_tax_rate,income_tax_amount,sales_tax_rate, sales_tax_amount ,total_amount, net_amount, extra_price_discount_id, extra_price_discount, extra_price_discount_amount, is_extra_percentage_discount, is_extra_with_tax_discount) values ("
 											+ DeskSaleID + ", " + ProductID[i] + ", " + RawCases[i] + ", " + Units[i]
 											+ ", " + TotalUnits + ", " + LiquidInMLValue + ", "+ RateRawCase + ", " + RateUnit + ", "
-											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+") ");
+											+ RawCaseAmount + ", " + RawCaseAmount + ", "+priceDiscountId+","+discountRate+","+discountAmount+","+isPercentage+","+isWithTax+","+IncomeTaxRate+","+IncomeTaxAmount+","+salesTaxRate+","+salesTaxAmount+","+ItemTotalAmount+","+RowNetAmount[i]+", "+extraPriceDiscountId+", "+extraDiscountRate+", "+extraDiscountAmount+", "+isExtraPercentage+", "+isExtraWithTax+") ");
 						}
 
 						InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));
@@ -430,7 +444,7 @@ public class DeskSaleExecute extends HttpServlet {
 									InoviceTotalAmountString.indexOf("."));
 
 							if (Fraction != 0) {
-								InoviceTotalAmountString = (Utilities.parseInt(InoviceTotalAmountString) + 1) + "";
+								InoviceTotalAmountString = (Utilities.parseInt(InoviceTotalAmountString) + 1) + ""; 
 							}
 						}
 
@@ -448,7 +462,9 @@ public class DeskSaleExecute extends HttpServlet {
 								+ ", sales_tax_amount= " + InvoiceSaleTaxAmount + " , wh_tax_amount = "
 								+ InvoiceWHTaxAmount + ", total_amount = " + InvoiceNetAmount
 								+ ", fraction_adjustment = " + Utilities.getDisplayCurrencyFormatSimple(FractionAmount)
-								+ ", net_amount = " + InoviceTotalAmountString + ", shelf_rent=" + ShelfRent
+								+ ", net_amount = " + NetAmount + ", shelf_rent=" + ShelfRent
+								+ ", price_discount = " + TotalPriceDiscount
+								+ ", extra_price_discount = " + TotalExtraPriceDiscount
 								+ " where id = " + DeskSaleID);
 
 						// /System.out.println("update rental_discount set is_released = 1,

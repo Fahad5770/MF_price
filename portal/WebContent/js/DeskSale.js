@@ -518,6 +518,13 @@ function DeskSaleAddProduct() {
 										+ $('#DeskSaleDiscount').val()
 										+ "'><input type='hidden' name='DeskSaleDiscountId' id='DeskSaleDiscountId' value='"+$('#DSDiscountId').val()+"' /></td>"
 										+ "<td>"
+										+ $('#DeskSaleExtraDiscount').val()
+										+ "<input type='hidden' name='DeskSaleMainFormExtraDiscount' value='"
+										+ $('#DeskSaleExtraDiscount').val()
+										+ "'><input type='hidden' name='DeskSaleExtraDiscountId' value='"+$('#DSExtraDiscountId').val()+"' />"
+										+ "<input type='hidden' name='DeskSaleMainFormIsExtraPercentage' value='"+$('#isExtraPercentage').val()+"' />"
+										+ "<input type='hidden' name='DeskSaleMainFormIsWithExtraTax' value='"+$('#isWithExtraTax').val()+"' /></td>"
+										+ "<td>"
 										+ $('#DeskSaleTax').val()
 										+ "<input type='hidden' name='DeskSaleMainFormTax' value='"
 										+ $('#DeskSaleTax').val()
@@ -547,6 +554,7 @@ function DeskSaleAddProduct() {
 								$('#DeskSaleTax').val('');
 								$('#DeskSaleAmount').val('');
 								$('#DeskSaleDiscount').val('');
+								$('#DeskSaleExtraDiscount').val('');
 								$('#DeskSaleNetAmount').val('');
 
 								$('#ProductInfoSpan').html('');
@@ -607,6 +615,7 @@ function disableRow() {
 	$('#DeskSaleRate').attr('disabled', 'disabled');
 	$('#DeskSaleAmount').attr('disabled', 'disabled');
 	$('#DeskSaleDiscount').attr('disabled', 'disabled');
+	$('#DeskSaleExtraDiscount').attr('disabled', 'disabled');
 	$('#DeskSaleNetAmount').attr('disabled', 'disabled');
 	$('#AddRowButton').attr('disabled', 'disabled');
 }
@@ -618,6 +627,7 @@ function enableRow() {
 	$('#DeskSaleRate').removeAttr('disabled', 'disabled');
 	$('#DeskSaleAmount').removeAttr('disabled', 'disabled');
 	$('#DeskSaleDiscount').removeAttr('disabled', 'disabled');
+	$('#DeskSaleExtraDiscount').removeAttr('disabled', 'disabled');
 	$('#DeskSaleNetAmount').removeAttr('disabled', 'disabled');
 	$('#AddRowButton').removeAttr('disabled', 'disabled');
 }
@@ -682,6 +692,21 @@ function updateInvoiceSummary() {
 	total_discont += parseFloat($("input[name=DeskSaleMainFormDiscount]")[i].value);
 	 }
 	console.log(total_discont);
+
+	// Total Extra Discount across all line items
+	var total_extra_discount = 0;
+	var extraNodes = $("input[name=DeskSaleMainFormExtraDiscount]");
+	for (var i = 0; i < extraNodes.length; i++) {
+		var v = parseFloat(extraNodes[i].value);
+		if (!isNaN(v)) total_extra_discount += v;
+	}
+	console.log('total_extra_discount:' + total_extra_discount);
+
+	$('#DeskSaleMainFormTotalExtraDiscount').val(
+			parseFloat(total_extra_discount).toFixed(2));
+	$('#DeskSaleMainFormTotalExtraDiscountField').val(
+			formatInCommas(parseFloat(total_extra_discount).toFixed(2)));
+
 	$('#DeskSaleMainFormTotalInvoiceAmount').val(
 			parseFloat(TotalAmount).toFixed(2));
 			
@@ -718,32 +743,16 @@ function updateInvoiceSummary() {
 		}
 	}
 
-	var NetAmount = parseFloat("" + parseFloat(TotalInvoiceAmount - total_discont).toFixed(2));
+	var NetAmount = parseFloat("" + parseFloat(TotalInvoiceAmount - total_discont - total_extra_discount).toFixed(2));
 	$('#DeskSaleMainFormFinalNetAmount').val(NetAmount);
 	$('#DeskSaleMainFormFinalNetAmountField').val(formatInCommas(NetAmount));
 
-	var DecimalIndex = (NetAmount + "").indexOf(".");
-	var FractionAmount = 0;
-	if (DecimalIndex != -1) {
-		FractionAmount = parseInt((NetAmount + "").substring(DecimalIndex + 1));
-	}
-	var FinalAmountRounded = 0;
-	if (FractionAmount != 0) {
-		FinalAmountRounded = parseInt((NetAmount + "").substring(0,
-				DecimalIndex)) + 1;
-		$('#DeskSaleMainFormFinalNetAmountRoundedField').val(
-				formatInCommas(FinalAmountRounded));
-		$('#DeskSaleMainFormFinalNetAmountRounded').val(FinalAmountRounded);
-		$('#DeskSaleMainFormAdjustment').val(
-				parseFloat(FinalAmountRounded - NetAmount).toFixed(2));
-
-	} else {
-		$('#DeskSaleMainFormFinalNetAmountRoundedField').val(
-				formatInCommas(NetAmount.toFixed(0)));
-		$('#DeskSaleMainFormFinalNetAmountRounded').val(NetAmount.toFixed(0));
-		$('#DeskSaleMainFormAdjustment').val(0);
-
-	}
+	// Summary Net Amount mirrors the per-row Net Amount: exact value to 2 decimals,
+	// no round-up-to-next-integer. Adjustment is therefore zero.
+	var NetAmountFixed = parseFloat(NetAmount).toFixed(2);
+	$('#DeskSaleMainFormFinalNetAmountRoundedField').val(formatInCommas(NetAmountFixed));
+	$('#DeskSaleMainFormFinalNetAmountRounded').val(NetAmountFixed);
+	$('#DeskSaleMainFormAdjustment').val(0);
 
 }
 
@@ -1017,6 +1026,19 @@ function getDeskSaleInfoJson(EditID) {
 											+ json.rows[i].Discount
 											+ "<input type='hidden' name='DeskSaleMainFormDiscount' value='"
 											+ json.rows[i].Discount
+											+ "'><input type='hidden' name='DeskSaleDiscountId' value='"
+											+ (json.rows[i].PriceDiscountId || 0)
+											+ "'></td>"
+											+ "<td>"
+											+ (json.rows[i].ExtraDiscount || 0)
+											+ "<input type='hidden' name='DeskSaleMainFormExtraDiscount' value='"
+											+ (json.rows[i].ExtraDiscount || 0)
+											+ "'><input type='hidden' name='DeskSaleExtraDiscountId' value='"
+											+ (json.rows[i].ExtraPriceDiscountId || 0)
+											+ "'><input type='hidden' name='DeskSaleMainFormIsExtraPercentage' value='"
+											+ (json.rows[i].IsExtraPercentage || 0)
+											+ "'><input type='hidden' name='DeskSaleMainFormIsWithExtraTax' value='"
+											+ (json.rows[i].IsExtraWithTax || 0)
 											+ "'></td>"
 											+ "<td>"
 											+ formatInCommas(json.rows[i].TotalAmount)
@@ -1418,11 +1440,21 @@ function getProductInfoJson(ProductID) {
 					}else if(json.IsPercentage == '1'){
 						$('#DeskSaleDiscount').val(json.DiscountValue);
 					}
-					
-					$('#DSDiscountId').val(json.DiscountId);
-					
 
-					
+					$('#DSDiscountId').val(json.DiscountId);
+
+					// Extra Discount — same priority/percentage handling as primary discount
+					if(json.IsExtraPercentage == '2'){
+						$('#DeskSaleExtraDiscount').val(json.CalculatedExtraDiscountValue);
+					}else if(json.IsExtraPercentage == '1'){
+						$('#DeskSaleExtraDiscount').val(json.ExtraDiscountValue);
+					}else{
+						$('#DeskSaleExtraDiscount').val('0');
+					}
+					$('#DSExtraDiscountId').val(json.ExtraDiscountId);
+					$('#isExtraPercentage').val(json.IsExtraPercentage);
+					$('#isWithExtraTax').val(json.IsWithExtraTax);
+
 					UnitPrice = parseFloat(json.UnitPrice);
 					$('#DeskSaleUnitRate').val(json.UnitPrice);
 					$('#DeskSaleTax').val(parseFloat(json.SalesTax + json.IncomeTax).toFixed(2));
@@ -1646,7 +1678,17 @@ function DeskSaleCalculate() {
 		$('#DeskSaleDiscount').val(parseFloat(Discount).toFixed(2));
 
 	}
-	
+
+	// Extra Discount — same calc semantics as primary Discount: per-raw-case * RawCases
+	var ExtraDiscount;
+	if ($('#DeskSaleExtraDiscount').val() == '' || isNaN(parseFloat($('#DeskSaleExtraDiscount').val()))) {
+		ExtraDiscount = 0;
+		$('#DeskSaleExtraDiscount').val('0');
+	} else {
+		ExtraDiscount = parseFloat($('#DeskSaleExtraDiscount').val()) * RawCases;
+		$('#DeskSaleExtraDiscount').val(parseFloat(ExtraDiscount).toFixed(2));
+	}
+
 	var Tax;
 	if ($('#DeskSaleTax').val() == '') {
 		Tax = 0;
@@ -1654,11 +1696,10 @@ function DeskSaleCalculate() {
 		Tax = $('#DeskSaleTax').val() * RawCases;
 		$('#DeskSaleTax').val(parseFloat(Tax).toFixed(2))
 	}
-	
 
-	
-	
-	
+
+
+
 	var Amount = (RawCases * Rate) + (Units * UnitPrice);
 	var NetAmount = Amount;
 	var isWithTax = $('#isWithTax').val();
@@ -1667,12 +1708,15 @@ function DeskSaleCalculate() {
 	console.log('isPercentage:'+isPercentage);
 	console.log('Tax:'+Tax);
 	console.log('Amount:'+Amount);
+	console.log('ExtraDiscount:'+ExtraDiscount);
 	if(isWithTax == '1'){
 		NetAmount += Tax;
 			NetAmount -= Discount;
+			NetAmount -= ExtraDiscount;
 
 	}else{
 		NetAmount -= Discount;
+		NetAmount -= ExtraDiscount;
 
 		NetAmount += Tax;
 	}

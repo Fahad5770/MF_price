@@ -123,17 +123,29 @@ public class GetProductInfo extends HttpServlet {
 					obj.put("DiscountValue", PriceArray[3]);
 					obj.put("IsWithTax", PriceArray[4]);
 					obj.put("IsPercentage", PriceArray[5]);
-					
+					obj.put("DiscountId", (long) PriceArray[6]);
+
 					double RawCasePrice = PriceArray[0] + PriceArray[2];
-					
+
 					double discountAmount = (RawCasePrice * PriceArray[3]) / 100;
 
 					obj.put("CalculatedDiscountValue", discountAmount);
-					
+
+					// Extra Discount — sourced from inventory_extra_price_discount* tables
+					// (slots [9..12] populated by Product.getSellingPrice_2)
+					obj.put("ExtraDiscountId", (long) PriceArray[9]);
+					obj.put("ExtraDiscountValue", PriceArray[10]);
+					obj.put("IsWithExtraTax", (int) PriceArray[11]);
+					obj.put("IsExtraPercentage", (int) PriceArray[12]);
+
+					double extraDiscountAmount = (RawCasePrice * PriceArray[10]) / 100;
+					obj.put("CalculatedExtraDiscountValue", extraDiscountAmount);
+
 					obj.put("RawCasePrice", Utilities.getDisplayCurrencyFormatAbbreviatedOneDecimal(RawCasePrice));
 
-					
+
 					System.out.println("Discount" + PriceArray[2]);
+					System.out.println("ExtraDiscount" + PriceArray[10]);
 
 					HashMap<String, Double> ProductsTax = AlmoizFormulas.ProductsTax(rs.getInt(6), OutletID);
 

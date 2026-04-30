@@ -191,14 +191,25 @@ long region_id= (rsRegion.first()) ? rsRegion.getLong("region_id") : 0;
 			
 			<td valign="top" style="width:10%">
 			    <!-- Discount amount -->
-			    <input type="text" placeholder="Discount" id="DeskSaleDiscount" name="DeskSaleDiscount" 
+			    <input type="text" placeholder="Discount" id="DeskSaleDiscount" name="DeskSaleDiscount"
 			           data-mini="true" onchange="DeskSaleCalculate()" readonly="readonly">
-			
+
 			    <!-- Discount ID / type (invisible) -->
 			    <input type="hidden" type="text" id="DSDiscountId" name="DSDiscountId" placeholder="Discount ID" readonly="readonly">
 			</td>
 
-			
+			<td valign="top" style="width:10%">
+			    <!-- Extra Discount amount (sourced from inventory_extra_price_discount* tables) -->
+			    <input type="text" placeholder="Extra Discount" id="DeskSaleExtraDiscount" name="DeskSaleExtraDiscount"
+			           data-mini="true" onchange="DeskSaleCalculate()" readonly="readonly">
+
+			    <!-- Extra Discount ID / type (invisible) -->
+			    <input type="hidden" id="DSExtraDiscountId" name="DSExtraDiscountId" placeholder="Extra Discount ID" readonly="readonly">
+			    <input type="hidden" id="isExtraPercentage" name="isExtraPercentage" value="1" >
+			    <input type="hidden" id="isWithExtraTax" name="isWithExtraTax" value="0" >
+			</td>
+
+
 			<td valign="top" style="width:10%">
 				<input  type="text" placeholder="Net Amount" id="DeskSaleNetAmount" name="DeskSaleNetAmount" data-mini="true" readonly="readonly">
 			</td>
@@ -242,15 +253,16 @@ long region_id= (rsRegion.first()) ? rsRegion.getLong("region_id") : 0;
 							<th data-priority="1" >Rate</th>
 							<th data-priority="1">Amount</th>
 							<th data-priority="1">Discount</th>
+							<th data-priority="1">Extra Discount</th>
 							<th data-priority="1">Tax</th>
 							<th data-priority="1">Net Amount</th>
 							<th data-priority="1">&nbsp;</th>
 					    </tr>
 					  </thead>
-					  
+
 						<tbody id="DeskSaleTableBody">
 						<tr id="NoProductRow">
-							<td colspan="10" style="margin: 1px; padding: 0px;">
+							<td colspan="11" style="margin: 1px; padding: 0px;">
 								<div style="width: 100%; background-color: #FFFFFF; padding: 5px;">No products added.</div>
 							</td>
 						</tr>
@@ -295,6 +307,9 @@ long region_id= (rsRegion.first()) ? rsRegion.getLong("region_id") : 0;
         					
         						<input type="hidden" placeholder="0" id="DeskSaleMainFormTotalDiscount" name="DeskSaleMainFormTotalDiscount" data-mini="true" onchange="updateInvoiceSummary()" >
         						<input type="hidden" placeholder="0" id="DeskSaleMainFormTotalDiscountField" name="DeskSaleMainFormTotalDiscountField" data-mini="true" onkeyup="updateInvoiceSummary()" >
+
+        						<input type="hidden" placeholder="0" id="DeskSaleMainFormTotalExtraDiscount" name="DeskSaleMainFormTotalExtraDiscount" data-mini="true" onchange="updateInvoiceSummary()" >
+        						<input type="hidden" placeholder="0" id="DeskSaleMainFormTotalExtraDiscountField" name="DeskSaleMainFormTotalExtraDiscountField" data-mini="true" onkeyup="updateInvoiceSummary()" >
         					</td>
         				</tr>
         				

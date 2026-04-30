@@ -90,10 +90,25 @@ public class GetDeskSaleInfoJson extends HttpServlet {
 					rows.put("Units", rs2.getInt("units"));
 					rows.put("RateRawCases", rs2.getDouble("rate_raw_cases"));
 					rows.put("RateUnits", rs2.getDouble("rate_units"));
-					
+
 					rows.put("TotalAmount", rs2.getDouble("total_amount"));
 					rows.put("Discount", rs2.getDouble("discount"));
 					rows.put("NetAmount", rs2.getDouble("net_amount"));
+
+					// Primary price discount columns (for round-trip on edit)
+					rows.put("PriceDiscountId", rs2.getLong("price_discount_id"));
+					rows.put("PriceDiscount", rs2.getDouble("price_discount"));
+					rows.put("PriceDiscountAmount", rs2.getDouble("price_discount_amount"));
+					rows.put("IsPercentageDiscount", rs2.getInt("is_percentage_discount"));
+					rows.put("IsWithTaxDiscount", rs2.getInt("is_with_tax_discount"));
+
+					// Extra discount columns (mirrors primary discount; sourced from
+					// inventory_extra_price_discount* tables on save)
+					rows.put("ExtraPriceDiscountId", rs2.getLong("extra_price_discount_id"));
+					rows.put("ExtraDiscount", rs2.getDouble("extra_price_discount_amount"));
+					rows.put("ExtraDiscountRate", rs2.getDouble("extra_price_discount"));
+					rows.put("IsExtraPercentage", rs2.getInt("is_extra_percentage_discount"));
+					rows.put("IsExtraWithTax", rs2.getInt("is_extra_with_tax_discount"));
 					
 					rows.put("UnitPerSKU", rs2.getString("unit_per_sku"));
 					
