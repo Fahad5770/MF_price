@@ -14,7 +14,9 @@ public interface IMobileReports {
 	ResponseModal MVNoOrderReport(JSONObject jsonData, HttpServletRequest request);
 
 
-	ResponseModal OrdersReport(JSONObject jsonData, HttpServletRequest request);	
+	ResponseModal OrdersReport(JSONObject jsonData, HttpServletRequest request);
+
+	ResponseModal SalesReport(JSONObject jsonData, HttpServletRequest request);	
 
 	
 }

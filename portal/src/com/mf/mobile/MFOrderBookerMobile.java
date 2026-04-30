@@ -97,6 +97,9 @@ public class MFOrderBookerMobile extends HttpServlet {
 			case "stock_position":
 				responseModal = new StockPosition().GetStockPosition(Payload, request);
 				break;
+			case "sales_report":
+				responseModal = new MobileReports().SalesReport(Payload, request);
+				break;
 			default:
 				responseModal.setErrorResponse("Wrong end point");
 			}

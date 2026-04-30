@@ -4,6 +4,10 @@ package com.mf.controller.reports;
 
 import com.mf.modals.ResponseModal;
 import com.mf.dao.NoOrderReportResponse;
+import com.mf.dao.SaleDetailsReport;
+import com.mf.dao.SaleReportResponse;
+import com.mf.dao.SalesReportBrands;
+import com.mf.dao.SalesReportRequest;
 import com.mf.dao.OrderReportResponse;
 import com.mf.dao.OutletDetailsOrdersReport;
 import com.mf.dao.OutletDetailsStrikeReport;
@@ -45,6 +49,182 @@ public  class MobileReports implements IMobileReports{
 		// TODO Auto-generated method stub
 		return orders_report(jsonData, request);
 	}
+	@Override
+	public ResponseModal SalesReport(JSONObject jsonData, HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		System.out.println("Here");
+		return sales_report(jsonData, request);
+	}
+	
+	private ResponseModal sales_report(JSONObject jsonData, HttpServletRequest request) {
+
+		ResponseModal ResponseModal = new ResponseModal();
+
+		SalesReportRequest salesReportRequest = new SalesReportRequest(jsonData);
+
+		Date sDate = Utilities.parseDateYYYYMMDD(salesReportRequest.getStart_date());
+		System.out.println(sDate);
+		Date eDate = Utilities.parseDateYYYYMMDD(salesReportRequest.getEnd_date());
+		System.out.println(eDate);
+
+		Datasource ds = new Datasource();
+
+		SaleReportResponse saleReportResponse = new SaleReportResponse();
+		List<SalesReportBrands> salesReportBrandsList = new ArrayList<SalesReportBrands>();
+		int totalOrderQuantity = 0, totalSaleQuantity = 0;
+		double totalOrderAmount = 0.0, totalSaleAmount = 0.0;
+
+		try {
+
+			ds.createConnection();
+			Statement s = ds.createStatement();
+			Statement s2 = ds.createStatement();
+			Statement s3 = ds.createStatement();
+
+			String WhereOrderBooker = " and mo.created_by in (" + salesReportRequest.getUser_id() + ") ";
+
+			String orderIds = "0";
+			System.out.println("SELECT mo.id FROM mobile_order mo where mo.status_type_id in (1,2) and created_by = "
+					+ salesReportRequest.getUser_id() + " and mo.created_on between " + Utilities.getSQLDate(sDate)
+					+ " and " + Utilities.getSQLDateNext(eDate) + "  " + WhereOrderBooker);
+			ResultSet rsOrderIds = s
+					.executeQuery("SELECT mo.id FROM mobile_order mo where mo.status_type_id in (1,2) and created_by = "
+							+ salesReportRequest.getUser_id() + " and mo.created_on between "
+							+ Utilities.getSQLDate(sDate) + " and " + Utilities.getSQLDateNext(eDate) + "  "
+							+ WhereOrderBooker);
+			while (rsOrderIds.next()) {
+				orderIds += "," + rsOrderIds.getInt("id");
+			}
+			System.out.println(orderIds);
+			String InvoiceIDsQuery = "select distinct id from inventory_sales_invoices where order_id in (" + orderIds
+					+ ")";
+
+			System.out.println(
+					"select distinct brand_id, brand_label from inventory_products_view where product_id in(select distinct product_id from mobile_order_products where id in ("
+							+ orderIds + "))");
+			ResultSet rsBrand = s.executeQuery(
+					"select distinct brand_id, brand_label from inventory_products_view where product_id in(select distinct product_id from mobile_order_products where id in ("
+							+ orderIds + "))");
+			while (rsBrand.next()) {
+
+				SalesReportBrands salesReportBrands = new SalesReportBrands();
+
+				int BrandID = rsBrand.getInt("brand_id");
+				salesReportBrands.setBrand(rsBrand.getString("brand_label"));
+
+				salesReportBrandsList.add(salesReportBrands);
+
+				List<SaleDetailsReport> saleDetailsReportList = new ArrayList<SaleDetailsReport>();
+				System.out.println(
+						"SELECT distinct product_id, product_label, brand_label FROM inventory_products_view where category_id=1 and lrb_type_id="
+								+ BrandID
+								+ " and  product_id in (select distinct product_id from mobile_order_products where id in ("
+								+ orderIds + ")) order by package_sort_order");
+				ResultSet rsProduct = s2.executeQuery(
+						"SELECT distinct product_id, product_label, brand_label FROM inventory_products_view where category_id=1 and lrb_type_id="
+								+ BrandID
+								+ " and  product_id in (select distinct product_id from mobile_order_products where id in ("
+								+ orderIds + ")) order by package_sort_order");
+				while (rsProduct.next()) {
+
+					SaleDetailsReport saleDetailsReport = new SaleDetailsReport();
+					// ProductOrder productOrder = saleDetailsReport.new ProductOrder();
+					// ProductSale productSale = saleDetailsReport.new ProductSale();
+
+					int product_id = rsProduct.getInt("product_id");
+					int quantity = 0;
+					double amount = 0.0;
+					saleDetailsReport.setProduct(rsProduct.getString("product_label"));
+
+					/************************** Orders Data **********************************/
+					// System.out.println(
+					// "SELECT mop.product_id, sum(total_units) bottles, sum(if (mop.is_promotion=1,
+					// 0, mop.net_amount)) amount FROM mobile_order mo, mobile_order_products mop
+					// where mo.id = mop.id and mo.id in ("
+					// + orderIds + ") and mop.product_id=" + product_id);
+					ResultSet rs3 = s3.executeQuery(
+							"SELECT mop.product_id, sum(total_units) bottles, sum(if (mop.is_promotion=1, 0, mop.net_amount)) amount FROM mobile_order mo, mobile_order_products mop where mo.id = mop.id and mo.id in ("
+									+ orderIds + ") and mop.product_id=" + product_id);
+					if (rs3.first()) {
+						// QuantityOrdersBooked = Utilities.convertToRawCases( rs3.getLong("bottles"),
+						// rs3.getInt("unit_per_sku"));
+						// AmountOrdersBooked = rs3.getDouble("amount");
+						// ProductID = rs3.getLong("product_id");
+						quantity = rs3.getInt("bottles");
+						amount = rs3.getDouble("amount");
+						totalOrderQuantity += rs3.getInt("bottles");
+						totalOrderAmount += rs3.getDouble("amount");
+					}
+
+					/************************* Orders Data **********************************/
+					saleDetailsReport.setOrderQuantity(quantity);
+					saleDetailsReport.setOrderAmount(amount);
+
+					/************************** Sales Data **********************************/
+					int salesQuantity = 0;
+					double salesAmount = 0.0;
+					System.out.println(
+							"SELECT sum(isap.total_units) bottles, sum(if (isap.is_promotion=1, 0, isap.net_amount)) amount FROM inventory_sales_adjusted isa, inventory_sales_adjusted_products isap where isa.id=isap.id and isa.id in ("
+									+ InvoiceIDsQuery + ") and isap.product_id=" + product_id);
+					ResultSet rs7 = s3.executeQuery(
+							"SELECT sum(isap.total_units) bottles, sum(if (isap.is_promotion=1, 0, isap.net_amount)) amount FROM inventory_sales_adjusted isa, inventory_sales_adjusted_products isap where isa.id=isap.id and isa.id in ("
+									+ InvoiceIDsQuery + ") and isap.product_id=" + product_id);
+					if (rs7.first()) {
+						salesQuantity = rs7.getInt("bottles");
+						// AmountSales = rs7.getDouble("amount");
+						// salesQuantity = Utilities.getDisplayCurrencyFormat(rs5.getDouble(1)) ;
+						salesAmount = rs7.getDouble("amount");
+						totalSaleQuantity += rs7.getInt("bottles");
+						totalSaleAmount += rs7.getDouble("amount");
+					}
+					/************************** Sales Data **********************************/
+					saleDetailsReport.setSaleQuantity(salesQuantity);
+					saleDetailsReport.setSaleAmount(salesAmount);
+					// productOrder.setQuantuity(quantity);
+					// productOrder.setAmount(amount);
+					// saleDetailsReport.setProductOrder(productOrder);
+
+					// productSale.setQuantuity(0);
+					// productSale.setAmount(0);
+					// saleDetailsReport.setProductSale(productSale);
+
+					saleDetailsReportList.add(saleDetailsReport);
+				}
+
+				salesReportBrands.setSaleDetails(saleDetailsReportList);
+			}
+
+			saleReportResponse.setSale(salesReportBrandsList);
+
+			// List<OutletOrdersReport> OutletOrdersReportList = new
+			// ArrayList<OutletOrdersReport>();
+
+			saleReportResponse.setGrandOrderQuantity(totalOrderQuantity);
+			saleReportResponse.setGrandOrderAmount(totalOrderAmount);
+
+			saleReportResponse.setGrandSaleQuantity(totalSaleQuantity);
+			saleReportResponse.setGrandSaleAmount(totalSaleAmount);
+
+			ResponseModal.setStatus(true);
+			ResponseModal.setData(saleReportResponse.getIntoJson());
+			s.close();
+			s2.close();
+			ds.dropConnection();
+		} catch (
+
+		Exception e) {
+
+			e.printStackTrace();
+			System.out.println("Orders Report Error :- " + e);
+			ResponseModal.setErrorResponse("server Error " + e);
+		}
+
+		return ResponseModal;
+
+	}
+
+
+
 	
 	
 	@SuppressWarnings("unused")
