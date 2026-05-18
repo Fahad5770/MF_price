@@ -1,4 +1,3 @@
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.workflow.ConversationMessage"%>
 <%@page import="com.pbc.workflow.WorkflowChat"%>
 <%@page import="com.pbc.util.Utilities"%>

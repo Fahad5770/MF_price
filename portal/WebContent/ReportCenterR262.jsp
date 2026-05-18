@@ -1,4 +1,3 @@
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.util.Datasource"%>
 
 <%@page import="java.sql.*"%>

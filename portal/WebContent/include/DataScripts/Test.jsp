@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-    <%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.util.Datasource"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.sql.Statement"%>

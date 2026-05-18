@@ -3,7 +3,7 @@
 <%@ page import="java.sql.*" %>
 <%@page import="com.pbc.util.Datasource"%>
 <%
-Class.forName("com.mysql.jdbc.Driver").newInstance();
+Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 Connection r_c = DriverManager.getConnection("jdbc:mysql://ep.pbc.com.pk/pbc","admin","lion@pbc");
 Statement r_s = r_c.createStatement();
 

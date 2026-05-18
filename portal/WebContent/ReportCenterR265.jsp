@@ -1,6 +1,5 @@
 <%@page import="java.awt.List"%>
 
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.util.Datasource"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.sql.Statement"%>

@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@page import="java.util.Date"%>
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.common.DocumentHeader"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
@@ -15,7 +14,6 @@
 <%@page import="com.pbc.common.Warehouse"%>
 <%@page import="com.pbc.util.UserAccess"%>
 <%@include file="include/ValidateSession.jsp" %>
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="com.pbc.util.Datasource"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.sql.Statement"%>

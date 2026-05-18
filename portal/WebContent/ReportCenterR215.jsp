@@ -1,4 +1,3 @@
-<%@page import="com.mysql.jdbc.Util"%>
 <%@page import="org.apache.commons.lang3.time.DateUtils"%>
 <%@page import="com.pbc.employee.EmployeeHierarchy"%>
 <%@page import="com.pbc.common.User"%>
