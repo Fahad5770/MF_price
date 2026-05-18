@@ -22,9 +22,9 @@ if(UserAccess.isAuthorized(FeatureID, SessionUserID, request) == false){
 Datasource ds = new Datasource();
 ds.createConnectionKSML();
 Connection cCane = ds.getConnection();
-Statement s = cCane.createStatement();
-Statement s2 = cCane.createStatement();
-Statement s3 = cCane.createStatement();
+Statement s = cCane.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = cCane.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = cCane.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 //Date date = Utilities.parseDate(request.getParameter("Date"));
 

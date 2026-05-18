@@ -17,16 +17,16 @@
 Datasource ds = new Datasource();
 ds.createConnectionToReplica();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
-Statement s3 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 
 
 Datasource ds2 = new Datasource();
 ds2.createConnection();
 Connection c2 = ds2.getConnection();
-Statement s4 = c2.createStatement();
+Statement s4 = c2.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 //Date date = Utilities.parseDate(request.getParameter("Date"));
 
 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");

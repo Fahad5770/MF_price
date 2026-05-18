@@ -14,7 +14,7 @@
 Datasource ds = new Datasource();
 ds.createConnectionToReplica2();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 ResultSet rs = s.executeQuery("SELECT count(distinct package_id) FROM inventory_products_view where  product_id in (SELECT distinct product_id FROM inventory_sales_adjusted_products where id in (select id from inventory_sales_adjusted where created_on between '2015-11-01' and '2015-11-10')) order by package_sort_order");
 while(rs.next()){

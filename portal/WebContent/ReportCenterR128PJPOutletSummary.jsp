@@ -22,9 +22,9 @@ String checkHibernation = (SessionUserID != 204220064) ? " and dbpauov.outlet_ac
 Datasource ds = new Datasource();
 ds.createConnectionToReplica();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
-Statement s3 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 String PJPIDsString = request.getParameter("PJPID");
 String WherePJPID = "";

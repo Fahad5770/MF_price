@@ -30,7 +30,7 @@ if(Utilities.isAuthorized(FeatureID, SessionUserID) == false){
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 %>
 <div data-role="page" id="MRDOutletsFormPage" data-url="MRDOutletsFormPage" data-theme="d">

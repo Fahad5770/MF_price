@@ -26,8 +26,8 @@ try{
 	//Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 	/*
 	Connection oc = DriverManager.getConnection("jdbc:odbc:canedsn","","");
-	Statement os = oc.createStatement();
-	Statement os2 = oc.createStatement();
+	Statement os = oc.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+	Statement os2 = oc.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 
 	ResultSet rs = os.executeQuery("select sum(field1), sum(field2) from canedata");

@@ -125,8 +125,8 @@ else if (type == 3){
 
 where += " and s.outlet_id not in ( SELECT outlet_id FROM sampling_monthly_request where month="+Utilities.getSQLDate(EndDate)+" ) ";
 
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 OutletDashboard op = new OutletDashboard();
 %>

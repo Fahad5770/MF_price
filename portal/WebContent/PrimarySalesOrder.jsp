@@ -74,7 +74,7 @@ if( UserWarehouse == null ){
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 float TaxRate[] =  new float[2];
 

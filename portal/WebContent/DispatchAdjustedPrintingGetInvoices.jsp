@@ -19,8 +19,8 @@ function redirect(url){
 Datasource ds = new Datasource();
 ds.createConnectionToReplica();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 long DispatchID = Utilities.parseLong(request.getParameter("DispatchID"));
 

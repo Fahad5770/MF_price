@@ -13,7 +13,7 @@
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 
 // A/C To A/C Trf. TO 300100293940001 # 280985

@@ -16,9 +16,9 @@
             Datasource ds = new Datasource();
 			ds.createConnection();
 			Connection c = ds.getConnection();
-			Statement s = c.createStatement();
-			Statement s2 = c.createStatement();
-			Statement s3 = c.createStatement();
+			Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+			Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+			Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 			
             ResultSet rs = s.executeQuery("SELECT * FROM mobile_order where beat_plan_id is null and unedited_order_id is not null order by id");
             while( rs.next() ){
@@ -46,9 +46,9 @@
             Datasource ds = new Datasource();
 			ds.createConnection();
 			Connection c = ds.getConnection();
-			Statement s = c.createStatement();
-			Statement s2 = c.createStatement();
-			Statement s3 = c.createStatement();
+			Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+			Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+			Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 			
             ResultSet rs = s.executeQuery("SELECT step_id, action_id, user_id, request_id, count(sequence_id) ct FROM pep.workflow_requests_steps group by step_id, action_id, user_id, request_id having ct > 1");
             while( rs.next() ){

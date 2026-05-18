@@ -31,15 +31,15 @@ int FeatureID = 354;
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
-Statement s3 = c.createStatement();
-Statement s4 = c.createStatement();
-Statement s5 = c.createStatement();
-Statement s6 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s4 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s5 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s6 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
-Statement s7 = c.createStatement();
-Statement s8 = c.createStatement();
+Statement s7 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s8 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 Date StartDate = (Date) session.getAttribute(UniqueSessionID + "_SR1StartDate");
 Date EndDate = (Date) session.getAttribute(UniqueSessionID + "_SR1EndDate");

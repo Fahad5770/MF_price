@@ -64,10 +64,10 @@ if( request.getParameter("DispatchID") != null ){
 	DispatchID = Utilities.parseInt(request.getParameter("DispatchID"));
 }
 
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
-Statement s3 = c.createStatement();
-Statement s4 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s4 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 
 String DriverName = "";

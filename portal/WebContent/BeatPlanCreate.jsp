@@ -31,7 +31,7 @@ if(EditID > 0){
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 ResultSet rs2 = s.executeQuery("SELECT name FROM common_distributors where distributor_id="+DistributorID);
 if(rs2.first()){

@@ -35,8 +35,8 @@ String ReportingLevel = "";
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 
 ResultSet rs = s.executeQuery("select display_name, designation, u.current_reporting_level, (select short_name from common_hierarchy_levels where id = u.current_reporting_level) current_reporting_label from users u where id="+EmployeeCode);

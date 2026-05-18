@@ -46,7 +46,7 @@ String DistributorName = "";
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 ResultSet rs = s.executeQuery("select name from common_distributors where distributor_id="+DistributorCode);
 if(rs.first()){

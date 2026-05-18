@@ -7,7 +7,7 @@ try{
 	e.printStackTrace();
 }
 Connection oc = DriverManager.getConnection("jdbc:odbc:sampling","","");
-Statement os = oc.createStatement();
+Statement os = oc.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 Datasource ds = new Datasource();
 ds.createConnection();

@@ -32,7 +32,7 @@ $(".tr_class_region").not('first').hover(
 			Datasource ds = new Datasource();
 			ds.createConnection();
 			Connection c = ds.getConnection();
-			Statement s = c.createStatement();
+			Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
             
             ResultSet rs = s.executeQuery("SELECT * FROM common_regions order by region_id");
             boolean IsFound = false;

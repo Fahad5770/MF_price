@@ -51,9 +51,9 @@ if(UserAccess.isAuthorized(FeatureID, SessionUserID, request) == false){
 Datasource ds = new Datasource();
 ds.createConnectionToReplica();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
-Statement s3 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 //Date date = Utilities.parseDate(request.getParameter("Date"));
 
@@ -357,10 +357,10 @@ if (HODIDs.length() > 0){
 
 private void populateData(Connection c, Date StartDate, Date EndDate, String SND_ID) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 	
-	Statement s = c.createStatement();
-	Statement s2 = c.createStatement();
-	Statement s3 = c.createStatement();
-	Statement s5 = c.createStatement();
+	Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+	Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+	Statement s3 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+	Statement s5 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 	
 	//s.executeUpdate("SET SESSION group_concat_max_len = 1000000");
 	

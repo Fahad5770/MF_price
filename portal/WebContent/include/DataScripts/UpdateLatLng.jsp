@@ -5,7 +5,7 @@
 <%
 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 Connection r_c = DriverManager.getConnection("jdbc:mysql://ep.pbc.com.pk/pbc","admin","lion@pbc");
-Statement r_s = r_c.createStatement();
+Statement r_s = r_c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 Datasource ds = new Datasource();
 ds.createConnection();

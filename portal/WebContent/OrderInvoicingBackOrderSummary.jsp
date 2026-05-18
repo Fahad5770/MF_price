@@ -22,7 +22,7 @@ if(items != null && items.length > 0){
 	Datasource ds = new Datasource();
 	ds.createConnection();
 	Connection c = ds.getConnection();
-	Statement s = c.createStatement();
+	Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 %>
 	<ul data-role="listview" data-inset="true" class="ui-icon-alt" data-theme="d" data-divider-theme="a" data-count-theme="c">

@@ -68,8 +68,8 @@ else if (type == 3){
 	where += " and s.sampling_id in (select sampling_id from sampling_monthly_approval where status_id = 3 and month = "+Utilities.getSQLDate(EndDate)+") ";
 }
 
-Statement s = c.createStatement();
-Statement s2 = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
+Statement s2 = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 OutletDashboard op = new OutletDashboard();
 %>

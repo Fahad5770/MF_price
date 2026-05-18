@@ -19,7 +19,7 @@ long SessionUserID = Long.parseLong((String)session.getAttribute("UserID"));
 Datasource ds = new Datasource();
 ds.createConnection();
 Connection c = ds.getConnection();
-Statement s = c.createStatement();
+Statement s = c.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY);
 
 ResultSet rs = s.executeQuery("SELECT outlet_id, count(distinct id) ct FROM pep.distributor_beat_plan_schedule group by outlet_id having ct != 1");
 while(rs.next()){
