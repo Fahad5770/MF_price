@@ -2,7 +2,7 @@ package com.mf.controller.visitOutlet;
 
 import java.sql.ResultSet;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONObject;
 

@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileUploadException;

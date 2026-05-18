@@ -2,9 +2,9 @@ package com.pbc.product;
 
 import java.io.IOException;
 import java.sql.Statement;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 
 import com.pbc.util.Datasource;
 

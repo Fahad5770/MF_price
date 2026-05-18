@@ -1,6 +1,6 @@
 package com.mf.controller.authentication;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

@@ -23,8 +23,8 @@ public class Datasource {
 	 * @throws SQLException
 	 */
 	public void createConnection() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-	Class.forName("com.mysql.jdbc.Driver").newInstance();
-	c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+	Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+	c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 //	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//c = DriverManager.getConnection("jdbc:mysql://192.169.188.163/pep", "admin", "a1m01z");
 	//	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "toor");
@@ -42,8 +42,8 @@ public class Datasource {
 	 * @throws SQLException
 	 */
 	public void createConnectionKSML() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 //		c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//c = DriverManager.getConnection("jdbc:mysql://192.169.188.163/pep", "admin", "a1m01z");
 	//c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "toor");
@@ -59,8 +59,8 @@ public class Datasource {
 	 */
 	public void createConnectionToReplica() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 	//	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//	c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
 		
@@ -81,8 +81,8 @@ public class Datasource {
 	 */
 	public void createConnectionToReplica2() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 		
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 	//	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//	c = DriverManager.getConnection("jdbc:mysql://192.169.188.163/pep", "admin", "a1m01z");
 	//	c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
@@ -99,9 +99,9 @@ public class Datasource {
 	 * @throws SQLException
 	 */
 	public void createConnectionToSAPDB() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-		//Class.forName("com.mysql.jdbc.Driver").newInstance();
+		//Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");;
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");;
 //	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 		//c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
 	}
@@ -114,11 +114,10 @@ public class Datasource {
 	 * @throws SQLException
 	 */
 	public void createConnectionToKSMLLab() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 	//	c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//	c = DriverManager.getConnection("jdbc:mysql://192.169.188.163/canelab", "admin", "a1m01z");
-		
 	}
 	
 	/**
@@ -129,8 +128,8 @@ public class Datasource {
 	 * @throws SQLException
 	 */
 	public void createConnectionToMRD() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		c = DriverManager.getConnection("jdbc:mysql://18.195.66.127:3306/pep?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "admin", "h@wkhRfvgUw6N!");
 	//c = DriverManager.getConnection("jdbc:mysql://localhost:3306/pep", "root", "Pbc@1472");
 	//	c = DriverManager.getConnection("jdbc:mysql://13.251.213.226/pep", "admin", "a1m01z");
 	//	c = DriverManager.getConnection("jdbc:mysql://192.169.188.163/pbc", "admin", "a1m01z");
@@ -184,7 +183,7 @@ public class Datasource {
 	 */
 	public Statement createStatement() throws SQLException {
 		if (c != null){
-			return c.createStatement();
+			return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		}else{
 			return null;
 		}

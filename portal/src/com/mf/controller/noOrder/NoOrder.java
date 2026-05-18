@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileUploadException;

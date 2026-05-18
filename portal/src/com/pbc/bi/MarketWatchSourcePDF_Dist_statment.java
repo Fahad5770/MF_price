@@ -9,8 +9,8 @@ import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.mail.Session;
-import javax.servlet.http.HttpSession;
+import jakarta.mail.Session;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.poi.hssf.usermodel.HeaderFooter;
 

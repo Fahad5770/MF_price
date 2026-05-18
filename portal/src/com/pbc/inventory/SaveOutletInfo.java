@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 import org.json.simple.JSONObject;
 import com.pbc.util.Datasource;
 import com.pbc.util.Utilities;

@@ -5,7 +5,7 @@
 package com.pbc.mobile;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.io.PrintWriter;
@@ -19,10 +19,10 @@ import com.pbc.util.Datasource;
 import com.pbc.util.Utilities;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
 
 @WebServlet(description = "Mobile Authenticate User V4", urlPatterns = { "/mobile/MobileAuthenticateUserSMV4" })
 public class MobileAuthenticateUserSMV4 extends HttpServlet

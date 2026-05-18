@@ -1,6 +1,6 @@
 package com.mf.controller;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 public class Controller extends HttpServlet {
 	

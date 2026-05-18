@@ -8,12 +8,12 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -76,7 +76,7 @@ public class GetOutletsByID extends HttpServlet {
 
 	protected void sendErrorRedirect(HttpServletRequest request, HttpServletResponse response, String errorPageURL,
 			Throwable e) throws ServletException, IOException {
-		request.setAttribute("javax.servlet.jsp.jspException", e);
+		request.setAttribute("jakarta.servlet.jsp.jspException", e);
 		getServletConfig().getServletContext().getRequestDispatcher(errorPageURL).forward(request, response);
 	}
 

@@ -5,7 +5,7 @@
 package com.pbc.reports;
 
 import com.pbc.common.Distributor;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.io.File;
@@ -15,11 +15,11 @@ import java.sql.SQLException;
 import com.pbc.util.UserAccess;
 import com.pbc.util.Utilities;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
 
 @WebServlet({ "/reports/ReportsR339DownloadExcel" })
 public class ReportsR339DownloadExcel extends HttpServlet

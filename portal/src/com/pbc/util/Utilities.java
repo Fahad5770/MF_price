@@ -1,6 +1,6 @@
 package com.pbc.util;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.time.DateUtils;

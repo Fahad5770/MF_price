@@ -35,7 +35,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.pbc.util.Datasource;
 import com.pbc.util.UserAccess;
 import com.pbc.util.Utilities;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.time.DateUtils;
