@@ -184,6 +184,433 @@ public class SalesPosting
      return success;
  }
  
+ 
+ 
+	public static boolean splitOrderUnregistered(long ID) {
+		System.out.println("[ORDER_MIGRATION] SalesPosting.splitOrderUnregistered START | ID(mobile_order_unregistered.id)="
+				+ ID);
+		boolean success = false;
+		Datasource ds = new Datasource();
+
+		try {
+
+			ds.createConnection();
+
+			Statement s = ds.createStatement();
+			Statement s2 = ds.createStatement();
+			Statement s3 = ds.createStatement();
+			Statement s4 = ds.createStatement();
+			Statement s5 = ds.createStatement();
+			Statement s6 = ds.createStatement();
+
+			double SalesTaxRate = 0;
+			double WHTaxRate = 0;
+			long OrderSequence = 0;
+
+			// NOTE: original used common_outlets_distributors_view, but for newly approved outlets
+			// no entry exists in common_outlets_distributors yet, so the view returns 0 rows.
+			// Reading directly from common_outlets (populated by the approve flow) works for this case.
+			// Also using co.cache_beat_plan_id for pjp_id because mobile_order_unregistered.beat_plan_id
+			// is not populated by OutletRegistration's insert.
+			String distSql = "select co.distributor_id, co.cache_beat_plan_id pjp_id, (select snd_id from common_distributors where distributor_id = co.distributor_id) snd_id, (select rsm_id from common_distributors where distributor_id = co.distributor_id) rsm_id from common_outlets co where co.id in (select outlet_id from mobile_order_unregistered where id = "
+					+ ID + ") order by co.distributor_id desc";
+			System.out.println("[ORDER_MIGRATION] " + distSql);
+			ResultSet rs1 = s.executeQuery(distSql);
+
+			System.out.println("[ORDER_MIGRATION] Distributor/PJP lookup query executed, entering while loop");
+
+			int loopCount = 0;
+			while (rs1.next()) {
+				loopCount++;
+				try {
+					System.out.println("[ORDER_MIGRATION] Loop iteration=" + loopCount
+							+ " | distributor_id=" + rs1.getLong(1)
+							+ " | pjp_id=" + rs1.getLong(2)
+							+ " | snd_id=" + rs1.getString("snd_id")
+							+ " | rsm_id=" + rs1.getString("rsm_id"));
+
+					long PJP_ID = rs1.getLong(2);
+					String SND_ID = rs1.getString("snd_id");
+					String RSM_ID = rs1.getString("rsm_id");
+
+					if (PJP_ID != 0) {
+
+						ds.startTransaction();
+
+						long SplitOrderID = 0;
+						double InvoiceAmount = 0;
+						double InvoiceWHTaxAmount = 0;
+						double InvoiceNetAmount = 0;
+						List<Integer> ProductIDArray = new ArrayList<Integer>();
+						List<Long> TotalUnitsArray = new ArrayList<Long>();
+
+						OrderSequence++;
+						ds.startTransaction();
+						long DistributorID = rs1.getLong(1);
+						long OutletID = 0;
+						long CreatedBy = 0;
+						long Orderno = 0;
+						int unregistered_id = 0;
+						String unregReadSql = "select * from mobile_order_unregistered where id = " + ID;
+						System.out.println("[ORDER_MIGRATION] " + unregReadSql);
+						ResultSet rs = s2.executeQuery(unregReadSql);
+						if (rs.first()) {
+							System.out.println("[ORDER_MIGRATION] mobile_order_unregistered row found | id="
+									+ rs.getInt("id") + " | outlet_id=" + rs.getLong("outlet_id")
+									+ " | mobile_order_no=" + rs.getLong("mobile_order_no")
+									+ " | sales_tax_rate=" + rs.getDouble("sales_tax_rate")
+									+ " | wh_tax_rate=" + rs.getDouble("wh_tax_rate"));
+
+							SalesTaxRate = rs.getDouble("sales_tax_rate");
+							WHTaxRate = rs.getDouble("wh_tax_rate");
+							OutletID = rs.getLong("outlet_id");
+
+							CreatedBy = rs.getLong("created_by");
+							Orderno = rs.getLong("mobile_order_no");
+							unregistered_id = rs.getInt("id");
+							System.out.println(
+									"insert into mobile_order (mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by, sales_tax_rate, wh_tax_rate, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id) values "
+											+ "(" + OrderSequence + rs.getString("mobile_order_no") + ", " + OutletID
+											+ ", " + DistributorID
+											+ ", (select region_id from common_distributors where distributor_id = "
+											+ DistributorID + "), now(), " + rs.getString("created_by") + ", "
+											+ rs.getString("sales_tax_rate") + ", " + rs.getString("wh_tax_rate")
+											+ ", '" + rs.getString("uuid") + "', '" + rs.getString("platform") + "', "
+											+ rs.getString("lat") + ", " + rs.getString("lng") + ", "
+											+ rs.getString("accuracy") + ", '" + rs.getString("mobile_timestamp")
+											+ "', " + Orderno + ", " + PJP_ID + ", " + SND_ID + ", " + RSM_ID
+											+ ",(SELECT if(sm_id = 0, null,sm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID
+											+ "), (SELECT if(tdm_id = 0, null,tdm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID
+											+ "), (SELECT if(asm_id = 0, null,asm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID + ") )");
+							s3.executeUpdate(
+									"insert into mobile_order (mobile_order_no, outlet_id, distributor_id, region_id, created_on, created_by, sales_tax_rate, wh_tax_rate, uuid, platform, lat, lng, accuracy, mobile_timestamp, unedited_order_id, beat_plan_id, snd_id, rsm_id, sm_id, tdm_id, asm_id) values "
+											+ "(" + OrderSequence + rs.getString("mobile_order_no") + ", " + OutletID
+											+ ", " + DistributorID
+											+ ", (select region_id from common_distributors where distributor_id = "
+											+ DistributorID + "), now(), " + rs.getString("created_by") + ", "
+											+ rs.getString("sales_tax_rate") + ", " + rs.getString("wh_tax_rate")
+											+ ", '" + rs.getString("uuid") + "', '" + rs.getString("platform") + "', "
+											+ rs.getString("lat") + ", " + rs.getString("lng") + ", "
+											+ rs.getString("accuracy") + ", '" + rs.getString("mobile_timestamp")
+											+ "', " + Orderno + ", " + PJP_ID + ", " + SND_ID + ", " + RSM_ID
+											+ ",(SELECT if(sm_id = 0, null,sm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID
+											+ "), (SELECT if(tdm_id = 0, null,tdm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID
+											+ "), (SELECT if(asm_id = 0, null,asm_id) FROM distributor_beat_plan where id = "
+											+ PJP_ID + ") )");
+
+							ResultSet rs2 = s3.executeQuery("select LAST_INSERT_ID()");
+							if (rs2.first()) {
+								SplitOrderID = rs2.getLong(1);
+							}
+							System.out.println("[ORDER_MIGRATION] mobile_order INSERT done | new mobile_order.id="
+									+ SplitOrderID);
+						} else {
+							System.out.println("[ORDER_MIGRATION] WARNING: mobile_order_unregistered row NOT found for id="
+									+ ID);
+						}
+
+						System.out.println(
+								"SELECT * FROM mobile_order_unregistered_products moup join inventory_products_view ipv on moup.product_id = ipv.product_id where moup.id = "
+										+ unregistered_id
+										+ " and moup.is_promotion = 0 and moup.is_processed = 0 and moup.product_id in (SELECT product_id FROM employee_product_groups_list where product_group_id in (select product_group_id from common_distributors where distributor_id = "
+										+ DistributorID + "))");
+						ResultSet rs2 = s2.executeQuery(
+								"SELECT * FROM mobile_order_unregistered_products moup join inventory_products_view ipv on moup.product_id = ipv.product_id where moup.id = "
+										+ unregistered_id
+										+ " and moup.is_promotion = 0 and moup.is_processed = 0 and moup.product_id in (SELECT product_id FROM employee_product_groups_list where product_group_id in (select product_group_id from common_distributors where distributor_id = "
+										+ DistributorID + "))");
+						while (rs2.next()) {
+
+							int ProductID = rs2.getInt("product_id");
+							int TotalUnits = rs2.getInt("total_units");
+
+							int RawCases = rs2.getInt("raw_cases");
+							int Units = rs2.getInt("units");
+
+							int UnitsPerSKU = rs2.getInt("unit_per_sku");
+							long LiquidInMLPerUnit = rs2.getLong("liquid_in_ml");
+
+							long LiquidinML = LiquidInMLPerUnit * TotalUnits;
+
+							double RateRawCase = rs2.getDouble("rate_raw_cases");
+							double RateUnit = rs2.getDouble("rate_units");
+
+							int LrbTypeID = rs2.getInt("lrb_type_id");
+
+							int PackageID = rs2.getInt("package_id");
+
+							/// int spot_discount_id = rs2.getInt("spot_discount_id");
+
+							// patch for hand discount
+							double HandDiscountRate = rs2.getDouble("hand_discount_rate");
+							long HandDiscountID = rs2.getLong("hand_discount_id");
+							double HandDiscountAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(
+									(HandDiscountRate * RawCases) + ((HandDiscountRate / UnitsPerSKU) * Units)));
+							String HandDiscountIDInsert = "null";
+							if (HandDiscountID != 0) {
+								HandDiscountIDInsert = "" + HandDiscountID;
+							}
+							// end patch
+
+							double AmountRawCases = rs2.getDouble("amount_raw_cases");
+							double AmountUnits = rs2.getDouble("amount_units");
+
+							double TotalAmount = rs2.getDouble("total_amount");
+							double WHTaxAmount = rs2.getDouble("wh_tax_amount");
+							double NetAmount = rs2.getDouble("net_amount");
+							// int discount_apply = rs2.getInt("discount_apply");
+							// double default_discount = rs2.getDouble("default_discount");
+							// double maximum_discount = rs2.getDouble("maximum_discount");
+							double spot_discount_amount = rs2.getDouble("spot_discount_amount");
+
+							InvoiceAmount += TotalAmount;
+							InvoiceWHTaxAmount += WHTaxAmount;
+							InvoiceNetAmount += NetAmount;
+
+							String PromotionID = null;
+
+							ProductIDArray.add(ProductID);
+							TotalUnitsArray.add(TotalUnits * 1l);
+							System.out.println(
+									"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
+											+ SplitOrderID + ", " + ProductID + ", " + RawCases + ", " + Units + ", "
+											+ TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
+											+ ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", "
+											+ WHTaxAmount + "," + NetAmount + ", 0, " + PromotionID + ","
+											+ HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert
+											+ ")  ");
+							s3.executeUpdate(
+									"insert into mobile_order_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, net_amount, is_promotion, promotion_id, hand_discount_rate, hand_discount_amount, hand_discount_id) values ("
+											+ SplitOrderID + ", " + ProductID + ", " + RawCases + ", " + Units + ", "
+											+ TotalUnits + ", " + LiquidinML + ", " + RateRawCase + ", " + RateUnit
+											+ ", " + AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", "
+											+ WHTaxAmount + "," + NetAmount + ", 0, " + PromotionID + ","
+											+ HandDiscountRate + ", " + HandDiscountAmount + ", " + HandDiscountIDInsert
+											+ ")  ");
+							System.out.println(
+									"update mobile_order_unregistered_products set is_processed = 1 where id = " + ID
+											+ " and product_id = " + ProductID + " and is_promotion = 0");
+
+							s3.executeUpdate(
+									"update mobile_order_unregistered_products set is_processed = 1 where id = " + ID
+											+ " and product_id = " + ProductID + " and is_promotion = 0");
+
+						}
+
+						if (ProductIDArray != null && ProductIDArray.size() > 0) {
+
+							PromotionItem PromotionProducts[] = Product.getPromotionItems(OutletID,
+									ArrayUtils.toPrimitive(ProductIDArray.toArray(new Integer[ProductIDArray.size()])),
+									ArrayUtils.toPrimitive(TotalUnitsArray.toArray(new Long[TotalUnitsArray.size()])));
+
+							for (int i = 0; i < PromotionProducts.length; i++) {
+
+								long RawCasesAndUnits[] = Utilities.getRawCasesAndUnits(
+										PromotionProducts[i].TOTAL_UNITS, PromotionProducts[i].UNIT_PER_SKU);
+
+								long ProSAPCode = 0;
+								int ProProductID = 0;
+								double ProSellingPriceRawCase = 0;
+								double ProSellingPriceUnit = 0;
+								long ProLiquidInML = 0;
+
+								int BrandID = 0;
+								int SelectedBrandID = 0;
+								System.out.println(
+										"SELECT ipv.brand_id FROM mobile_order_unedited_products moup join inventory_products_view ipv on moup.product_id = ipv.product_id where moup.id = "
+												+ ID + " and moup.promotion_id = " + PromotionProducts[i].PROMOTION_ID);
+
+								ResultSet rs4 = s4.executeQuery(
+										"SELECT ipv.brand_id FROM mobile_order_unedited_products moup join inventory_products_view ipv on moup.product_id = ipv.product_id where moup.id = "
+												+ ID + " and moup.promotion_id = " + PromotionProducts[i].PROMOTION_ID);
+								if (rs4.first()) {
+									SelectedBrandID = rs4.getInt(1);
+								}
+
+								if (PromotionProducts[i].BRANDS.size() > 0) {
+									BrandID = PromotionProducts[i].BRANDS.get(0);
+								}
+
+								if (SelectedBrandID != 0) {
+									BrandID = SelectedBrandID;
+								}
+
+								if (BrandID != 0) {
+
+									Product PromotionProduct = new Product(1, PromotionProducts[i].PACKAGE_ID, BrandID);
+									ProProductID = PromotionProduct.PRODUCT_ID;
+									ProSAPCode = PromotionProduct.SAP_CODE;
+									double rates[] = Product.getSellingPrice(PromotionProduct.SAP_CODE, OutletID);
+									ProSellingPriceRawCase = rates[0];
+									ProSellingPriceUnit = rates[1];
+									ProLiquidInML = PromotionProduct.LIQUID_IN_ML;
+
+									double AmountRawCases = Utilities
+											.parseDouble(Utilities.getDisplayCurrencyFormatSimple(
+													(RawCasesAndUnits[0] * ProSellingPriceRawCase)));
+									double AmountUnits = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(
+											(RawCasesAndUnits[1] * ProSellingPriceUnit)));
+
+									double TotalAmount = Utilities.parseDouble(
+											Utilities.getDisplayCurrencyFormatSimple((AmountRawCases + AmountUnits)));
+									double WHTaxAmount = Utilities.parseDouble(
+											Utilities.getDisplayCurrencyFormatSimple((TotalAmount * WHTaxRate / 100)));
+									double NetAmount = Utilities.parseDouble(
+											Utilities.getDisplayCurrencyFormatSimple((TotalAmount + WHTaxAmount)));
+									int lrbTypeId = 0;
+
+									ResultSet rs5 = s6.executeQuery(
+											"select lrb_type_id from inventory_products where id = " + ProProductID);
+
+									while (rs5.next()) {
+										lrbTypeId = rs5.getInt("lrb_type_id");
+									}
+
+									s3.executeUpdate(
+											"replace into mobile_order_unregistered_products (id, product_id, raw_cases, units, total_units, liquid_in_ml, rate_raw_cases, rate_units, amount_raw_cases, amount_units, total_amount, wh_tax_amount, net_amount, is_promotion, promotion_id,cache_created_on_date,cache_created_by,cache_outlet_id,cache_lrb_type_id,cache_units_per_sku,cache_package_id) values ("
+													+ SplitOrderID + ", " + ProProductID + ", " + RawCasesAndUnits[0]
+													+ ", " + RawCasesAndUnits[1] + ", "
+													+ PromotionProducts[i].TOTAL_UNITS + ", " + ProLiquidInML + ", "
+													+ ProSellingPriceRawCase + ", " + ProSellingPriceUnit + ", "
+													+ AmountRawCases + ", " + AmountUnits + ", " + TotalAmount + ", "
+													+ WHTaxAmount + " ," + NetAmount + ", 1, "
+													+ PromotionProducts[i].PROMOTION_ID + ",curdate()," + CreatedBy
+													+ "," + OutletID + "," + lrbTypeId + ","
+													+ PromotionProduct.UNIT_PER_SKU + "," + PromotionProduct.PACKAGE_ID
+													+ ")  ");
+
+								}
+
+							}
+
+						}
+
+						InvoiceAmount = Utilities.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount));
+						InvoiceWHTaxAmount = Utilities
+								.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceWHTaxAmount));
+						InvoiceNetAmount = Utilities
+								.parseDouble(Utilities.getDisplayCurrencyFormatSimple(InvoiceNetAmount));
+
+						double TotalAmountExSalesTax = Utilities.parseDouble(
+								Utilities.getDisplayCurrencyFormatSimple((InvoiceAmount / (SalesTaxRate + 100)) * 100));
+
+						double SalesTaxAmount = Utilities.parseDouble(
+								Utilities.getDisplayCurrencyFormatSimple(InvoiceAmount - TotalAmountExSalesTax));
+
+						String InoviceTotalAmountString = InvoiceNetAmount + "";
+
+						if (InoviceTotalAmountString.indexOf(".") != -1) {
+							double Fraction = Utilities.parseDouble(InoviceTotalAmountString.substring(
+									InoviceTotalAmountString.indexOf("."), InoviceTotalAmountString.length()));
+
+							InoviceTotalAmountString = InoviceTotalAmountString.substring(0,
+									InoviceTotalAmountString.indexOf("."));
+
+							if (Fraction != 0) {
+								InoviceTotalAmountString = (Utilities.parseInt(InoviceTotalAmountString) + 1) + "";
+							}
+						}
+
+						double FractionAmount = Utilities.parseDouble(InoviceTotalAmountString) - InvoiceNetAmount;
+						String updateMobileOrderSql = "update mobile_order set invoice_amount = " + InvoiceAmount
+								+ ", sales_tax_amount  = " + SalesTaxAmount + ", wh_tax_amount = " + InvoiceWHTaxAmount
+								+ ", total_amount = " + InvoiceNetAmount + ", fraction_adjustment = "
+								+ Utilities.getDisplayCurrencyFormatSimple(FractionAmount) + ", net_amount = "
+								+ InoviceTotalAmountString + " where id = " + SplitOrderID;
+						System.out.println("[ORDER_MIGRATION] " + updateMobileOrderSql);
+						int moAmountUpdated = s5.executeUpdate(updateMobileOrderSql);
+						System.out.println("[ORDER_MIGRATION] mobile_order amounts updated rows=" + moAmountUpdated
+								+ " | InvoiceAmount=" + InvoiceAmount + " | NetAmount=" + InoviceTotalAmountString);
+
+						String markProcessedSql = "update mobile_order_unregistered set is_processed = 1 where id = "
+								+ ID;
+						System.out.println("[ORDER_MIGRATION] " + markProcessedSql);
+						int unregMarkedRows = s5.executeUpdate(markProcessedSql);
+						System.out.println("[ORDER_MIGRATION] mobile_order_unregistered marked processed rows="
+								+ unregMarkedRows);
+
+						if (InvoiceAmount != 0) {
+							ds.commit();
+							System.out.println("[ORDER_MIGRATION] inner ds.commit() done | SplitOrderID="
+									+ SplitOrderID + " | InvoiceAmount=" + InvoiceAmount);
+
+							try {
+
+								final long iOrderID = SplitOrderID;
+
+								Thread smsthread = new Thread() {
+									public void run() {
+										try {
+											Utilities.sendSMSOrderBookering(iOrderID);
+										} catch (IOException e) {
+											System.out.println("Sales Posting (SMS Attempt Thread):");
+											e.printStackTrace();
+										}
+									}
+								};
+
+								smsthread.start();
+
+							} catch (Exception e) {
+								System.out.println("Sales Posting (SMS Attempt):");
+								e.printStackTrace();
+							}
+
+						} else {
+							System.out.println("[ORDER_MIGRATION] InvoiceAmount=0, rolling back inner transaction");
+							ds.rollback();
+						}
+					} else {
+						System.out.println("[ORDER_MIGRATION] Skipping iteration | PJP_ID=0 for distributor_id="
+								+ rs1.getLong(1));
+					}
+
+				} catch (SQLException e) {
+					System.out.println("[ORDER_MIGRATION] Inner SQLException for ID " + ID + ": " + e);
+					e.printStackTrace();
+				}
+
+			}
+			System.out.println("[ORDER_MIGRATION] Loop completed | iterations=" + loopCount);
+
+			s5.close();
+			s4.close();
+			s3.close();
+			s2.close();
+			s.close();
+			// ds.commit();
+			success = true;
+		} catch (Exception e) {
+			System.out.println("[ORDER_MIGRATION] Outer Exception for ID " + ID + ": " + e);
+			e.printStackTrace();
+			try {
+				ds.rollback();
+				System.out.println("[ORDER_MIGRATION] outer rollback done");
+			} catch (SQLException e1) {
+
+				e1.printStackTrace();
+			}
+		} finally {
+			if (ds != null) {
+				try {
+					ds.dropConnection();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		System.out.println("[ORDER_MIGRATION] SalesPosting.splitOrderUnregistered END | ID=" + ID + " | success="
+				+ success);
+		return success;
+
+	}
+
  public static boolean postOrder2Invoice(final long OrderID, final long UserID, final long UVID) {
      boolean success = false;
      final Datasource ds = new Datasource();

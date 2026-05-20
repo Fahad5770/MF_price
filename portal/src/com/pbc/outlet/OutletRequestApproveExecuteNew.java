@@ -275,27 +275,52 @@ public class OutletRequestApproveExecuteNew extends HttpServlet {
 					     
 					     
 					     /**** Order Punch ****/
-					     
-					     System.out.println(
-									"Update mobile_order_unregistered set outlet_id=" + OutletID + " where Request_id=" + ID + " and mobile_order_no="+mobile_transaction_no);
-							s.executeUpdate(
-									"Update mobile_order_unregistered set outlet_id=" + OutletID + " where Request_id=" + ID + " and mobile_order_no="+mobile_transaction_no);
-							
-							System.out.println(
-									"select id from mobile_order_unregistered  where Request_id=" + ID + " and mobile_order_no="+mobile_transaction_no);
-							ResultSet rsOrder_id = s.executeQuery(
-									"select id from mobile_order_unregistered  where Request_id=" + ID + " and mobile_order_no="+mobile_transaction_no);
+					     System.out.println("[ORDER_MIGRATION] START | is_order=" + is_order
+								+ " | common_outlets_request.id=" + ID
+								+ " | mobile_transaction_no=" + mobile_transaction_no
+								+ " | new OutletID=" + OutletID
+								+ " | distributor_id=" + distributor_id
+								+ " | pjp_id=" + pjp_id);
+
+							String updateUnregSql = "Update mobile_order_unregistered set outlet_id=" + OutletID
+									+ " where mobile_order_no=" + mobile_transaction_no;
+							System.out.println("[ORDER_MIGRATION] " + updateUnregSql);
+							int unregRowsUpdated = s.executeUpdate(updateUnregSql);
+							System.out.println("[ORDER_MIGRATION] mobile_order_unregistered rows updated="
+									+ unregRowsUpdated);
+
+							String selectOrderIdSql = "select id from mobile_order_unregistered where mobile_order_no="
+									+ mobile_transaction_no;
+							System.out.println("[ORDER_MIGRATION] " + selectOrderIdSql);
+							ResultSet rsOrder_id = s.executeQuery(selectOrderIdSql);
 							long Order_id = (rsOrder_id.first()) ? rsOrder_id.getLong("id") : 0;
+							System.out.println("[ORDER_MIGRATION] Order_id (mobile_order_unregistered.id)="
+									+ Order_id);
 					     /**** Order Punch ****/
-					     
+
 						   s.executeUpdate("Update common_outlets_request set is_approved=1 where id="+ID+"");
 //						   System.out.println("Update mobile_order_unregistered set outlet_id="+OutletID+" where Request_id="+ID+"");
-//						     s.executeUpdate("Update mobile_order_unregistered set outlet_id="+OutletID+" where Request_id="+ID+"");  
-						   if(is_order==1) {
-							//   SalesPosting.splitOrderUnregistered(Order_id);
-						   }
-						   
+//						     s.executeUpdate("Update mobile_order_unregistered set outlet_id="+OutletID+" where Request_id="+ID+"");
+
 					ds.commit();
+					System.out.println("[ORDER_MIGRATION] Outer servlet ds.commit() done for ID=" + ID);
+
+					if(is_order==1 && Order_id != 0) {
+						System.out.println("[ORDER_MIGRATION] Calling SalesPosting.splitOrderUnregistered(Order_id="
+								+ Order_id + ") AFTER outer commit");
+						try {
+							boolean migrationOk = SalesPosting.splitOrderUnregistered(Order_id);
+							System.out.println("[ORDER_MIGRATION] splitOrderUnregistered returned="
+									+ migrationOk);
+						} catch (Exception migrationEx) {
+							System.out.println("[ORDER_MIGRATION] splitOrderUnregistered threw: "
+									+ migrationEx);
+							migrationEx.printStackTrace();
+						}
+					} else {
+						System.out.println("[ORDER_MIGRATION] Skipped splitOrderUnregistered. is_order="
+								+ is_order + ", Order_id=" + Order_id);
+					}
 				
 					obj.put("success", "true");
 					obj.put("OutletIDGen", OutletID);
