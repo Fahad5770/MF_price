@@ -38,7 +38,7 @@ long DistributorID = 0;
 if( UserDistributor != null ){
 	if(UserDistributor.length>1) //if it has more than 1 distributor
 	{
-		//response.sendRedirect("AccessDenied.jsp");
+		response.sendRedirect("AccessDenied.jsp");
 	}
 	else
 	{
